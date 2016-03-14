@@ -1,0 +1,25 @@
+{
+  "name": "unprocrastinator",
+  "version": "1.0.0",
+  "description": "Finally, an intelligent TODO application.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nicschumann/unprocrastinator.git"
+  },
+  "keywords": [
+    "todo",
+    "time-management",
+    "task-planning",
+    "machine-learning"
+  ],
+  "author": "cs-132-group-38",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nicschumann/unprocrastinator/issues"
+  },
+  "homepage": "https://github.com/nicschumann/unprocrastinator#readme"
+}
