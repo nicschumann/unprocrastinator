@@ -11,12 +11,13 @@ ENTRY_POINT	= main.js
 all: serve
 
 serve:
-	sass --watch $(SASS_SOURCE):$(SCSS_TARGET) &
+	sass --watch $(SCSS_SOURCE):$(SCSS_TARGET) &
 	watchify $(JS_SOURCE) -o $(JS_TARGET) &
 	livereload $(STATIC_DIR) &
-	node $(ENTRY_POINT)
+
+kill: stop
 
 stop:
 	kill -9 $$(ps aux | grep -v grep | grep "livereload" | awk '{print $$2}') 
-	kill -9 $$(ps aux | grep -v grep | grep "http-server" | awk '{print $$2}') 
+	kill -9 $$(ps aux | grep -v grep | grep "watchify" | awk '{print $$2}') 
 	kill -9 $$(ps aux | grep -v grep | grep "sass" | awk '{print $$2}') 
