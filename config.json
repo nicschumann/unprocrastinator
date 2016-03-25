@@ -1,0 +1,8 @@
+{
+	"static": {
+		"route": "/static",
+		"directory": "static"
+	},
+	"debug": true,
+	"port": 8080
+}
