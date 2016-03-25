@@ -1,7 +1,7 @@
 var exports = module.exports = {};
 
 exports.get_user = function(username, password) {
-
+  
 }
 
 exports.add_user = function(username, password) {
