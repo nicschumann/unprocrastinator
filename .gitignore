@@ -35,8 +35,12 @@ jspm_packages
 .sass-cache/
 *.css.map
 
+
 # Optional REPL history
 .node_repl_history
+
+# Linting Options
+.jshintrc
 
 bundle.js
 bundle.css
