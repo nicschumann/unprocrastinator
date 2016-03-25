@@ -2,6 +2,15 @@
 
 Finally – an intelligent TODO application!
 
+## Database Update
+
+This is just a demo version, with limited amount of features implemented. I don't recommend merging this code before the next meeting. But please let me know the existing problems and I will try to fix them.
+
+To browse the database pleace replace the url in this line with your Firebase url
+```var root = new Firebase("dazzling-heat-1685.firebaseio.com/"); ```
+
+or you can use my public google account zcpublic@gmail.com without modifiying the code, I've sent the password in Hangout.
+
 ## Installation
 
 This section of the README handles installing a local, development version of this project on your local machine. The following documentation assumes you have ```node``` and ```npm``` installed locally, that you have at least a passing familiarity with ```git```, and that you're using a mac for development. If you're not using a mac, please figure out how to get this program running on your machine, and make a pull-request adding the proper steps to this document. Thanks.
