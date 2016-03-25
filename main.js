@@ -1,3 +1,6 @@
+"use strict";
 
-process.stdout.write('No Implementation Yet');
-process.exit( 0 );
+var options 	= require('./config.json');
+var router 		= require('./router')( options );
+
+router();
