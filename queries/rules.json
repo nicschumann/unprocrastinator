@@ -1,0 +1,42 @@
+// This file is for reference only, and will not be used.
+{
+    "rules": {
+        "users": {
+            ".read": true,
+            "$user_id": {
+                ".write": "auth !== null && auth.uid === $user_id",
+                ".read": "auth !== null && auth.provider === 'password'"
+            },
+            "tasks": {
+                "$task_id": {
+                    ".write": "root.child('tasks/' + $task_id + '/user').val() == auth.id"
+                }
+            }
+        },
+        "tasks": {
+          ".read": true,
+          ".write": true,
+          ".indexOn": ["user"],
+            "$task_id": {
+                ".validate": "newData.hasChildren(['name', 'user', 'progress', 'tags', 'category'])",
+                "name": {
+                    ".validate": "newData.isString()"
+                },
+                "$user": {
+                    ".validate": "newData.val() == auth.uid"
+                },
+                "progress": {
+                    ".validate": "newData.isNumber() &&
+                                  newData.val() >= 0 &&
+                                  newData.val() <= 100"
+                },
+                "tags": {
+
+                },
+                "category": {
+                    ".validate": "newData.isString()"
+                }
+            }
+        }
+    }
+}

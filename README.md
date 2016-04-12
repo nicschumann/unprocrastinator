@@ -2,20 +2,11 @@
 
 Finally – an intelligent TODO application!
 
-## Database Update
-
-This is just a demo version, with limited amount of features implemented. I don't recommend merging this code before the next meeting. But please let me know the existing problems and I will try to fix them.
-
-To browse the database pleace replace the url in this line with your Firebase url
-```var root = new Firebase("dazzling-heat-1685.firebaseio.com/"); ```
-
-or you can use my public google account zcpublic@gmail.com without modifiying the code, I've sent the password in Hangout.
-
 ## Installation
 
 This section of the README handles installing a local, development version of this project on your local machine. The following documentation assumes you have ```node``` and ```npm``` installed locally, that you have at least a passing familiarity with ```git```, and that you're using a mac for development. If you're not using a mac, please figure out how to get this program running on your machine, and make a pull-request adding the proper steps to this document. Thanks.
 
-You'll  also need to have ```sass```, the [css preprocessor](http://sass-lang.com) installed locally, which you can get with ```sudo gem install sass``` assuming you have ruby installed, and ```watchify```, which you can get with a simple ```npm install -g watchify``` or ```sudo npm install -g watchify``` if you get errors. Both of these tools will be used to compile front end javascript and css. We're also using livereload, which refreshes our client whenever a source file changes, which means we won't have to CMD-R all the time during development to see changes on the client – you can get that as a local tool by running ```npm install -g livereload```. If you have all that, clone this repository locally, ```cd``` into the new directory, and run ```npm install``` to install the required dependencies. 
+You'll  also need to have ```sass```, the [css preprocessor](http://sass-lang.com) installed locally, which you can get with ```sudo gem install sass``` assuming you have ruby installed, and ```watchify```, which you can get with a simple ```npm install -g watchify``` or ```sudo npm install -g watchify``` if you get errors. Both of these tools will be used to compile front end javascript and css. We're also using livereload, which refreshes our client whenever a source file changes, which means we won't have to CMD-R all the time during development to see changes on the client – you can get that as a local tool by running ```npm install -g livereload```. If you have all that, clone this repository locally, ```cd``` into the new directory, and run ```npm install``` to install the required dependencies.
 
 At this point you should be all set to launch the development server by running ```make serve``` at the commandline. This should start a development server running on your local machine, which you can visit at ```http://localhost:8080```.
 
@@ -90,7 +81,7 @@ Note that ```category``` is true just in case this tag is regarded as a category
 
 ---
 
-Our application is decomposed into three different interface APIs; we'll discuss the **client API** and the **Database API** here. We'll let the **REST API** emerge dynamically out of the needs of each of these. 
+Our application is decomposed into three different interface APIs; we'll discuss the **client API** and the **Database API** here. We'll let the **REST API** emerge dynamically out of the needs of each of these.
 
 **Note for developers / API implementors: please update these pages in your feature-branches as you work! That way, we'll fill out a specification as we work**
 
@@ -164,7 +155,7 @@ Given a specific ```UserID``` and a specific ```TaskId```, drop that task from t
 ##### ```edit_task : (Credential, TaskID, TaskObject) → Task```
 *```edit_task : (UserID, TaskID, TaskObject) → ( (Err,Task) → void ) → void ```*
 
-This routine consumes a ```TaskObject``` which is some subset of the fields required by a ```Task```, and updates that given ```TaskID``` to reflect this "patch". 
+This routine consumes a ```TaskObject``` which is some subset of the fields required by a ```Task```, and updates that given ```TaskID``` to reflect this "patch".
 
 ---
 
@@ -234,12 +225,3 @@ This routine patches a set of the users tasks.
 ---
 
 *Note that this description qualifies a public interface to the database. It also implies the existence of some private methods that manage tags and tasks specifically, and independent of a given user. The decision to hide this portion of the database's operation is an intentional choice.*
-
-
-
-
-
-
-
-
-
