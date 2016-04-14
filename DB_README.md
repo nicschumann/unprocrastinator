@@ -99,7 +99,7 @@ Two methods for filtering tasks by category or tags.
 ## Rules
 
 The database also enforces some constraints to the data, such like:
--   Users cannot write into his/her own account.
+-   Users can only write into his/her own account.
 -   Progress can only be number from 0 to 100.
 
 I am still figuring this out. If you encounter errors like "Permission Denied", please check if you have logged in properly.
