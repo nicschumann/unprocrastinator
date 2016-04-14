@@ -3,11 +3,6 @@ var express = require("express");
 var db = require("./queries/queries.js");
 var app = express();
 
-var engines = require("consolidate");
-app.engine('html', engines.hogan);
-app.set('views', __dirname + '/templates');
-app.use('/static', express.static(__dirname + '/static'));
-
 var steven = {
     "email": "steven@fake.com",
     "password": "123",
@@ -45,7 +40,7 @@ var eat_bananas = {
 };
 
 app.get('/', function(request, response) {
-    response.render("dbtest_login.html");
+    // response.render("dbtest_login.html");
     // response.end();
 });
 
@@ -78,7 +73,6 @@ app.get('/allie', function(request, response) {
 });
 
 app.get('/add_tasks', function(request, response) {
-    console.log(eat_apples.due_date);
     db.log_in(steven, function (error, user_id) {
         if (!error) {
             db.add_task_to_user(user_id, eat_apples);

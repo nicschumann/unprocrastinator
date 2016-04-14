@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../static/dbtest.css">
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.12.0.min.js"></script>
+    <script src="../static/javascript/bundle.js"></script>
+</head>
+
+<body>
+    <div id="user_info">
+        <label id="user_account_label"></label>
+        <button id="log_out"> Log Out </button>
+    </div>
+    <hr>
+
+    <div class="user_page">
+        <div class="task_adder">
+            <form>
+                <div class="input-container">
+                    <input type="text" id="task_name" required="required" placeholder="Eat apples."/>
+                    <label for="task_name">Name</label>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="category" required="required" placeholder="food"/>
+                    <label for="category">Category</label>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="tags" required="required" placeholder="heathy, delicious"/>
+                    <label for="tags">Tags</label>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="due_date" required="required" placeholder="MM/DD/YY"/>
+                    <label for="due_date">Due Date</label>
+                </div>
+                <div class="button-container">
+                    <button id="add_task">Add Task</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="user_tasks">
+            <table id="task_list">
+
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,6 +1,15 @@
 # Unprocrastinator
 
-Finally – an intelligent TODO application!
+## Using Simple Front End
+
+Run the following command in project root directory:
+
+```
+browserify static/javascript/dbtest_client.js -o static/javascript/bundle.js
+```
+
+and then open templates/dbtest_login.html.
+
 
 ## Installation
 

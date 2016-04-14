@@ -36,7 +36,7 @@ exports.log_in = function (user, callback) {
             console.log("Login Failed!", error);
             if (callback) { callback(error); }
         } else {
-            console.log(user.username + " has logged in");
+            console.log(user.email + " has logged in");
             if (callback) { callback(null, authData.uid); }
         }
     });
