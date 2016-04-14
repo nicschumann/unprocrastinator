@@ -18,7 +18,7 @@
           ".write": true,
           ".indexOn": ["user"],
             "$task_id": {
-                ".validate": "newData.hasChildren(['name', 'user', 'progress', 'tags', 'category'])",
+                ".validate": "newData.hasChildren(['name', 'user', 'progress', 'due_date', 'tags', 'category'])",
                 "name": {
                     ".validate": "newData.isString()"
                 },
@@ -29,6 +29,9 @@
                     ".validate": "newData.isNumber() &&
                                   newData.val() >= 0 &&
                                   newData.val() <= 100"
+                },
+                "due_date": {
+                    ".validate": "newData.isNumber()"
                 },
                 "tags": {
 

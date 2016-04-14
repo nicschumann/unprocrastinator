@@ -14,6 +14,7 @@ exports.add_user = function (user, callback) {
             var user_id = userData.uid;
             root.authWithPassword(user, function (error, authData) {
                 if (error) {
+                    console.log("Error creating user: ", error);
                     if (callback) { callback(error); }
                 } else {
                     users.child(authData.uid).set({
@@ -23,7 +24,7 @@ exports.add_user = function (user, callback) {
                     console.log("Successfully created user acoount with uid: ", user_id);
                     if (callback) { callback(null, user_id); }
                 }
-                root.unauth();
+                // root.unauth();
             });
         }
     });
@@ -42,6 +43,7 @@ exports.log_in = function (user, callback) {
 };
 
 exports.log_out = function (callback) {
+    console.log("User logged out.");
     root.unauth();
     if (callback) { callback(); }
 };
@@ -68,8 +70,8 @@ exports.delete_user = function (user_id, user, callback) {
                         console.log("Error removing user:", error);
                         if (callback) { callback(error); }
                     } else {
-                        if (callback) { callback(null); }
                         console.log("User removed successfully");
+                        if (callback) { callback(null); }
                     }
                 });
             }
@@ -80,12 +82,14 @@ exports.delete_user = function (user_id, user, callback) {
     });
 };
 
-exports.get_user = function(user_id, callback) {
+exports.get_user = function (user_id, callback) {
     users.child(user_id).once("value", function(snapshot) {
         var user = snapshot.val();
+        console.log("Successfully got user.");
         if (callback) { callback(null, user); }
     }, function (error) {
-        console.log(error);
+        console.log("Error getting user: ", error);
+        if (callback) { callback(error); }
     });
 };
 
@@ -139,13 +143,16 @@ exports.add_task_to_user = function (user_id, task, callback) {
     task.user = user_id;
     var task_ref = tasks.push(task, function (error) {
         if (error) {
+            console.log("Error adding task to user.");
             if (callback) { callback(error); }
         } else {
             var task_id = task_ref.key();
             users.child(user_id).child("tasks").push(task_id, function (error) {
                 if (error) {
+                    console.log("Error adding task.");
                     if (callback) { callback(error); }
                 } else {
+                    console.log("Successfully added task.");
                     if (callback) { callback(null, task_ref.key()); }
                 }
             });
@@ -153,29 +160,32 @@ exports.add_task_to_user = function (user_id, task, callback) {
     });
 };
 
-exports.patch_task_for_user = function(task_id, task_object, callback) {
+exports.patch_task_for_user = function (task_id, task_object, callback) {
     tasks.child(task_id).update(task_object, function (error) {
         if (error) {
+            console.log("Error patching task.");
             if (callback) { callback(error); }
         } else {
-            console.log("Task updated!");
+            console.log("Successfully patched task.");
             if (callback) { callback(null); }
         }
     });
 };
 
-exports.remove_task_from_user = function(user_id, task_id, callback) {
+exports.remove_task_from_user = function (user_id, task_id, callback) {
     tasks.child(task_id).remove(function (error) {
         if (error) {
+            console.log("Error removing task.");
             if (callback) { callback(error); }
         } else {
             users.child(user_id).child("tasks").orderByValue().equalTo(task_id)
                 .ref().remove(function (error) {
                     if (error) {
+                        console.log("Error removing task from user.");
                         if (callback) { callback(error); }
                     } else {
                         if (callback) { callback(null); }
-                        console.log("Task Removed");
+                        console.log("Successfully removed task.");
                     }
                 });
         }
@@ -191,6 +201,7 @@ exports.get_user_tags = function (user_id, callback) {
                 tags.add(tag);
             });
         });
+        console.log("Successfully got user tags.");
         if (callback) { callback(null, tags); }
     }, function (error) {
         console.log("Error when listing user tags: ", error);
@@ -205,9 +216,9 @@ exports.get_user_tasks = function (user_id, callback) {
         //     user_tasks.push(task_snapshot.val());
         // });
         if (callback) { callback(null, snapshot.val()); }
-        console.log("Successfully loaded user tasks.");
+        console.log("Successfully got user tasks.");
     }, function (error) {
-            console.log("Error loading user tasks: ", error);
+            console.log("Error getting user tasks: ", error);
             if (callback) { callback(error); }
     });
 };
@@ -222,8 +233,8 @@ exports.get_task_by_category = function (user_id, category, callback) {
                 filtered_tasks.push(task);
             }
         });
-        if (callback) { callback(null, filtered_tasks); }
         console.log("Successfully filtered by category.");
+        if (callback) { callback(null, filtered_tasks); }
     }, function (error) {
             console.log("Error filtering by category: ", error);
             if (callback) { callback(error); }
@@ -248,18 +259,3 @@ exports.get_task_by_tags = function (user_id, tags, callback) {
         }
     );
 };
-
-// exports.get_task_id = function (user_id, order, callback) {
-//     users.child(user_id).child("tasks").once("value", function (snapshot) {
-//         var count = 0;
-//         console.log(snapshot.val());
-//         snapshot.forEach(function (data) {
-//             if (count == order) {
-//                 if (callback) { callback(null, data.val()); }
-//             }
-//             count += 1;
-//         });
-//     }, function (error) {
-//         console.log("Error: ", error);
-//     });
-// };

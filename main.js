@@ -3,6 +3,11 @@ var express = require("express");
 var db = require("./queries/queries.js");
 var app = express();
 
+var engines = require("consolidate");
+app.engine('html', engines.hogan);
+app.set('views', __dirname + '/templates');
+app.use('/static', express.static(__dirname + '/static'));
+
 var steven = {
     "email": "steven@fake.com",
     "password": "123",
@@ -18,6 +23,7 @@ var allie = {
 var eat_fries = {
     "name": "Eat fries",
     "progress": 0,
+    "due_date": new Date().getTime(),
     "tags": ["junk", "delicious", "very yellow"],
     "category": "food"
 };
@@ -25,6 +31,7 @@ var eat_fries = {
 var eat_apples = {
     "name": "Eat apples",
     "progress": 0,
+    "due_date": new Date().getTime(),
     "tags": ["healthy", "delicious"],
     "category": "food"
 };
@@ -32,13 +39,14 @@ var eat_apples = {
 var eat_bananas = {
     "name": "Eat bananas",
     "progress": 0,
+    "due_date": new Date().getTime(),
     "tags": ["healthy", "very yellow"],
     "category": "food"
 };
 
 app.get('/', function(request, response) {
-
-    response.end();
+    response.render("dbtest_login.html");
+    // response.end();
 });
 
 app.get('/create_users', function(request, response) {
@@ -70,6 +78,7 @@ app.get('/allie', function(request, response) {
 });
 
 app.get('/add_tasks', function(request, response) {
+    console.log(eat_apples.due_date);
     db.log_in(steven, function (error, user_id) {
         if (!error) {
             db.add_task_to_user(user_id, eat_apples);
@@ -81,6 +90,8 @@ app.get('/add_tasks', function(request, response) {
                     db.add_task_to_user(user_id, eat_apples);
                     db.add_task_to_user(user_id, eat_bananas);
                     db.add_task_to_user(user_id, eat_fries);
+                } else {
+                    console.log(error);
                 }
             });
         }
@@ -88,7 +99,6 @@ app.get('/add_tasks', function(request, response) {
 
     response.end();
 });
-
 
 app.get('/steven', function(request, response) {
     db.log_in(steven, function (error, user_id) {
@@ -117,7 +127,5 @@ app.get('/delete_users', function(request, response) {
     });
     response.end();
 });
-
-
 
 app.listen(8080);
