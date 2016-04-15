@@ -1,15 +1,16 @@
 # Unprocrastinator
 
-## Using Simple Front End
+## Simple Front End
 
-Run the following command in project root directory:
+This page is primarily for debugging database. More functionalities will be added later.
+
+Open `templates/dbtest_login.html`.
+
+Source code is in `static/javascript/dbtest_client.js`. If you change the source code you need to run the command below to rebuild.
 
 ```
 browserify static/javascript/dbtest_client.js -o static/javascript/bundle.js
 ```
-
-and then open templates/dbtest_login.html.
-
 
 ## Installation
 
