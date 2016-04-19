@@ -2,15 +2,20 @@
 
 ## Simple Front End
 
-This page is primarily for debugging database. More functionalities will be added later.
+We've build a basic server that can be used for debugging and playing with the basic task-tracking and authentication functions. Here's how to get up and running with that.
 
-Open `templates/dbtest_login.html`.
+1. Run ```npm install``` or ```sudo npm install``` if you're not a sudoer on your computer by default. This will fetch down all of the libraries and dependencies for the project.
 
-Source code is in `static/javascript/dbtest_client.js`. If you change the source code you need to run the command below to rebuild.
+2. Run ```make build-test``` to compile and package the client-side database scripts. This needs to happen so that we can embed the database and nodejs specific programs in a browser-friendly manner. Under the hood, this uses a tool called ```browserify``` which does a nice job converting a node program into a vanilla javascript program.
 
-```
-browserify static/javascript/dbtest_client.js -o static/javascript/bundle.js
-```
+3. Run ```node main.js``` this will start a server on port ```8080``` which serves the test code (as well as Jina's existing frontent model). 
+
+4. Visit ```http://localhost:8080/test```. You'll be redirected to ```http://localhost:8080/test/login``` at which point you can create a toy account with our firebase instance and play around with the test frontend.
+
+The core methods for interacting with the firebase are located at ```queries/queries.js```. The front end code that interacts with the html, and uses the queries is located at ```static/test/javascript/dbtest_client.js```, and gets compiled to the file at ```static/test/javascript/bundle.js```. In general, we should use the term **```bundle.<filetype>```** for compiled output, and ignore that output in version control (this is why you have to run ```make build-test``` when you check the branch out). 
+
+The actual HTML that represents the views of the test application live at ```templates/test/login.html``` and ```templates/test/user.html```. Let's use the ```templates/test``` folder for any views related to testing, and similarly, the server should mount any testing routes at ```/test```.
+
 
 ## Installation
 
