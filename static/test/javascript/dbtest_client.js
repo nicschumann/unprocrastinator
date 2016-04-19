@@ -1,4 +1,4 @@
-var db = require('../../queries/queries.js');
+var db = require('../../../queries/queries.js');
 
 $(document).ready(function () {
     $("#login_button").click(function (event) {
