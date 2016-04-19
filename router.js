@@ -31,6 +31,34 @@ module.exports = function( options ) {
 
 	});
 
+	// =================== TESTING CODE ===============================
+
+	/** 
+	 * this is a temporary route which serves
+	 * ZC's code. You can hit this endpoint to try out the basic
+	 * authentication and task creation workflow.
+	 */
+	app.get('/test', function( req, res ) {
+		res.redirect('/test/login');
+	});
+
+	/** 
+	 * This page displays a login field, which will redirect you
+	 * to the user page, once a you've logged in.
+	 */
+	app.get('/test/login', function( req, res ) {
+		res.sendFile( path.join( __dirname, 'templates', 'test', 'login.html') );
+	});
+
+	/**
+	 * This page serves out the user page, which renders
+	 * each user's specific tasks.
+	 */
+	app.get('/test/user', function( req, res ) {
+		res.sendFile( path.join( __dirname, 'templates', 'test', 'user.html') );
+	});
+
+
 	return function( continuation ) {
 
 		app.listen( options.port, continuation );
