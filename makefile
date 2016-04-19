@@ -10,6 +10,9 @@ ENTRY_POINT	= main.js
 
 all: serve
 
+build-test:
+	browserify $(STATIC_DIR)/test/javascript/dbtest_client.js -o $(STATIC_DIR)/test/javascript/bundle.js
+
 serve:
 	sass --watch $(SCSS_SOURCE):$(SCSS_TARGET) &
 	watchify $(JS_SOURCE) -o $(JS_TARGET) &
