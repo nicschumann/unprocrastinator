@@ -10,7 +10,7 @@ $(document).ready(function () {
         db.log_in(user, function (error, user_id) {
             if (!error) {
                 sessionStorage.user_id = user_id;
-                window.location.href = "dbtest_user.html";
+                window.location.href = "/test/user";
             }
         });
     });
@@ -26,7 +26,7 @@ $(document).ready(function () {
         db.add_user(user, function (error, user_id) {
             if (!error) {
                 sessionStorage.user_id = user_id;
-                window.location.href = "dbtest_user.html";
+                window.location.href = "/test/user";
             }
         });
     });
@@ -48,7 +48,7 @@ $(document).ready(function () {
         event.preventDefault();
         db.log_out(function (error) {
             if (!error) {
-                window.location.href = "dbtest_login.html";
+                window.location.href = "/test/login";
             }
         });
     });
