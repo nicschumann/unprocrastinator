@@ -7,6 +7,8 @@ var express 	= require('express');
 
 var app 		= express();
 
+
+
 /**
  * This is the mount point for the applications router.
  * requiring this module gives you a reference to the entirety
@@ -20,9 +22,22 @@ var app 		= express();
  */
 module.exports = function( options ) {
 
+	/**
+	 * Build out a object containing different middleware
+	 * structures to mount at different routes
+	 * 
+	 * @type {Object}
+	 */
+	var middleware 	= {
+		log: require('./middleware/log')( options )
+	};	 
+
 	// at the specified static route, invoke the express static middleware
 	// on the specified static source directory
 	app.use( options.static.route, express.static( path.join( __dirname, options.static.directory ) ) );
+
+	// use the logger everywhere.
+	app.use( '/', middleware.log );
 
 	// send the basic index.html when / is requested.
 	app.get('/', function( req, res ) {
