@@ -18,6 +18,6 @@ serve:
 kill: stop
 
 stop:
-	kill -9 $$(ps aux | grep -v grep | grep "livereload" | awk '{print $$2}') 
-	kill -9 $$(ps aux | grep -v grep | grep "watchify" | awk '{print $$2}') 
-	kill -9 $$(ps aux | grep -v grep | grep "sass" | awk '{print $$2}') 
+	kill -9 $$(ps aux | grep -v grep | grep "livereload" | awk '{print $$2}')
+	kill -9 $$(ps aux | grep -v grep | grep "watchify" | awk '{print $$2}')
+	kill -9 $$(ps aux | grep -v grep | grep "sass" | awk '{print $$2}')
