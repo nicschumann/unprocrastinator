@@ -1,6 +1,6 @@
 STATIC_DIR 	= static
 
-SCSS_SOURCE 	= $(STATIC_DIR)/sass/main.scss
+SCSS_SOURCE 	= $(STATIC_DIR)/scss/main.scss
 JS_SOURCE 		= $(STATIC_DIR)/javascript/main.js
 
 JS_TARGET 		= $(STATIC_DIR)/bundle.js
@@ -14,6 +14,7 @@ build-test:
 	browserify $(STATIC_DIR)/test/javascript/dbtest_client.js -o $(STATIC_DIR)/test/javascript/bundle.js
 
 build-client:
+	sass $(SCSS_SOURCE):$(SCSS_TARGET)
 	browserify $(JS_SOURCE) -o $(JS_TARGET)
 
 serve:
