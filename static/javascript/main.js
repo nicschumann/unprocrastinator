@@ -1,8 +1,9 @@
-var Calendar = require('calendar');
+// var Calendar = require('calendar');
 
-var cal = new Calendar;
-cal.el.appendTo('body');
+// var cal = new Calendar;
+// cal.el.appendTo('body');
 
+console.log( 'hi!' );
 
 var today = new Date();
 var dateCounter = 1;
