@@ -27,9 +27,13 @@ In main.js, there are some terrible test code.
         $task_id {
             name: String,
             user: uid,
-            progress: Number in [0, 100],
             category: String,
-            tags: [String]
+            tags: [String],
+            start_date: Number, // JS Date value
+            due_date: Number,
+            hours: Number,
+            progress: Number in [0, 100],
+            notes: String
         }
     }
 }

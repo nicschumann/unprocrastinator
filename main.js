@@ -19,6 +19,9 @@ var eat_fries = {
     "name": "Eat fries",
     "progress": 0,
     "due_date": new Date().getTime(),
+    "start_date": new Date().getTime(),
+    "hours": 0,
+    "notes": "I love fries!!!",
     "tags": ["junk", "delicious", "very yellow"],
     "category": "food"
 };
@@ -27,6 +30,7 @@ var eat_apples = {
     "name": "Eat apples",
     "progress": 0,
     "due_date": new Date().getTime(),
+    "start_date": new Date().getTime(),
     "tags": ["healthy", "delicious"],
     "category": "food"
 };
@@ -74,21 +78,9 @@ app.get('/allie', function(request, response) {
 
 app.get('/add_tasks', function(request, response) {
     db.log_in(steven, function (error, user_id) {
-        if (!error) {
-            db.add_task_to_user(user_id, eat_apples);
-            db.add_task_to_user(user_id, eat_bananas);
-            db.add_task_to_user(user_id, eat_fries);
-
-            db.log_in(allie, function (error, user_id) {
-                if (!error) {
-                    db.add_task_to_user(user_id, eat_apples);
-                    db.add_task_to_user(user_id, eat_bananas);
-                    db.add_task_to_user(user_id, eat_fries);
-                } else {
-                    console.log(error);
-                }
-            });
-        }
+        db.add_task_to_user(user_id, eat_fries, function (error, task_id) {
+            console.log("done");
+        });
     });
 
     response.end();

@@ -30,13 +30,22 @@
                                   newData.val() >= 0 &&
                                   newData.val() <= 100"
                 },
+                "start_date": {
+                    ".validate": "newData.isNumber()"
+                },
                 "due_date": {
+                    ".validate": "newData.isNumber()"
+                },
+                "hours": {
                     ".validate": "newData.isNumber()"
                 },
                 "tags": {
 
                 },
                 "category": {
+                    ".validate": "newData.isString()"
+                },
+                "notes": {
                     ".validate": "newData.isString()"
                 }
             }
