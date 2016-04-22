@@ -1,15 +1,27 @@
 # Unprocrastinator
 
-## Simple Front End
+## Datatypes
 
-This page is primarily for debugging database. More functionalities will be added later.
-
-Open `templates/dbtest_login.html`.
-
-Source code is in `static/javascript/dbtest_client.js`. If you change the source code you need to run the command below to rebuild.
-
-```
-browserify static/javascript/dbtest_client.js -o static/javascript/bundle.js
+``` javascript
+{
+    Users: {
+        $user_id {
+            email: String,
+            password: String,
+            username: String,
+            tasks: [task_id]
+        }
+    },
+    Tasks: {
+        $task_id {
+            name: String,
+            user: uid,
+            progress: Number in [0, 100],
+            category: String,
+            tags: [String]
+        }
+    }
+}
 ```
 
 ## Installation
