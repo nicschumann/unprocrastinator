@@ -30,7 +30,7 @@
                                   newData.val() >= 0 &&
                                   newData.val() <= 100"
                 },
-                "start_date": {
+                "assigned_date": {
                     ".validate": "newData.isNumber()"
                 },
                 "due_date": {

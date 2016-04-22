@@ -29,7 +29,7 @@ In main.js, there are some terrible test code.
             user: uid,
             category: String,
             tags: [String],
-            start_date: Number, // JS Date value
+            assigned_date: Number, // JS Date value
             due_date: Number,
             hours: Number,
             progress: Number in [0, 100],

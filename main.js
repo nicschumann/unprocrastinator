@@ -19,7 +19,7 @@ var eat_fries = {
     "name": "Eat fries",
     "progress": 0,
     "due_date": new Date().getTime(),
-    "start_date": new Date().getTime(),
+    "assigned_date": new Date().getTime(),
     "hours": 0,
     "notes": "I love fries!!!",
     "tags": ["junk", "delicious", "very yellow"],
