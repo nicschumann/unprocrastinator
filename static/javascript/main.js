@@ -170,7 +170,7 @@ function loadCheckboxes() {
 // -----------------------------------------------------------
 // button and request handlers for landing.html
 
-$('#signUp').on('click', function(event) {
+$('#signup').on('click', function(event) {
 	event.preventDefault();
 	var email = prompt("Enter email: ");
 	var password = prompt("Enter password: ");
@@ -186,11 +186,11 @@ $('#signUp').on('click', function(event) {
         if (!error) {
          	sessionStorage.user_id = user_id;
             window.location.href = "/user";
-        }
+        } 
     });
 });
 
-$('#signIn').on('click', function(event) {
+$('#signin').on('click', function(event) {
 	event.preventDefault();
 	var user = {
 		"email": $("#email").val(),
@@ -204,5 +204,14 @@ $('#signIn').on('click', function(event) {
 		    alert(error);
 		}
 	});	
+});
+
+$("#logout").click(function (event) {
+    event.preventDefault();
+    db.log_out(function (error) {
+        if (!error) {
+            window.location.href = "/login";
+        }
+    });
 });
 
