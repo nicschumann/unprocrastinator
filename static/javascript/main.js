@@ -1,67 +1,98 @@
-// var Calendar = require('calendar');
-
-// var cal = new Calendar;
-// cal.el.appendTo('body');
-
-console.log( 'hi!' );
-
 var today = new Date();
+var todayId = today.getMonth() + '-' + today.getDate() + '-' + today.getYear();
 var dateCounter = 1;
 
+// actions to happen on page load
 $(document).ready(function(){
 	populateToday();
-	populateSevenDays();
+	populateWeek();
 	loadCheckboxes();
 
 	$(window).scroll(function(){
 	    if ($(window).scrollTop() == $(document).height()-$(window).height()){
-	        populateSevenDays();
+	        populateWeek();
 			loadCheckboxes();
 	    }
-
 	});
 
-	// $(window).scroll(function () {
-	//         if ($(this).scrollTop() > 50) {
-	//             $("#monthBar").addClass("f-nav");
-	//         } else {
-	//             $("#monthBar").removeClass("f-nav");
-	//         }
-	//     });
   $('[data-toggle="popover"]').popover();
 
+  $('.taskButton').click(function (e) { 
+  	e.preventDefault();
+  	var dateId = $(this).parent().parent().parent().parent().attr('id');
+	var taskName = $(this).prev().val();
+	appendTask(dateId, taskName)
+	loadCheckboxes();
+
+	$(this).prev().val('');
+	});
 });
 
-
-
+// function that translate 0-6 to SUN-SAT
 function getDayOfWeek(date) { 
 	return ["SUN","MON","TUE","WED","THU","FRI","SAT"][(date.getDay())];
 }
 
-function populateToday() {
-	$("#agendaList").append('<div class="day" id="today"><div class="row"><div class="col-sm-3"><h4>Today\'s Overview:</h4></div><div class="progress col-sm-9"><div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">60%</div></div></div><div class="row"><div class="dates col-md-1"><div class="row"><h2>' + today.getDate() + '<br>' + getDayOfWeek(today) + '</h2></div></div><div class="col-md-11"><div class="well" style="height: auto;overflow: auto;"><ul id="todo-list" class="list-group checked-list-box"><li class="list-group-item">Eat lunch </li><li class="list-group-item" data-checked="true">Wake up</li><li class="list-group-item">Work on CS132<br><br><div class="progress"><div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%"></div></div></li><li class="list-group-item">Study for CLPS</li></ul></div></div></div>');
+// generates day HTML template
+function generateDayTemplate(currDate) {
+	var currDateId = currDate.getMonth() + '-' + currDate.getDate() + '-' + currDate.getYear()
+	return  '<div class="day row" id="' + currDateId + '">' + 
+				'<div class="dates col-md-1">' + 
+					'<div class="row">' + 
+						'<h2>' + currDate.getDate() + '<br>' + getDayOfWeek(currDate) + '</h2>' + 
+					'</div>' + 
+				'</div>' + 
+				'<div class="col-md-11">' + 
+					'<p>' + 
+						'<div class="well" style="height: auto;overflow: auto;">' + 
+							'<ul class="list-group checked-list-box">' +
+							'</ul>'+ 
+								'<div class="input-group">' +
+							 		'<input type="text" class="form-control ="newTask' + '" placeholder="Add a task..." aria-describedby="basic-addon2">' +
+							  		'<span class="input-group-addon taskButton"> + </span>' +
+								'</div>'+
+						'</div>' +
+					'</p>' + 
+				'</div>'
+			'</div>';
 }
 
-function populateSevenDays() {
+//today Overview bar
+function generateTodayOverview() {
+	return '<div class= id="todayOverview">' + 
+				'<div class="row">' + 
+					'<div class="col-sm-3">' +
+						'<h4>Today\'s Overview:</h4>' +
+					'</div>' +
+					'<div class="progress col-sm-9"><div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">60%</div>' +
+				'</div>' +
+			'</div>';
+}
+
+// append a task to a date
+function appendTask(dateId, taskName) {
+	$("#" + dateId + " ul").append('<li class="list-group-item" data-checked="false">' + taskName + '</li>');
+}
+
+//populate today (just for a sample)
+function populateToday() {
+	$("#agendaList").append(generateTodayOverview() + generateDayTemplate(today));
+	appendTask(todayId, 'Eat lunch')
+}
+
+//populates next 7 days. happens when user scrolls down infinitely too
+function populateWeek() {
 	for (i = 0; i < 7; i++) {
 		console.log('hi')
 		var currDate = new Date();
 		currDate.setDate(today.getDate() + dateCounter);
-		$("#agendaList").append('<div class="row"><div class="dates col-md-1"><div class="row"><h2>' + currDate.getDate() + '<br>' + getDayOfWeek(currDate) + '</h2></div></div><div class="col-md-11"><p><div class="well" style="height: auto;overflow: auto;"><ul id="todo-list" class="list-group checked-list-box"><li class="list-group-item">Eat lunch</li><li class="list-group-item" data-checked="true">Wake up</li><li class="list-group-item">Work on CS132</li><li class="list-group-item">Study for CLPS</li></ul></div></p></div>');
+
+		$("#agendaList").append(generateDayTemplate(currDate));
 		dateCounter++;
 	}
-
-	// var currDate = new Date();
-	// currDate.setDate(today.getDate() + dateCounter);
-	// populateEmptyDay(currDate);
 }
 
-// function populateEmptyDay(currDate) {
-// 	$("#agendaList").append('<div class="row"><div class="dates col-md-1"><div class="row"><h2>' + currDate.getDate() + '<br>' + getDayOfWeek(currDate) + '</h2></div></div><div class="col-md-11"><p><div class="well" style="height: auto;overflow: auto;"><ul id="todo-list" class="list-group checked-list-box"></ul></div></p></div>');
-// }
-
-
-
+//loads checkboxes 
 function loadCheckboxes() {
 	$('.list-group.checked-list-box .list-group-item').each(function () {
 	    
@@ -104,20 +135,13 @@ function loadCheckboxes() {
 	        $widget.find('.state-icon')
 	            .removeClass()
 	            .addClass('state-icon ' + settings[$widget.data('state')].icon);
-
-	        // Update the button's color
-	        // if (isChecked) {
-	        //     $widget.addClass(style + color + ' active');
-	        // } else {
-	        //     $widget.removeClass(style + color + ' active');
-	        // }
 	    }
 
 	    // Initialization
 	    function init() {
 	        
 	        if ($widget.data('checked') == true) {
-	            $checkbox.prop('checked', !$checkbox.is(':checked'));
+	            $checkbox.prop('checkerd', !$checkbox.is(':checked'));
 	        }
 	        
 	        updateDisplay();
@@ -140,17 +164,3 @@ function loadCheckboxes() {
 	    $('#display-json').html(JSON.stringify(checkedItems, null, '\t'));
 	});
 }
-
-$('#add-task').on('click', function(e) {
-	console.log('click');
-    e.preventDefault();
-    var taskName = $('#task-name').val();
-    var dueDate = $('#due-date').val();
-
-    $('#todo-list').append('<li class="list-group-item">'+ dueDate + ' - ' + taskName +'</li>');
-
-    loadCheckboxes();
-
-    $('#task-name').val('');
-    $('#due-date').val('');
-});
