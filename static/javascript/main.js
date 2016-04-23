@@ -154,3 +154,19 @@ $('#add-task').on('click', function(e) {
     $('#task-name').val('');
     $('#due-date').val('');
 });
+
+
+
+
+
+
+// -----------------------------------------------------------
+// button and request handlers for landing.html
+
+$('#signUp').on('click', function(e) {
+	console.log('sign up');
+});
+
+$('#signIn').on('click', function(e) {
+	console.log('sign in');
+});
