@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 var db = require('../../queries/queries.js');
 
 var today = new Date();
