@@ -12,8 +12,8 @@ $(document).ready(function(){
 
   $(window).scroll(function(){
       if ($(window).scrollTop() == $(document).height()-$(window).height()){
-          populateWeek();
-      loadCheckboxes();
+        	populateWeek();
+      		loadCheckboxes();
       }
   });
 
@@ -85,7 +85,6 @@ function populateToday() {
 //populates next 7 days. happens when user scrolls down infinitely too
 function populateWeek() {
   for (i = 0; i < 7; i++) {
-    console.log('hi')
     var currDate = new Date();
     currDate.setDate(today.getDate() + dateCounter);
 
@@ -166,10 +165,6 @@ function loadCheckboxes() {
       $('#display-json').html(JSON.stringify(checkedItems, null, '\t'));
   });
 }
-
-
-
-
 
 
 // -----------------------------------------------------------
