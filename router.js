@@ -41,9 +41,15 @@ module.exports = function( options ) {
 
 	// send the basic index.html when / is requested.
 	app.get('/', function( req, res ) {
+		res.redirect('/login');
+	});
 
-		res.sendFile( path.join( __dirname, 'templates', 'index.html' ) );
+	app.get('/login', function( req, res ) {
+		res.sendFile( path.join( __dirname, 'templates', 'landing.html'));
+	});
 
+	app.get('/user', function( req, res ) {
+		res.sendFile( path.join( __dirname, 'templates', 'index.html'));
 	});
 
 	// =================== TESTING CODE ===============================

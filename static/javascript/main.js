@@ -12,8 +12,8 @@ $(document).ready(function(){
 
   $(window).scroll(function(){
       if ($(window).scrollTop() == $(document).height()-$(window).height()){
-          populateWeek();
-      loadCheckboxes();
+        	populateWeek();
+      		loadCheckboxes();
       }
   });
 
@@ -85,7 +85,6 @@ function populateToday() {
 //populates next 7 days. happens when user scrolls down infinitely too
 function populateWeek() {
   for (i = 0; i < 7; i++) {
-    console.log('hi')
     var currDate = new Date();
     currDate.setDate(today.getDate() + dateCounter);
 
@@ -168,15 +167,28 @@ function loadCheckboxes() {
 }
 
 
-
-
-
-
 // -----------------------------------------------------------
 // button and request handlers for landing.html
 
 $('#signUp').on('click', function(event) {
-  console.log('sign up');
+	console.log('sign up');
+	event.preventDefault();
+	var email = prompt("Enter email: ");
+	var password = prompt("Enter password: ");
+	var username = prompt("Enter a username: ");
+    var user = {
+            // "email": $("#email").val(),
+            // "password": $("#password").val(),
+            "email": email,
+            "password": password,
+            "username": username
+    };
+    db.add_user(user, function (error, user_id) {
+        if (!error) {
+         	sessionStorage.user_id = user_id;
+            window.location.href = "/user";
+        }
+    });
 });
 
 $('#signIn').on('click', function(event) {
