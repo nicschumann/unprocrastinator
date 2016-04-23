@@ -169,18 +169,16 @@ function loadCheckboxes() {
 
 // -----------------------------------------------------------
 // button and request handlers for landing.html
+$('#myModal').on('shown.bs.modal', function () {
+  $('#myInput').focus()
+})
 
-$('#signup').on('click', function(event) {
+$('#createaccount').on('click', function(event) {
 	event.preventDefault();
-	var email = prompt("Enter email: ");
-	var password = prompt("Enter password: ");
-	var username = prompt("Enter a username: ");
     var user = {
-            // "email": $("#email").val(),
-            // "password": $("#password").val(),
-            "email": email,
-            "password": password,
-            "username": username
+    	"username": $("#newusername").val(),
+        "email": $("#newemail").val(),
+        "password": $("#newpassword").val()
     };
     db.add_user(user, function (error, user_id) {
         if (!error) {
@@ -188,7 +186,7 @@ $('#signup').on('click', function(event) {
             window.location.href = "/user";
         } 
     });
-});
+}); 
 
 $('#signin').on('click', function(event) {
 	event.preventDefault();
