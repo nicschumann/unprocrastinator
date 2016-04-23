@@ -1,3 +1,4 @@
+var db = require('../../queries/queries.js');
 // var Calendar = require('calendar');
 
 // var cal = new Calendar;
@@ -163,10 +164,25 @@ $('#add-task').on('click', function(e) {
 // -----------------------------------------------------------
 // button and request handlers for landing.html
 
-$('#signUp').on('click', function(e) {
+$('#signUp').on('click', function(event) {
 	console.log('sign up');
 });
 
-$('#signIn').on('click', function(e) {
-	console.log('sign in');
+$('#signIn').on('click', function(event) {
+	console.log('sign in clicked');
+  event.preventDefault();
+  var user = {
+    "email": $("#email").val(),
+    "password": $("#password").val()
+  };
+  console.log(user);
+  db.log_in(user, function (error, user_id) {
+    if (!error) {
+      sessionStorage.user_id = user_id;
+      //window.location.href = "/";
+      //window.location.href = ('');
+    } else {
+    	alert(error);
+    }
+  });
 });
