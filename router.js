@@ -48,6 +48,14 @@ module.exports = function( options ) {
 
 	// =================== TESTING CODE ===============================
 
+	/**
+	 * This page displays the landing page telling users about our app
+	 * and giving them a chance to sign up or sign in.
+	 */
+	app.get('/landing', function( req, res ) {
+		res.sendFile( path.join( __dirname, 'templates', 'landing.html' ) );
+	});
+
 	/** 
 	 * this is a temporary route which serves
 	 * ZC's code. You can hit this endpoint to try out the basic

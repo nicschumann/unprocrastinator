@@ -24,6 +24,10 @@ body {
   padding-bottom: 20px; }
 
 #monthBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 4;
   background-color: black;
   color: white;
   padding: 10px;
@@ -37,7 +41,17 @@ body {
     float: right; }
 }
 
+#monthBarWrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  background-color: white;
+  height: 90px;
+}
+
 #agendaList {
+  margin-top: 100px;
   width: 70%;
   word-break: break-all; 
   
