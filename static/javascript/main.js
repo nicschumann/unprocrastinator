@@ -171,7 +171,6 @@ function loadCheckboxes() {
 // button and request handlers for landing.html
 
 $('#signUp').on('click', function(event) {
-	console.log('sign up');
 	event.preventDefault();
 	var email = prompt("Enter email: ");
 	var password = prompt("Enter password: ");
@@ -192,20 +191,18 @@ $('#signUp').on('click', function(event) {
 });
 
 $('#signIn').on('click', function(event) {
-  console.log('sign in clicked');
-  event.preventDefault();
-  var user = {
-    "email": $("#email").val(),
-    "password": $("#password").val()
-  };
-  console.log(user);
-  db.log_in(user, function (error, user_id) {
-    if (!error) {
-      sessionStorage.user_id = user_id;
-      //window.location.href = "/";
-      //window.location.href = ('');
-    } else {
-      alert(error);
-    }
-  });
+	event.preventDefault();
+	var user = {
+		"email": $("#email").val(),
+		"password": $("#password").val()
+	};
+	db.log_in(user, function (error, user_id) {
+		if (!error) {
+		   	sessionStorage.user_id = user_id;
+		    window.location.href = "/user";
+		} else {
+		    alert(error);
+		}
+	});	
 });
+
