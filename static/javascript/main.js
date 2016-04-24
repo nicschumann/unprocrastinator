@@ -213,3 +213,25 @@ $("#logout").click(function (event) {
     });
 });
 
+$("#unprocrastinator").click(function (event) { //automatically log user out
+    event.preventDefault();
+    db.log_out(function (error) {
+        if (!error) {
+            window.location.href = "/login";
+        }
+    });
+});
+
+function display_user_info() {
+    db.get_user(sessionStorage.user_id, function (error, user) {
+        if (!error) {
+            var info = "Username: " + user.username + "&nbsp;&nbsp; | &nbsp;&nbsp;"
+                    + "Email: " + user.email + "&nbsp;&nbsp; | &nbsp;&nbsp;"
+                    + "User ID: " + sessionStorage.user_id;
+            $("#user_account_label").html(info);
+        }
+    });
+}
+
+display_user_info();
+
