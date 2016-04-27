@@ -35,7 +35,7 @@ var db = require('../../queries/queries.js');
 // Global date variables
 var today = new Date();
 var todayId = today.getMonth() + '-' + today.getDate() + '-' + today.getYear();
-var dateCounter = 1;
+var dateCounter = 0;
 
 // Actions to happen on page load
 $(document).ready(function(){
@@ -83,7 +83,7 @@ function generateDayTemplate(currDate) {
                   '<ul class="tasks list-group checked-list-box">' +
                   '</ul>'+ 
                     '<div class="input-group">' +
-                      '<input type="text" class="form-control ="newTask' + '" placeholder="Add a task..." aria-describedby="basic-addon2">' +
+                      '<input type="text" class="form-control taskInput" placeholder="Add a task..." aria-describedby="basic-addon2">' +
                         '<span class="input-group-addon taskButton"> + </span>' +
                     '</div>'+
                 '</div>' +
@@ -122,19 +122,8 @@ function generateTodayOverview() {
     #TODO - Delete later on; this is for testing purposes.
 */
 function populateToday() {
-  $("#agendaList").append(generateTodayOverview() + generateDayTemplate(today));
-  appendTask(todayId, 'Eat lunch');
-
-  // Event handler for adding task
-  $('#' + todayId + ' .taskButton').click(function (e) { 
-      e.preventDefault();
-      var dateId = $(this).parent().parent().parent().parent().attr('id');
-      var taskName = $(this).prev().val();
-      appendTask(dateId, taskName);
-      // loadCheckboxes();
-
-      $(this).prev().val('');
-  });
+  $("#agendaList").append(generateTodayOverview());
+  appendTask(todayId, 'Eat lunch');  
 }
 
 /*
@@ -147,20 +136,30 @@ function populateWeek() {
     currDate.setDate(today.getDate() + dateCounter);
 
     $("#agendaList").append(generateDayTemplate(currDate));
-    dateCounter++;
 
     var currDateId = currDate.getMonth() + '-' + currDate.getDate() + '-' + currDate.getYear();
 
-    // Event handler for adding task
+    // Event handlers for adding task (click and enter)
     $('#' + currDateId + ' .taskButton').click(function (e) { 
       e.preventDefault();
       var dateId = $(this).parent().parent().parent().parent().attr('id');
       var taskName = $(this).prev().val();
       appendTask(dateId, taskName);
-      // loadCheckboxes();
-
       $(this).prev().val('');
     });
+
+    $("#" + currDateId + ' .taskInput').keypress(function (e) {
+       var key = e.which;
+       if (key == 13) { // the enter key code
+          e.preventDefault();
+          var dateId = $(this).parent().parent().parent().parent().attr('id');
+          var taskName = $(this).val();
+          appendTask(dateId, taskName);
+          $(this).val('');
+        }
+    });   
+  
+    dateCounter++;
   }
 }
 
@@ -204,7 +203,7 @@ function appendTask(dateId, taskName) {
           '<ul class="list-group checked-list-box"> ' +
           '</ul> ' +
             '<div class="input-group"> ' +
-              '<input type="text" class="form-control" id="newSubtask" placeholder="Add a subtask..." aria-describedby="basic-addon2">' +
+              '<input type="text" class="form-control subtaskInput" placeholder="Add a subtask..." aria-describedby="basic-addon2">' +
                 '<span class="input-group-addon subtaskButton">+</span> ' +
             '</div>' +
         '</div> ' +
@@ -225,17 +224,28 @@ function appendTask(dateId, taskName) {
   $("#" + dateId + " .tasks").append(task);
   $('#' + taskId + ' .taskDetails').hide(); // Hide taskDetails until clicked.
 
-  // Event handler for adding subtasks 
+  // Event handlers for adding subtasks (click and enter key)
   $("#" + taskId + ' .subtaskButton').click(function (e) { 
-      console.log('subtask button click')
+    console.log('subtask button click')
+    e.preventDefault();
+    var taskId = $(this).parent().parent().parent().parent().attr('id');
+    console.log('taskId =  ' + taskId)
+    var subtaskName = $(this).prev().val();
+    appendSubtask(taskId, subtaskName);
+
+    $(this).prev().val('');
+  });
+
+  $("#" + taskId + ' .subtaskInput').keypress(function (e) {
+     var key = e.which;
+     if (key == 13) { // the enter key code
       e.preventDefault();
       var taskId = $(this).parent().parent().parent().parent().attr('id');
-      console.log('taskId =  ' + taskId)
-      var subtaskName = $(this).prev().val();
+      var subtaskName = $(this).val();
       appendSubtask(taskId, subtaskName);
-
-      $(this).prev().val('');
-  });
+      $(this).val('');
+    }
+  });   
 
   // Call loadTask to load the interactive features of a task (toggle, details, etc.)
   loadTask(taskId);
@@ -255,7 +265,7 @@ function appendSubtask(taskId, subtaskName) {
 		'<li class="list-group-item subtask" data-checked="false">' +
 			'<input type="checkbox"/>' + subtaskName +
 		'</li>';
-
+  // #TODO - for some reason these checkboxes dont click
 	  $("#" + taskId + " .subtasks > .list-group").append(subtask);
 }
 
