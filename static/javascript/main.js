@@ -39,6 +39,9 @@ Ask Jina about the front end code anytime!!! :)
 var db = require('../../queries/queries.js');
 var autosize = require('autosize');
 
+var tag_search = require('./tag-search')( db );
+
+
 // Global date variables
 var today = new Date();
     today.setHours(0,0,0,0);
