@@ -6,16 +6,16 @@
 
 /* CSS REQUIRED */
 .state-icon {
-    left: -5px;
+  left: -5px;
 }
 .list-group-item-primary {
-    color: rgb(255, 255, 255);
-    background-color: rgb(66, 139, 202);
+  color: rgb(255, 255, 255);
+  background-color: rgb(66, 139, 202);
 }
 
 /* DEMO ONLY - REMOVES UNWANTED MARGIN */
 .well .list-group {
-    margin-bottom: 0px;
+  margin-bottom: 0px;
 }
 
 /* Move down content because we have a fixed navbar that is 50px tall */
@@ -23,46 +23,82 @@ body {
   padding-top: 50px;
   padding-bottom: 20px; }
 
-#monthBar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  z-index: 4;
-  background-color: black;
-  color: white;
-  padding: 10px;
-  width: 70%;
-  margin: 20px auto 20px auto; 
+  #monthBar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: 4;
+    background-color: black;
+    color: white;
+    padding: 10px;
+    width: 70%;
+    margin: 20px auto 20px auto; 
 
-  h2 {
-    display: inline; }
+    h2 {
+      display: inline; }
 
-  calendarIcon {
-    float: right; }
-}
+      calendarIcon {
+        float: right; }
+      }
 
-#monthBarWrap {
-  z-index: 3;
-  position: fixed;
-  width: 100%;
-  height: 80px;
-  background-color: white;
-}
+      #monthBarWrap {
+        z-index: 3;
+        position: fixed;
+        width: 100%;
+        height: 80px;
+        background-color: white;
+      }
 
-#agendaList {
-  margin-top: 100px;
-  width: 70%;
-  word-break: break-all; 
-  
-  .dates {
-    text-align: center;
-  }
-}
+      #agendaList {
+        margin-top: 100px;
+        width: 70%;
+        word-break: break-all; 
+
+        input[type="checkbox"] {
+          margin-right:5px;
+        }
+
+        .dates {
+          text-align: center;
+        }
+
+        .taskDetails { 
+          margin-top: 10px;
+          padding: 15px;
+          background-color: #fcfcfc;
+          border-color: #dfdfdf;
+          border-style: solid;
+          border-width: 2px;
+          border-radius: 8px;
+
+          .taskIcons {
+            .glyphicon {
+              font-size: 25px;
+              margin-left: 10px;
+              margin-right: 10px;
+            }
+          }
+
+          .notes {
+
+
+            input[type=text] {
+              outline: none;
+              -webkit-box-shadow: none !important;
+              -moz-box-shadow: none !important;
+              box-shadow: none !important;
+
+              background: transparent;
+              border: none;
+              border-bottom: 1px solid #000000;
+              border-radius: 0;
+            }
+          }
 
 
 /*# sourceMappingURL=jumbotron.css.map */
-
-#landingImg {
-  background-image: url('http://images.freecreatives.com/wp-content/uploads/2015/10/free-lined-paper-texture.jpg');
-  background-size: cover;
-}
+  #landingImg {
+    background-image: url('http://images.freecreatives.com/wp-content/uploads/2015/10/free-lined-paper-texture.jpg');
+    background-size: cover;
+  }
+}}
