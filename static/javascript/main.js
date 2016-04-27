@@ -38,7 +38,7 @@ Ask Jina about the front end code anytime!!! :)
 ********************************************/
 
 var db = require('../../queries/queries.js');
-var autosize = require('./autosize');
+var autosize = require('autosize');
 
 // Global date variables
 var today = new Date();
