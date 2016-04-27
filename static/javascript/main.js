@@ -5,7 +5,7 @@ The general flow of the index.html is as follows:
 
 1. On page load, a full week of dates is populated by populateWeek, which...
     i) calls generateDayHTML 7 times.
-    ii) loads "addTaskButtons" so new tasks can be added by user 
+    ii) loads "taskButton" so new tasks can be added by user 
 
 2. generateTodayOverview is called to load the rainbow progress bar at the top.
    currently, it uses fake numbers (hard coded %s that i made up) - needs to use DB data 
@@ -124,23 +124,9 @@ function generateTodayOverview() {
 function populateToday() {
   $("#agendaList").append(generateTodayOverview() + generateDayTemplate(today));
   appendTask(todayId, 'Eat lunch');
-}
-
-/*
-    populateWeek: Populates the next 7 days. Is called for use in the infinite scroll.
-    Not actually necessary to make this a lone function, but improves code readability!
-*/
-function populateWeek() {
-  for (i = 0; i < 7; i++) {
-      var currDate = new Date();
-      currDate.setDate(today.getDate() + dateCounter);
-
-      $("#agendaList").append(generateDayTemplate(currDate));
-      dateCounter++;
-  }
 
   // Event handler for adding task
-  $('.taskButton').click(function (e) { 
+  $('#' + todayId + ' .taskButton').click(function (e) { 
       e.preventDefault();
       var dateId = $(this).parent().parent().parent().parent().attr('id');
       var taskName = $(this).prev().val();
@@ -149,6 +135,33 @@ function populateWeek() {
 
       $(this).prev().val('');
   });
+}
+
+/*
+    populateWeek: Populates the next 7 days. Is called for use in the infinite scroll.
+    Not actually necessary to make this a lone function, but improves code readability!
+*/
+function populateWeek() {
+  for (i = 0; i < 7; i++) {
+    var currDate = new Date();
+    currDate.setDate(today.getDate() + dateCounter);
+
+    $("#agendaList").append(generateDayTemplate(currDate));
+    dateCounter++;
+
+    var currDateId = currDate.getMonth() + '-' + currDate.getDate() + '-' + currDate.getYear();
+
+    // Event handler for adding task
+    $('#' + currDateId + ' .taskButton').click(function (e) { 
+      e.preventDefault();
+      var dateId = $(this).parent().parent().parent().parent().attr('id');
+      var taskName = $(this).prev().val();
+      appendTask(dateId, taskName);
+      // loadCheckboxes();
+
+      $(this).prev().val('');
+    });
+  }
 }
 
 /*
