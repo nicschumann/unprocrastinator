@@ -41,6 +41,3 @@ jspm_packages
 
 # Linting Options
 .jshintrc
-
-bundle.js
-bundle.css

@@ -1,0 +1,117 @@
+@font-face {
+  font-family: 'Glyphicons Halflings';
+  src: url("../fonts/glyphicons-halflings-regular.eot");
+  src: url("../fonts/glyphicons-halflings-regular.eot?#iefix") format("embedded-opentype"), url("../fonts/glyphicons-halflings-regular.woff") format("woff"), url("../fonts/glyphicons-halflings-regular.ttf") format("truetype"), url("../fonts/glyphicons-halflings-regular.svg#glyphicons-halflingsregular") format("svg"); }
+/* CSS REQUIRED */
+.state-icon {
+  left: -5px; }
+
+.list-group-item-primary {
+  color: white;
+  background-color: #428bca; }
+
+/* DEMO ONLY - REMOVES UNWANTED MARGIN */
+.well .list-group {
+  margin-bottom: 0px; }
+
+/* Move down content because we have a fixed navbar that is 50px tall */
+body {
+  padding-top: 50px;
+  padding-bottom: 20px; }
+
+#monthBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  background-color: black;
+  color: white;
+  padding: 10px;
+  width: 70%;
+  margin: 20px auto 20px auto; }
+  #monthBar h2 {
+    display: inline; }
+  #monthBar calendarIcon {
+    float: right; }
+
+#monthBarWrap {
+  z-index: 3;
+  position: fixed;
+  width: 100%;
+  height: 80px;
+  background-color: white; }
+
+#agendaList {
+  margin-top: 100px;
+  width: 70%;
+  word-break: break-all; }
+  #agendaList input[type="checkbox"] {
+    margin-right: 5px; }
+  #agendaList .dates {
+    text-align: center; }
+  #agendaList .taskDetails {
+    margin-top: 10px;
+    padding: 15px;
+    background-color: #fcfcfc;
+    border-color: #dfdfdf;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 8px;
+    /*# sourceMappingURL=jumbotron.css.map */ }
+    #agendaList .taskDetails .taskIcons .glyphicon {
+      font-size: 25px;
+      margin-left: 10px;
+      margin-right: 10px;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: normal;
+      cursor: pointer; }
+    #agendaList .taskDetails .timerWrapper {
+      display: inline-block; }
+      #agendaList .taskDetails .timerWrapper .timer {
+        display: inline-block;
+        font-size: .8vw;
+        display: inline-block;
+        vertical-align: middle;
+        line-height: normal; }
+      #agendaList .taskDetails .timerWrapper .glyphicon {
+        font-size: 14px;
+        line-height: normal;
+        cursor: pointer; }
+    #agendaList .taskDetails .plusWrapper {
+      display: inline-block; }
+      #agendaList .taskDetails .plusWrapper .plusProgress {
+        width: 105px; }
+    #agendaList .taskDetails .noteInput {
+      outline: none;
+      -webkit-box-shadow: none !important;
+      -moz-box-shadow: none !important;
+      box-shadow: none !important;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid #000000;
+      border-radius: 0; }
+    #agendaList .taskDetails .calButton {
+      display: inline-block;
+      margin: 0;
+      padding: 0;
+      outline: none;
+      -webkit-box-shadow: none !important;
+      -moz-box-shadow: none !important;
+      box-shadow: none !important;
+      background: transparent;
+      border: none; }
+      #agendaList .taskDetails .calButton .glyphicon {
+        font-size: 25px;
+        display: inline-block;
+        vertical-align: middle;
+        line-height: normal;
+        cursor: pointer; }
+    #agendaList .taskDetails .progressText {
+      margin: 0;
+      text-align: center; }
+    #agendaList .taskDetails #landingImg {
+      background-image: url("http://images.freecreatives.com/wp-content/uploads/2015/10/free-lined-paper-texture.jpg");
+      background-size: cover; }
+
+/*# sourceMappingURL=bundle.css.map */
