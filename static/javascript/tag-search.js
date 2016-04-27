@@ -45,9 +45,13 @@ module.exports = function( db ) {
 
 				} else {
 
+					var arr = Array.from( tags.entries() ).map( function( tag_bucket ){ return [ tag_bucket[0] ]; } );
+
+					console.log( arr );
+
 					element.autocomplete($.extend({
 
-						sources: tags.entries()
+						source: arr
 
 					}, options));
 

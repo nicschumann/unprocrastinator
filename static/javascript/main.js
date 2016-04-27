@@ -73,6 +73,10 @@ $(document).ready(function(){
         scrollJump($('#jumpDate').datepicker('getDate'));
     });
 
+  tag_search( $('.taskInput') );
+
+
+
     // As user scrolls, loads 7 more days infinitely. 
     // #TODO - Currently has bugs according to screen/zoom size
     $(window).scroll(function(){
