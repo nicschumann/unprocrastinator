@@ -76,13 +76,41 @@ body {
               font-size: 25px;
               margin-left: 10px;
               margin-right: 10px;
+
+              display: inline-block;
+              vertical-align: middle;
+              line-height: normal;   
+
+              cursor: pointer;
+            }
+          }
+          .timerWrapper {
+            display: inline-block;
+
+            .timer {
+              display: inline-block;
+              font-size: .8vw;
+
+              display: inline-block;
+              vertical-align: middle;
+              line-height: normal;   
+            }
+
+            .glyphicon {
+              font-size: 14px;
+              line-height: normal;
+              cursor: pointer;
             }
           }
 
-          .notes {
-
-
-            input[type=text] {
+          .plusWrapper {
+            display: inline-block;
+            .plusProgress {
+              width: 105px;
+            }
+          }
+          
+          .noteInput {
               outline: none;
               -webkit-box-shadow: none !important;
               -moz-box-shadow: none !important;
@@ -92,7 +120,12 @@ body {
               border: none;
               border-bottom: 1px solid #000000;
               border-radius: 0;
-            }
+          }
+
+          .progressText {
+            margin: 0;
+            // padding: 10px;
+            text-align: center;
           }
 
 
