@@ -76,29 +76,82 @@ body {
               font-size: 25px;
               margin-left: 10px;
               margin-right: 10px;
+
+              display: inline-block;
+              vertical-align: middle;
+              line-height: normal;   
+
+              cursor: pointer;
+            }
+          }
+          .timerWrapper {
+            display: inline-block;
+
+            .timer {
+              display: inline-block;
+              font-size: .8vw;
+
+              display: inline-block;
+              vertical-align: middle;
+              line-height: normal;   
+            }
+
+            .glyphicon {
+              font-size: 14px;
+              line-height: normal;
+              cursor: pointer;
             }
           }
 
-          .notes {
-
-
-            input[type=text] {
-              outline: none;
-              -webkit-box-shadow: none !important;
-              -moz-box-shadow: none !important;
-              box-shadow: none !important;
-
-              background: transparent;
-              border: none;
-              border-bottom: 1px solid #000000;
-              border-radius: 0;
+          .plusWrapper {
+            display: inline-block;
+            .plusProgress {
+              width: 105px;
             }
+          }
+          
+          .noteInput {
+            outline: none;
+            -webkit-box-shadow: none !important;
+            -moz-box-shadow: none !important;
+            box-shadow: none !important;
+
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #000000;
+            border-radius: 0;
+          }
+
+          .calButton {
+            display: inline-block;
+            margin:0;
+            padding:0;
+            outline: none;
+            -webkit-box-shadow: none !important;
+            -moz-box-shadow: none !important;
+            box-shadow: none !important;
+            background: transparent;
+            border: none;
+            .glyphicon {
+              font-size: 25px;
+              display: inline-block;
+              vertical-align: middle;
+              line-height: normal;   
+
+              cursor: pointer;
+            }
+          }
+
+          .progressText {
+            margin: 0;
+            // padding: 10px;
+            text-align: center;
           }
 
 
 /*# sourceMappingURL=jumbotron.css.map */
-  #landingImg {
-    background-image: url('http://images.freecreatives.com/wp-content/uploads/2015/10/free-lined-paper-texture.jpg');
-    background-size: cover;
-  }
+#landingImg {
+  background-image: url('http://images.freecreatives.com/wp-content/uploads/2015/10/free-lined-paper-texture.jpg');
+  background-size: cover;
+}
 }}

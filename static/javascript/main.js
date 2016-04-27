@@ -25,22 +25,32 @@ for readability, but its nbd if you don't read the HTML templates - you shouldn'
 I have tagged all things that need to be done soon with a #TODO tag. Please look for these and 
 pick out any you'd like to tackle!
 
+DESIGN QUESTIONS
+Editing task name?
+Due date display?
+Category display?
+Notes saving?
+
+
 ANY QUESTIONS? 
 Ask Jina about the front end code anytime!!! :)
 
 ********************************************/
 
 var db = require('../../queries/queries.js');
+var autosize = require('autosize');
 
 // Global date variables
 var today = new Date();
 var todayId = today.getMonth() + '-' + today.getDate() + '-' + today.getYear();
-var dateCounter = 1;
+var dateCounter = 0;
 
 // Actions to happen on page load
 $(document).ready(function(){
-	populateToday();
+  loadTodayOverview();
 	populateWeek();
+  populateTodaySample();
+
 
     // As user scrolls, loads 7 more days infinitely. 
     // #TODO - Currently has bugs according to screen/zoom size
@@ -83,7 +93,7 @@ function generateDayTemplate(currDate) {
                   '<ul class="tasks list-group checked-list-box">' +
                   '</ul>'+ 
                     '<div class="input-group">' +
-                      '<input type="text" class="form-control ="newTask' + '" placeholder="Add a task..." aria-describedby="basic-addon2">' +
+                      '<input type="text" class="form-control taskInput" placeholder="Add a task..." aria-describedby="basic-addon2">' +
                         '<span class="input-group-addon taskButton"> + </span>' +
                     '</div>'+
                 '</div>' +
@@ -118,23 +128,18 @@ function generateTodayOverview() {
 }
 
 /*
-    populateToday: Populates just the current day with a sample task. 
+  loadTodayOverview: loads and appends today overview progress bar.
+*/
+function loadTodayOverview() {
+  $("#agendaList").append(generateTodayOverview());
+}
+
+/*
+    populateTodaySample: Populates just the current day with a sample task. 
     #TODO - Delete later on; this is for testing purposes.
 */
-function populateToday() {
-  $("#agendaList").append(generateTodayOverview() + generateDayTemplate(today));
+function populateTodaySample() {
   appendTask(todayId, 'Eat lunch');
-
-  // Event handler for adding task
-  $('#' + todayId + ' .taskButton').click(function (e) { 
-      e.preventDefault();
-      var dateId = $(this).parent().parent().parent().parent().attr('id');
-      var taskName = $(this).prev().val();
-      appendTask(dateId, taskName);
-      // loadCheckboxes();
-
-      $(this).prev().val('');
-  });
 }
 
 /*
@@ -147,20 +152,30 @@ function populateWeek() {
     currDate.setDate(today.getDate() + dateCounter);
 
     $("#agendaList").append(generateDayTemplate(currDate));
-    dateCounter++;
 
     var currDateId = currDate.getMonth() + '-' + currDate.getDate() + '-' + currDate.getYear();
 
-    // Event handler for adding task
+    // Event handlers for adding task (click and enter)
     $('#' + currDateId + ' .taskButton').click(function (e) { 
       e.preventDefault();
       var dateId = $(this).parent().parent().parent().parent().attr('id');
       var taskName = $(this).prev().val();
       appendTask(dateId, taskName);
-      // loadCheckboxes();
-
       $(this).prev().val('');
     });
+
+    $("#" + currDateId + ' .taskInput').keypress(function (e) {
+       var key = e.which;
+       if (key == 13) { // the enter key code
+          e.preventDefault();
+          var dateId = $(this).parent().parent().parent().parent().attr('id');
+          var taskName = $(this).val();
+          appendTask(dateId, taskName);
+          $(this).val('');
+        }
+    });   
+  
+    dateCounter++;
   }
 }
 
@@ -192,50 +207,70 @@ function appendTask(dateId, taskName) {
 		      '<span class="sr-only">40% Complete (success)</span>' +
 		    '</div>' +
 		  '</div>' +
+      '<p class="progressText"></p>' +
+
 
 		  '<div class="taskIcons">' +
-		    '<span id="plusIcon" class="glyphicon glyphicon-time"></span>' +
-		    '<span id="timeIcon" class="glyphicon glyphicon-plus-sign"></span>' +
-		    '<span id="calIcon" class="glyphicon glyphicon-calendar"></span>' +
-		  '</div>' +
+		    '<span class="plusIcon glyphicon glyphicon-plus-sign"></span>' +
+        '<div class="plusWrapper"></div>' +
+		    '<span class="timeIcon glyphicon glyphicon-time"></span>' +
+        '<div class="timerWrapper"></div>' +
+        '<button class="calButton" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Calendar here!">' +
+            '<span id="calIcon" class="glyphicon glyphicon-calendar"></span>' +
+        '</button>' +
+		  '</div><br>' +
 
   	 '<h5>Subtasks</h5>' +
 		 '<div class="subtasks well" style="height: auto;overflow: auto;">  ' +
           '<ul class="list-group checked-list-box"> ' +
           '</ul> ' +
             '<div class="input-group"> ' +
-              '<input type="text" class="form-control" id="newSubtask" placeholder="Add a subtask..." aria-describedby="basic-addon2">' +
+              '<input type="text" class="form-control subtaskInput" placeholder="Add a subtask..." aria-describedby="basic-addon2">' +
                 '<span class="input-group-addon subtaskButton">+</span> ' +
             '</div>' +
         '</div> ' +
 
 		  '<div class="notes">' +
 		  	'<h5>Notes</h5>' +
-		    '<input type="text" class="form-control" placeholder="Write a note..." aria-describedby="sizing-addon1">' +
+		    '<textarea class="noteInput form-control" placeholder="Write a note..." rows="1" aria-describedby="sizing-addon1"></textarea>' +
 		  '</div>' +
 		'</div>'
 
 	var task = 
 		'<li id="'+ taskId +'" class="list-group-item" data-checked="false">' +
-			'<input type="checkbox"/>' + taskName + 
+			'<input class="taskCheckbox" type="checkbox"/>' + taskName + 
 			taskDetails + 
 		'</li>';
 
  
   $("#" + dateId + " .tasks").append(task);
+  autosize($('.noteInput'));
   $('#' + taskId + ' .taskDetails').hide(); // Hide taskDetails until clicked.
 
-  // Event handler for adding subtasks 
+
+
+  // Event handlers for adding subtasks (click and enter key)
   $("#" + taskId + ' .subtaskButton').click(function (e) { 
-      console.log('subtask button click')
+    console.log('subtask button click')
+    e.preventDefault();
+    var taskId = $(this).parent().parent().parent().parent().attr('id');
+    console.log('taskId =  ' + taskId)
+    var subtaskName = $(this).prev().val();
+    appendSubtask(taskId, subtaskName);
+
+    $(this).prev().val('');
+  });
+
+  $("#" + taskId + ' .subtaskInput').keypress(function (e) {
+     var key = e.which;
+     if (key == 13) { // the enter key code
       e.preventDefault();
       var taskId = $(this).parent().parent().parent().parent().attr('id');
-      console.log('taskId =  ' + taskId)
-      var subtaskName = $(this).prev().val();
+      var subtaskName = $(this).val();
       appendSubtask(taskId, subtaskName);
-
-      $(this).prev().val('');
-  });
+      $(this).val('');
+    }
+  });   
 
   // Call loadTask to load the interactive features of a task (toggle, details, etc.)
   loadTask(taskId);
@@ -246,17 +281,23 @@ function appendTask(dateId, taskName) {
     @taskId - the ID of the task to append this subtask to
     @subtaskName - the name of the subtask
     #TODO Discuss if subtasks need any more values besides name?
+    #TODO Should subtasks have subtaskIds?
 */
 function appendSubtask(taskId, subtaskName) {
   console.log('subtask added')
 	var subtask = 
-	// '<li id="'+ taskId +'" class="list-group-item" data-checked="false">' +
-	// no task ID yet
 		'<li class="list-group-item subtask" data-checked="false">' +
-			'<input type="checkbox"/>' + subtaskName +
+			'<input class="subtaskCheckbox" type="checkbox"/>' + subtaskName +
 		'</li>';
-
+  // #TODO - for some reason these checkboxes dont click
 	  $("#" + taskId + " .subtasks > .list-group").append(subtask);
+    $("#" + taskId + " .subtasks > .list-group .subtaskCheckbox").click(function(e) {
+      var isChecked = $(this).is(':checked');
+
+      // Set the subtask's state (complete/incomplete)
+      $(this).data('state', (isChecked) ? "complete" : "incomplete");
+      console.log('subtask is ' + $(this).data('state'));
+    })
 }
 
 
@@ -274,7 +315,12 @@ function loadTask(taskId) {
 	$('#' + taskId).each(function () {
     // Settings
     var $widget = $(this),
-    $checkbox = $("input:checkbox"),
+    $checkbox = $('#' + taskId + " .taskCheckbox"),
+    $notes = $widget.find(".noteInput"),
+    $timerWrapper = $widget.find(".timerWrapper"),
+    $timerButton = $widget.find(".timeIcon"),
+    $plusButton = $widget.find(".plusIcon"),
+    $plusWrapper = $widget.find(".plusWrapper"),
     color = ($widget.data('color') ? $widget.data('color') : "primary"),
     style = ($widget.data('style') == "button" ? "btn-" : "list-group-item-");
     // settings = {
@@ -301,22 +347,21 @@ function loadTask(taskId) {
         $widget.find('.taskDetails').slideToggle();
       });
 
-    // Handle clicking just the checkbox (mark task as complete/incomplete)
+    // Used for testing click
     $checkbox.on('click', function (e) {
-        e.stopPropagation();
+        e.stopPropagation(); // so it doesnt slideToggle
         console.log('clicked!')
       });
 
     // Cursor for within task details
     $(".taskDetails").css('cursor', 'default')
 
-    // Handle click - used for testing
+    // Prevents clicking in task details from slideToggling
     $(".taskDetails").on('click', function(e) {
         e.stopPropagation();
-        e.preventDefault();
     });
 
-    // Handles changing the checkbox state (complete/incomplete)
+    // Handles changing the task checkbox state (complete/incomplete)
     $checkbox.on('change', function () {
         var isChecked = $checkbox.is(':checked');
         // Set the button's state
@@ -324,6 +369,84 @@ function loadTask(taskId) {
 
         console.log($widget.data('state'));
       });
+
+    autosize.update('#' + taskId + ' .noteInput');
+
+    $notes.keypress(function (e) {
+       var key = e.which;
+       if (key == 13) { // the enter key code
+          // update notes in DB with $(this).val()
+          if (e.shiftKey === true)
+        {
+            return true;
+        }
+        else
+        {
+          $(this).blur();
+        }
+        return false;
+        }
+    });   
+
+    $plusButton.click(function(e) {
+      if ($plusWrapper.find('.plusProgress').length == 0) { // check that this doesnt already exist
+        $plusWrapper.append("<input type='text' placeholder='HRS, MIN, SEC' class='plusProgress'></input>");
+        $plusWrapper.find('.plusProgress').focus();  
+
+        $plusWrapper.find('.plusProgress').keypress(function (e) {
+         var key = e.which;
+         if (key == 13) { // the enter key code
+          e.preventDefault();
+          var progressTime = $(this).val().split(/[ ,]+/);
+
+          $widget.find('.progressText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
+          $widget.find('.progressText').text(progressTime[0] + " hours, " + progressTime[1] + " minutes, and " + progressTime[2] + " seconds of progress time have been added.");
+          $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});
+
+          $plusWrapper.empty();
+        }
+      });   
+      } else if ($plusWrapper.find('.plusProgress').length == 1) {
+        $plusWrapper.empty();
+      }
+    })
+
+    // Loads and handles timer actions 
+    $timerButton.click(function(e) {
+      if ($timerWrapper.find('.timer').length == 0) { // check that tmer doesnt already exist
+        $timerWrapper.append("<div class='timer'></div>");
+        var $timer = $timerWrapper.find('.timer')
+        var startTime = new Date();
+        $timer.countdown({since: startTime, format: 'HMS', 'compact': 'true'});
+        $timer.countdown('resume');
+        $timer.css("height", "10%");
+        $timer.parent().append('<span class="playIcon glyphicon glyphicon-play"></span><span class="pauseIcon glyphicon glyphicon-pause"></span><span class="stopIcon glyphicon glyphicon-stop"></span>')
+        $timer.parent().find('.playIcon').click(function (e) {
+          $timer.countdown('resume');
+        });
+        $timer.parent().find('.pauseIcon').click(function (e) {
+          $timer.countdown('pause');
+        });
+        $timer.parent().find('.stopIcon').click(function (e) {
+          $timer.countdown('pause');
+          var progressTime = $timer.countdown('getTimes');
+          $timer.countdown('destroy');
+          $timer.parent().empty();
+          $timer.remove();
+
+          $widget.find('.progressText').css({ opacity: 1, "height": "auto", "padding-bottom": "10px"});
+          $widget.find('.progressText').text(progressTime[4] + " hours, " + progressTime[5] + " minutes, and " + progressTime[6] + " seconds of progress time have been added.");
+          $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});
+
+        });
+      } else if ($timerWrapper.find('.timer').length == 1) {
+          var $timer = $timerWrapper.find('.timer')
+          $timer.countdown('pause');
+          $timer.countdown('destroy');
+          $timer.parent().empty();
+          $timer.remove();
+      }
+    });
 
     // Actions
     function updateDisplay() {
