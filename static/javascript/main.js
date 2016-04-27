@@ -47,6 +47,7 @@ var dateCounter = 0;
 
 // Actions to happen on page load
 $(document).ready(function(){
+  loadTodayOverview();
 	populateWeek();
   populateTodaySample();
 
@@ -127,11 +128,17 @@ function generateTodayOverview() {
 }
 
 /*
-    populateToday: Populates just the current day with a sample task. 
+  loadTodayOverview: loads and appends today overview progress bar.
+*/
+function loadTodayOverview() {
+  $("#agendaList").append(generateTodayOverview());
+}
+
+/*
+    populateTodaySample: Populates just the current day with a sample task. 
     #TODO - Delete later on; this is for testing purposes.
 */
 function populateTodaySample() {
-  $("#agendaList").append(generateTodayOverview());
   appendTask(todayId, 'Eat lunch');
 }
 
@@ -208,7 +215,9 @@ function appendTask(dateId, taskName) {
         '<div class="plusWrapper"></div>' +
 		    '<span class="timeIcon glyphicon glyphicon-time"></span>' +
         '<div class="timerWrapper"></div>' +
-		    '<span class="calIcon glyphicon glyphicon-calendar"></span>' +
+        '<button class="calButton" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Calendar here!">' +
+            '<span id="calIcon" class="glyphicon glyphicon-calendar"></span>' +
+        '</button>' +
 		  '</div><br>' +
 
   	 '<h5>Subtasks</h5>' +
@@ -383,21 +392,22 @@ function loadTask(taskId) {
       if ($plusWrapper.find('.plusProgress').length == 0) { // check that this doesnt already exist
         $plusWrapper.append("<input type='text' placeholder='HRS, MIN, SEC' class='plusProgress'></input>");
         $plusWrapper.find('.plusProgress').focus();  
-      
-      $plusWrapper.find('.plusProgress').keypress(function (e) {
+
+        $plusWrapper.find('.plusProgress').keypress(function (e) {
          var key = e.which;
          if (key == 13) { // the enter key code
-            e.preventDefault();
-            var progressTime = $(this).val().split(/[ ,]+/);
+          e.preventDefault();
+          var progressTime = $(this).val().split(/[ ,]+/);
 
-            $widget.find('.progressText').css({ opacity: 1, "height": "auto",});
-            $widget.find('.progressText').text(progressTime[0] + " hours, " + progressTime[1] + " minutes, and " + progressTime[2] + " seconds of progress time have been added.");
-            $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0"});
+          $widget.find('.progressText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
+          $widget.find('.progressText').text(progressTime[0] + " hours, " + progressTime[1] + " minutes, and " + progressTime[2] + " seconds of progress time have been added.");
+          $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});
 
-            $plusWrapper.empty();
-          }
+          $plusWrapper.empty();
+        }
       });   
-
+      } else if ($plusWrapper.find('.plusProgress').length == 1) {
+        $plusWrapper.empty();
       }
     })
 
@@ -405,29 +415,37 @@ function loadTask(taskId) {
     $timerButton.click(function(e) {
       if ($timerWrapper.find('.timer').length == 0) { // check that tmer doesnt already exist
         $timerWrapper.append("<div class='timer'></div>");
-      var $timer = $timerWrapper.find('.timer')
-      var startTime = new Date();
+        var $timer = $timerWrapper.find('.timer')
+        var startTime = new Date();
         $timer.countdown({since: startTime, format: 'HMS', 'compact': 'true'});
+        $timer.countdown('resume');
         $timer.css("height", "10%");
         $timer.parent().append('<span class="playIcon glyphicon glyphicon-play"></span><span class="pauseIcon glyphicon glyphicon-pause"></span><span class="stopIcon glyphicon glyphicon-stop"></span>')
         $timer.parent().find('.playIcon').click(function (e) {
           $timer.countdown('resume');
         });
         $timer.parent().find('.pauseIcon').click(function (e) {
-          $timer.countdown('pause')
+          $timer.countdown('pause');
         });
         $timer.parent().find('.stopIcon').click(function (e) {
+          $timer.countdown('pause');
           var progressTime = $timer.countdown('getTimes');
+          $timer.countdown('destroy');
           $timer.parent().empty();
           $timer.remove();
 
-          $widget.find('.progressText').css({ opacity: 1, "height": "auto",});
+          $widget.find('.progressText').css({ opacity: 1, "height": "auto", "padding-bottom": "10px"});
           $widget.find('.progressText').text(progressTime[4] + " hours, " + progressTime[5] + " minutes, and " + progressTime[6] + " seconds of progress time have been added.");
-          $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0"});
+          $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});
 
         });
+      } else if ($timerWrapper.find('.timer').length == 1) {
+          var $timer = $timerWrapper.find('.timer')
+          $timer.countdown('pause');
+          $timer.countdown('destroy');
+          $timer.parent().empty();
+          $timer.remove();
       }
-
     });
 
     // Actions

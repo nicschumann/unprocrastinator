@@ -111,15 +111,35 @@ body {
           }
           
           .noteInput {
-              outline: none;
-              -webkit-box-shadow: none !important;
-              -moz-box-shadow: none !important;
-              box-shadow: none !important;
+            outline: none;
+            -webkit-box-shadow: none !important;
+            -moz-box-shadow: none !important;
+            box-shadow: none !important;
 
-              background: transparent;
-              border: none;
-              border-bottom: 1px solid #000000;
-              border-radius: 0;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #000000;
+            border-radius: 0;
+          }
+
+          .calButton {
+            display: inline-block;
+            margin:0;
+            padding:0;
+            outline: none;
+            -webkit-box-shadow: none !important;
+            -moz-box-shadow: none !important;
+            box-shadow: none !important;
+            background: transparent;
+            border: none;
+            .glyphicon {
+              font-size: 25px;
+              display: inline-block;
+              vertical-align: middle;
+              line-height: normal;   
+
+              cursor: pointer;
+            }
           }
 
           .progressText {
@@ -130,8 +150,8 @@ body {
 
 
 /*# sourceMappingURL=jumbotron.css.map */
-  #landingImg {
-    background-image: url('http://images.freecreatives.com/wp-content/uploads/2015/10/free-lined-paper-texture.jpg');
-    background-size: cover;
-  }
+#landingImg {
+  background-image: url('http://images.freecreatives.com/wp-content/uploads/2015/10/free-lined-paper-texture.jpg');
+  background-size: cover;
+}
 }}
