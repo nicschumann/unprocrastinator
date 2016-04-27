@@ -22,7 +22,8 @@
     "url": "https://github.com/nicschumann/unprocrastinator/issues"
   },
   "engines":{
-    "node": "4.2.1"
+    "node": "4.2.1",
+    "npm": "1.2.25"
   },
   "homepage": "https://github.com/nicschumann/unprocrastinator#readme",
   "dependencies": {
