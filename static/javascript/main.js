@@ -50,6 +50,8 @@ $(document).ready(function(){
   loadTodayOverview();
 	populateWeek();
   populateTodaySample();
+  console.log(getMonthOfYear(new Date()));
+  $("#monthName").html(getMonthOfYear(new Date()));
 
 
     // As user scrolls, loads 7 more days infinitely. 
