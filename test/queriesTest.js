@@ -40,6 +40,21 @@ var testTaskTakeTwo = {
   "category" : category2
 }
 
+exports.create_bad_account = function(test) {
+  test.expect(1);
+  var badEmail = randomString(10);  // will throw error because has no @ or .
+  var badUser = {
+    "username" : username,
+    "email" : badEmail,
+    "password" : password
+  }
+
+  db.add_user(badUser, function (error, user_id) {
+    test.ok(error, "error from bad email address");
+    test.done();
+  });
+}
+
 exports.create_account_test = function(test) {
   test.expect(2);
 
@@ -50,6 +65,21 @@ exports.create_account_test = function(test) {
     uid = user_id;
     test.ok(!err, "this shouldn't throw an error");
     test.ok(uid, "and user_id should now exist");
+    test.done();
+  });
+}
+
+exports.incorrect_password_test = function(test) {
+  test.expect(1);
+
+  var badUser = {
+    'username' : username,
+    'email' : email,
+    'password' : randomString(10)
+  }
+
+  db.log_in(badUser, function (error, user_id) {
+    test.ok(error, "incorrect password error");
     test.done();
   });
 }
@@ -65,13 +95,23 @@ exports.log_in_test = function(test) {
   });
 }
 
+exports.no_user_test = function(test) {
+  test.expect(1);
+  db.get_user(randomString(10), function (error, user) {
+    console.log(error);
+    console.log(user);
+    test.ok(error, "uid doesn't exist error");
+    test.done();
+  })
+}
+
 exports.get_user_test = function(test) {
   test.expect(2);
   db.get_user(uid, function (error, user) {
     err = error;
     testUserObject = user;
     test.ok(!err, "this shouldn't throw an error");
-    test.ok(uid, "and user should now exist");
+    test.ok(user, "and user should now exist");
     test.done();
   })
 }
@@ -92,6 +132,15 @@ exports.change_email_test = function(test) {
   })
 }
 
+exports.change_email_bad_password_test = function(test) {
+  test.expect(1);
+  var newEmail = randomEmail();
+  db.change_email(email, newEmail, 'martha', function (error) {
+    test.ok(error, "bad password throw an error");
+    test.done();
+  })
+}
+
 exports.change_password_test = function(test) {
   test.expect(1);
   var newPassword = randomString(10);
@@ -104,6 +153,15 @@ exports.change_password_test = function(test) {
       "email" : email,
       "password" : password
     }
+    test.done();
+  })
+}
+
+exports.change_password_bad_old_test = function(test) {
+  test.expect(1);
+  var newPassword = randomString(10);
+  db.change_password(email, 'martha', newPassword, function (error) {
+    test.ok(error, "bad old password error");
     test.done();
   })
 }

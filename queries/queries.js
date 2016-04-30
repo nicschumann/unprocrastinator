@@ -86,7 +86,12 @@ exports.delete_user = function (user_id, user, callback) {
 exports.get_user = function (user_id, callback) {
     users.child(user_id).once("value", function(snapshot) {
         var user = snapshot.val();
-        console.log("Successfully got user.");
+        if (!user) {
+            var err = 'The specified user ID does not exist in the database.';
+            console.log("Error getting user: ", err);
+            if (callback) { callback(err); }
+            return;
+        }
         if (callback) { callback(null, user); }
     }, function (error) {
         console.log("Error getting user: ", error);

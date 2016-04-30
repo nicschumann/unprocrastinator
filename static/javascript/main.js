@@ -76,11 +76,29 @@ function getDayOfWeek(date) {
 }
 
 /*
+    getMonthOfYear: Similar to the above, returns the month based on the date object.
+    @date - the Date object to retrieve the month for.
+*/
+function getMonthOfYear(date) {
+  return ["January","February","March","April","May","June","July","September","October","November","December"][(date.getMonth())];
+}
+
+/*
+    incrementMonth: Return the next month. E.g. 'April' returns 'May'.
+    @month - the month whose following month to retrieve.
+*/
+function incrementMonth(month) {
+  var months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  return months[(months.indexOf(month) + 1)%12];
+}
+
+/*
     generateDateTemplate: Generates the HTML template for a single day on the agenda list.
     @currDate - the Date object to generate the HTML for.
 */
 function generateDayTemplate(currDate) {
   var currDateId = currDate.getMonth() + '-' + currDate.getDate() + '-' + currDate.getYear()
+
   return '<div class="day row" id="' + currDateId + '">' + 
             '<div class="dates col-md-1">' + 
               '<div class="row">' + 
