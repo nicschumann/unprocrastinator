@@ -82,7 +82,7 @@ module.exports = function( options ) {
 
 	return function( continuation ) {
 
-		app.listen( options.port, continuation );
+		app.listen( process.env.PORT || options.port, continuation );
 
 	};
 

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://unprocrastinator.herokuapp.com/login" />
+<title>subtask_and_note</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">subtask_and_note</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>/user</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>id=33</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>css=#33 &gt; div.taskDetails &gt; div.subtasks.well &gt; div.input-group &gt; input.form-control.subtaskInput</td>
+	<td>subsubsub</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>css=#33 &gt; div.taskDetails &gt; div.subtasks.well &gt; div.input-group &gt; span.input-group-addon.subtaskButton</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>css=#33 &gt; div.taskDetails &gt; div.notes &gt; textarea.noteInput.form-control</td>
+	<td>note</td>
+</tr>
+
+</tbody></table>
+</body>
+</html>
