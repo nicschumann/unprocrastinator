@@ -20,6 +20,9 @@
 
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
+  #logo {
+    display:inline
+  }
   padding-top: 50px;
   padding-bottom: 20px; }
 
@@ -36,9 +39,6 @@ body {
 
     h2 {
       display: inline; }
-
-      calendarIcon {
-        float: right; }
       }
 
       #monthBarWrap {
@@ -132,6 +132,7 @@ body {
             box-shadow: none !important;
             background: transparent;
             border: none;
+
             .glyphicon {
               font-size: 25px;
               display: inline-block;

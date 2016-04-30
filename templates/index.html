@@ -20,8 +20,8 @@
 
   <!-- Bootstrap core CSS -->
   <link href="/static/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="static/css/jquery.countdown.css"> 
-
+  <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-datepicker.css"> 
+  <link rel="stylesheet" type="text/css" href="/static/css/jquery.countdown.css"> 
   <link href="/static/bundle.css" rel="stylesheet">
 
   <!-- Bootstrap Material Design -->
@@ -57,7 +57,7 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a id="unprocrastinator" class="navbar-brand" href="/">Unprocrastinator</a>
+        <a id="unprocrastinator" class="navbar-brand" href="#" style="display: inline;"><img style="width: 20%;" src="/static/img/logo.png"></a>
       </div>
       <div id="navbar" class="collapse navbar-collapse">
         <ul class="nav navbar-nav">
@@ -73,12 +73,17 @@
   </nav>
 
   <div id="monthBarWrap">
-    <div class="container divide-nav" id="monthBar">
-      <h2 id="monthName">April</h2>
-      <button id="calendarIcon" type="button" class="btn btn-default" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Calendar here!" style="float:right">
-          <span id="calendarIcon" class="glyphicon glyphicon-calendar"></span>
+    <div class="container divide-nav" id="monthBar" style="color: black">
+      <h2 id="monthName" style="color: white">April</h2>
+      <button id="calendarIcon" type="button" title="Jump To" class="btn btn-default" data-toggle="popover" data-placement="bottom" style="float:right;">
+          <span class="glyphicon glyphicon-calendar"></span>
       </button>
-    </div>
+
+      <div id="datepicker1-wrapper" style="display:none;">
+        <div id="datepicker1" style="color: black"></div>
+        <input type="hidden" id="pickedDate">
+      </div>
+    </div> 
   </div>
 
   <div class="container" id="agendaList">
@@ -98,6 +103,7 @@
   <script src="/static/javascript/bootstrap.min.js"></script>
   <script src="static/javascript/countdown/jquery.plugin.js"></script> 
   <script src="static/javascript/countdown/jquery.countdown.js"></script>
+  <script src="static/javascript/bootstrap-datepicker.min.js"></script>
   <script src="/static/bundle.js"></script>
   <script src="/static/javascript/custom.js"></script>
   <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>

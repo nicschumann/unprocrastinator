@@ -42,13 +42,14 @@ var autosize = require('autosize');
 
 // Global date variables
 var today = new Date();
-var todayId = today.getMonth() + '-' + today.getDate() + '-' + today.getYear();
+var todayId = generateDateId(today); 
 var dateCounter = 0;
 
 // Actions to happen on page load
 $(document).ready(function(){
   loadTodayOverview();
 	populateWeek();
+  loadAllUserTasks();
   populateTodaySample();
 
 
@@ -63,8 +64,22 @@ $(document).ready(function(){
       }
   });
 
-    // Required Bootstrap JS 
-    $('[data-toggle="popover"]').popover();
+  // Required Bootstrap JS 
+  $('[data-toggle="popover"]').popover(
+    {html: true,
+     content: function() {
+           return $('#datepicker1-wrapper').html();
+         }
+  });
+
+  $("#datepicker1").datepicker();
+  $('#datepicker1').on("changeDate", function() {
+      console.log('hi');
+      $('#pickedDate').val(
+          $('#datepicker1').datepicker('getFormattedDate')
+      );
+      console.log( $('#pickedDate').val());
+  });
 });
 
 /*
@@ -75,12 +90,44 @@ function getDayOfWeek(date) {
    return ["SUN","MON","TUE","WED","THU","FRI","SAT"][(date.getDay())];
 }
 
+
+function generateDateId(date) {
+  var month = date.getMonth() + 1; // js is ridiculous.
+  return month + "-" + date.getDate() + "-" + date.getFullYear();
+}
+
+function generateDateFromId(dateId) {
+  var date = dateId.split('-');
+  var month = date[0]-1; // js is ridiculous.
+  var day = date[1];
+  var year = date[2]
+  return new Date(year, month, day, 0, 0, 0, 0);
+}
+
+function parseDate(dateValue) {
+  var date = new Date(dateValue);
+  var month = date.getMonth() + 1; // js is ridiculous.
+  return month + "-" + date.getDate() + "-" + date.getFullYear();
+}
+
+function loadAllUserTasks() {
+  db.get_user_tasks(sessionStorage.user_id, function (error, tasks) {
+    for (var task_id in tasks) {
+        if (tasks.hasOwnProperty(task_id)) {
+          var task = tasks[task_id];
+          console.log(task)
+          appendTask(task_id, task);
+        }
+    }
+  });
+}
+
 /*
     generateDateTemplate: Generates the HTML template for a single day on the agenda list.
     @currDate - the Date object to generate the HTML for.
 */
 function generateDayTemplate(currDate) {
-  var currDateId = currDate.getMonth() + '-' + currDate.getDate() + '-' + currDate.getYear()
+  var currDateId = generateDateId(currDate);
   return '<div class="day row" id="' + currDateId + '">' + 
             '<div class="dates col-md-1">' + 
               '<div class="row">' + 
@@ -139,7 +186,18 @@ function loadTodayOverview() {
     #TODO - Delete later on; this is for testing purposes.
 */
 function populateTodaySample() {
-  appendTask(todayId, 'Eat lunch');
+  var sampleTask =  {
+        "name": "Eat lunch",
+        "progress": 0,
+        "assigned_date": today.getTime(),
+        "due_date": today.getTime(),
+        "tags": "",
+        "category": ""
+    };
+
+  db.add_task_to_user(sessionStorage.user_id, sampleTask, function(error, taskId) {
+    appendTask(taskId, sampleTask);
+  });
 }
 
 /*
@@ -153,14 +211,25 @@ function populateWeek() {
 
     $("#agendaList").append(generateDayTemplate(currDate));
 
-    var currDateId = currDate.getMonth() + '-' + currDate.getDate() + '-' + currDate.getYear();
+    var currDateId = generateDateId(currDate);
 
     // Event handlers for adding task (click and enter)
     $('#' + currDateId + ' .taskButton').click(function (e) { 
       e.preventDefault();
       var dateId = $(this).parent().parent().parent().parent().attr('id');
       var taskName = $(this).prev().val();
-      appendTask(dateId, taskName);
+      var taskToAdd =  {
+            "name": taskName,
+            "progress": 0,
+            "assigned_date": generateDateFromId(dateId),
+            // "due_date": today.getTime(),
+            "tags": "",
+            "category": ""
+        };
+      db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
+        appendTask(taskId, taskToAdd);
+      });
+
       $(this).prev().val('');
     });
 
@@ -170,7 +239,19 @@ function populateWeek() {
           e.preventDefault();
           var dateId = $(this).parent().parent().parent().parent().attr('id');
           var taskName = $(this).val();
-          appendTask(dateId, taskName);
+
+          var taskToAdd =  {
+                "name": taskName,
+                "progress": 0,
+                "assigned_date": generateDateFromId(dateId).getTime(),
+                "due_date": generateDateFromId(dateId).getTime(),
+                "tags": "",
+                "category": ""
+            };
+          db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
+            appendTask(taskId, taskToAdd);
+          });
+
           $(this).val('');
         }
     });   
@@ -196,10 +277,8 @@ function displayCalendarComponent() {
     #TODO need to add: @category and @dueDate
     #TODO Currently uses a "dummy" random int as a task ID. Connect DB to use the real task ID.
 */
-function appendTask(dateId, taskName) {
-	var taskId = Math.floor(Math.random() * 100);
-	// console.log(taskId)
-	var taskDetails = 
+function appendTask(taskId, task) {
+	var taskDetailsDOM = 
 		'<div class="taskDetails">' +
 			'<h4>Task Details</h4>' +
 		  '<div class="progress">' +
@@ -209,15 +288,18 @@ function appendTask(dateId, taskName) {
 		  '</div>' +
       '<p class="progressText"></p>' +
 
-
 		  '<div class="taskIcons">' +
 		    '<span class="plusIcon glyphicon glyphicon-plus-sign"></span>' +
         '<div class="plusWrapper"></div>' +
 		    '<span class="timeIcon glyphicon glyphicon-time"></span>' +
         '<div class="timerWrapper"></div>' +
-        '<button class="calButton" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Calendar here!">' +
+        '<button class="calButton" type="button" title="Reschedule Task" data-container="body" data-toggle="popover" data-placement="bottom">' +
             '<span id="calIcon" class="glyphicon glyphicon-calendar"></span>' +
         '</button>' +
+        '<div class="datepicker-wrapper" style="display:none;">' +
+          '<div class="datepicker" style="color: black"></div>' +
+          '<input type="hidden" class="newAssignedDate">' +
+        '</div>' +
 		  '</div><br>' +
 
   	 '<h5>Subtasks</h5>' +
@@ -236,25 +318,21 @@ function appendTask(dateId, taskName) {
 		  '</div>' +
 		'</div>'
 
-	var task = 
+	var taskDOM = 
 		'<li id="'+ taskId +'" class="list-group-item" data-checked="false">' +
-			'<input class="taskCheckbox" type="checkbox"/>' + taskName + 
-			taskDetails + 
+			'<input class="taskCheckbox" type="checkbox"/>' + task.name + 
+			taskDetailsDOM + 
 		'</li>';
 
- 
-  $("#" + dateId + " .tasks").append(task);
-  autosize($('.noteInput'));
+  $("#" + parseDate(task.assigned_date) + " .tasks").append(taskDOM);
   $('#' + taskId + ' .taskDetails').hide(); // Hide taskDetails until clicked.
 
 
 
   // Event handlers for adding subtasks (click and enter key)
   $("#" + taskId + ' .subtaskButton').click(function (e) { 
-    console.log('subtask button click')
     e.preventDefault();
     var taskId = $(this).parent().parent().parent().parent().attr('id');
-    console.log('taskId =  ' + taskId)
     var subtaskName = $(this).prev().val();
     appendSubtask(taskId, subtaskName);
 
@@ -284,7 +362,6 @@ function appendTask(dateId, taskName) {
     #TODO Should subtasks have subtaskIds?
 */
 function appendSubtask(taskId, subtaskName) {
-  console.log('subtask added')
 	var subtask = 
 		'<li class="list-group-item subtask" data-checked="false">' +
 			'<input class="subtaskCheckbox" type="checkbox"/>' + subtaskName +
@@ -296,7 +373,6 @@ function appendSubtask(taskId, subtaskName) {
 
       // Set the subtask's state (complete/incomplete)
       $(this).data('state', (isChecked) ? "complete" : "incomplete");
-      console.log('subtask is ' + $(this).data('state'));
     })
 }
 
@@ -312,6 +388,7 @@ function appendSubtask(taskId, subtaskName) {
     #TODO - Jina is working on this, but: Interactivity for notes, and icon interactions!
 */
 function loadTask(taskId) {
+
 	$('#' + taskId).each(function () {
     // Settings
     var $widget = $(this),
@@ -332,14 +409,23 @@ function loadTask(taskId) {
     //     }
     // };
 
-    // Change cursor to indicate clickable
-    $widget.css('cursor', 'pointer');
+    $widget.css('cursor', 'pointer'); // Change cursor to indicate clickable
+    autosize($('.noteInput')); // Autosize note textarea
+    $widget.find( ".datepicker" ).datepicker(); // Datepicker JS
+    $widget.find('[data-toggle="popover"]').popover(
+      {html: true,
+       content: function() {
+             return $widget.find('.datepicker-wrapper').html(); //need to initialize datepicker AFTER
+           }
+      }
+    );
 
-    // Append, load, and hide taskDetails template
-    // $widget.append(taskDetails);
-    // loadTaskDetails(taskId);
-    // $widget.hide($(".taskDetails"));
-
+    $widget.find('.newAssignedDate').on("changeDate", function() {
+        $widget.find('.newAssignedDate').val(
+            $widget.find('.datepicker').datepicker('getFormattedDate')
+        );
+    });
+   
     // Event Handlers
     // -----------------------
     // Handle clicking the task outside of the checkbox
@@ -350,7 +436,6 @@ function loadTask(taskId) {
     // Used for testing click
     $checkbox.on('click', function (e) {
         e.stopPropagation(); // so it doesnt slideToggle
-        console.log('clicked!')
       });
 
     // Cursor for within task details
@@ -366,8 +451,6 @@ function loadTask(taskId) {
         var isChecked = $checkbox.is(':checked');
         // Set the button's state
         $widget.data('state', (isChecked) ? "complete" : "incomplete");
-
-        console.log($widget.data('state'));
       });
 
     autosize.update('#' + taskId + ' .noteInput');
@@ -572,5 +655,3 @@ function displayUserInfo() {
         }
     });
 }
-
-displayUserInfo();
