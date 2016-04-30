@@ -158,6 +158,16 @@ exports.add_task_to_user = function (user_id, task, callback) {
                     console.log("Error adding task.");
                     if (callback) { callback(error); }
                 } else {
+                    tags = task.tags;
+                    users.child(user_id).child("tags").once("value", function (snapshot) {
+                        existing_tags = snapshot.val();
+                        existing_tags.forEach(function (exsisting_tag) {
+                            if (tags.indexOf(exsisting_tag) < 0) {
+                                tags.push(exsisting_tag);
+                            }
+                        });
+                        users.child(user_id).child("tags").set(tags);
+                    });
                     console.log("Successfully added task.");
                     if (callback) { callback(null, task_ref.key()); }
                 }
@@ -214,6 +224,15 @@ exports.get_user_tags = function (user_id, callback) {
         if (callback) { callback(error); }
     });
 };
+
+exports.get_user_task = function (user_id, task_id, callback) {
+    tasks.child(task_id).once("value", function (snapshot) {
+        if (callback) { callback(null, snapshot.val()); }
+    }, function (error) {
+        console.log("Error getting user task: ", error);
+        if (callback) { callback(error); }
+    });
+}
 
 exports.get_user_tasks = function (user_id, callback) {
     tasks.orderByChild("user").equalTo(user_id).once("value", function (snapshot) {
