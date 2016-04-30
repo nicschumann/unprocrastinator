@@ -60,6 +60,7 @@ $(document).ready(function(){
     // through the days. (basic idea = keep track of when the monthBar div touches a div with
     // a new month in its dateId)
     $(window).scroll(function(){
+      console.log($(".first"))
       if ($(window).scrollTop() == $(document).height()-$(window).height()){ // doesnt work if zoom is not at 100%
       	populateWeek();
       }
@@ -100,9 +101,15 @@ function incrementMonth(month) {
 */
 function generateDayTemplate(currDate) {
   var currDateId = currDate.getMonth() + '-' + currDate.getDate() + '-' + currDate.getYear()
+  var html;
 
-  return '<div class="day row" id="' + currDateId + '">' + 
-            '<div class="dates col-md-1">' + 
+  if (currDate.getDate() == 1) {
+    html += '<div class="day row first" id="' + currDateId + '">';
+  } else {
+    html += '<div class="day row" id="' + currDateId + '">';
+  }
+
+  html += '<div class="dates col-md-1">' + 
               '<div class="row">' + 
                 '<h2>' + currDate.getDate() + '<br>' + getDayOfWeek(currDate) + '</h2>' + 
               '</div>' + 
@@ -120,6 +127,8 @@ function generateDayTemplate(currDate) {
               '</p>' + 
             '</div>'
             '</div>';
+
+  return html;
 }
 
 /*
