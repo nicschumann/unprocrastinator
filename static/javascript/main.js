@@ -50,24 +50,36 @@ $(document).ready(function(){
   loadTodayOverview();
 	populateWeek();
   populateTodaySample();
-  console.log(getMonthOfYear(new Date()));
-  $("#monthName").html(getMonthOfYear(new Date()));
 
+  $("#monthName").html(getMonthOfYear(new Date().getMonth()));
 
     // As user scrolls, loads 7 more days infinitely. 
     // #TODO - Currently has bugs according to screen/zoom size
     // #TODO - Make the #monthBar change from APRIL to MAY to JUNE, etc, as it scrolls
     // through the days. (basic idea = keep track of when the monthBar div touches a div with
     // a new month in its dateId)
-    $(window).scroll(function(){
-      console.log($(".first"))
-      if ($(window).scrollTop() == $(document).height()-$(window).height()){ // doesnt work if zoom is not at 100%
-      	populateWeek();
+  $(window).scroll(function(){
+    if ($(window).scrollTop() == $(document).height()-$(window).height()){ // doesnt work if zoom is not at 100%
+    	populateWeek();
+    }
+
+    var days = $(".day");
+    for (var i = 0; i < days.length; i++) {
+      var day = $(days[i]);
+      if (collide($("#monthBarWrap"), day)) {
+        var month = getMonthOfYear(day.attr('id')[0])
+        $("#monthName").html(month);
       }
+    }
+
+    if ($(window).scrollTop() == 0) {  // fixes bug where if user scrolls up too fast, month won't update
+      $("#monthName").html(getMonthOfYear(new Date().getMonth()));
+    }
+
   });
 
     // Required Bootstrap JS 
-    $('[data-toggle="popover"]').popover();
+  $('[data-toggle="popover"]').popover();
 });
 
 /*
@@ -79,20 +91,38 @@ function getDayOfWeek(date) {
 }
 
 /*
-    getMonthOfYear: Similar to the above, returns the month based on the date object.
-    @date - the Date object to retrieve the month for.
+    getMonthOfYear: Get month based on int, e.g. 1 -> January.
+    @index - the index to retrieve the month for.
 */
-function getMonthOfYear(date) {
-  return ["January","February","March","April","May","June","July","September","October","November","December"][(date.getMonth())];
+function getMonthOfYear(index) {
+  return ["January","February","March","April","May","June","July","September","October","November","December"][index];
 }
 
 /*
-    incrementMonth: Return the next month. E.g. 'April' returns 'May'.
-    @month - the month whose following month to retrieve.
+    collide: Determine if two divs collide.
+    @div1, @div2: the two divs whose collision we are wondering about
 */
-function incrementMonth(month) {
-  var months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  return months[(months.indexOf(month) + 1)%12];
+function collide(div1, div2) {
+  //console.log(div1.offset().top - $(document).scrollTop());
+
+  var x1 = div1.offset().left;
+  var y1 = div1.offset().top;
+  var h1 = div1.outerHeight(true);
+  var w1 = div1.outerWidth(true);
+  var b1 = y1 + h1;
+  var r1 = x1 + w1;
+
+  var x2 = div2.offset().left;
+  var y2 = div2.offset().top;
+  var h2 = div2.outerHeight(true);
+  var w2 = div2.outerWidth(true);
+  var b2 = y2 + h2;
+  var r2 = x2 + w2;
+
+  if (b1 < y2 || y1 > b2 || r1 < x2 || x1 > r2) {
+    return false;
+  }
+  return true;
 }
 
 /*
@@ -103,13 +133,14 @@ function generateDayTemplate(currDate) {
   var currDateId = currDate.getMonth() + '-' + currDate.getDate() + '-' + currDate.getYear()
   var html;
 
-  if (currDate.getDate() == 1) {
-    html += '<div class="day row first" id="' + currDateId + '">';
+  /*if (currDate.getDate() == 1) {
+    html = '<div class="day row first" id="' + currDateId + '">';
   } else {
-    html += '<div class="day row" id="' + currDateId + '">';
-  }
+    html = '<div class="day row" id="' + currDateId + '">';
+  }*/
 
-  html += '<div class="dates col-md-1">' + 
+  html = '<div class="day row" id="' + currDateId + '">' +
+            '<div class="dates col-md-1">' + 
               '<div class="row">' + 
                 '<h2>' + currDate.getDate() + '<br>' + getDayOfWeek(currDate) + '</h2>' + 
               '</div>' + 
