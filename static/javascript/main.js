@@ -133,17 +133,6 @@ function loadTaskMap() {
   }); 
 }
 
-function loadAllUserTasks() {
-  db.get_user_tasks(sessionStorage.user_id, function (error, tasks) {
-    for (var task_id in tasks) {
-        if (tasks.hasOwnProperty(task_id)) {
-          var task = tasks[task_id];
-          appendTask(task_id, task);
-        }
-    }
-  });
-}
-
 /*
     generateDateTemplate: Generates the HTML template for a single day on the agenda list.
     @currDate - the Date object to generate the HTML for.
