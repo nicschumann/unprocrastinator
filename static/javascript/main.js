@@ -20,7 +20,6 @@ GENERAL NOTES
 I don't recommend auto-indenting all, since the HTML templates are indented in a particular way
 for readability, but its nbd if you don't read the HTML templates - you shouldn't need to anyway!
 
-
 #TODO
 I have tagged all things that need to be done soon with a #TODO tag. Please look for these and 
 pick out any you'd like to tackle!
@@ -45,13 +44,13 @@ var today = new Date();
 var todayId = generateDateId(today); 
 var dateCounter = 0;
 
+//Global task map for loading existing tasks
+var taskMap = {};
+
 // Actions to happen on page load
 $(document).ready(function(){
+  loadTaskMap();
   loadTodayOverview();
-	populateWeek();
-  loadAllUserTasks();
-  populateTodaySample();
-
 
     // As user scrolls, loads 7 more days infinitely. 
     // #TODO - Currently has bugs according to screen/zoom size
@@ -74,7 +73,6 @@ $(document).ready(function(){
 
   $("#datepicker1").datepicker();
   $('#datepicker1').on("changeDate", function() {
-      console.log('hi');
       $('#pickedDate').val(
           $('#datepicker1').datepicker('getFormattedDate')
       );
@@ -110,12 +108,36 @@ function parseDate(dateValue) {
   return month + "-" + date.getDate() + "-" + date.getFullYear();
 }
 
+function loadTaskMap() {
+  db.get_user_tasks(sessionStorage.user_id, function (error, tasks) {
+    if (!error) {
+      for (var task_id in tasks) {
+          if (tasks.hasOwnProperty(task_id)) {
+            var task = tasks[task_id];
+            var taskDateId = parseDate(task.assigned_date);
+          } else {
+            console.log('invalid task to load')
+          }
+   
+          if (taskMap[taskDateId]) {
+            var existingTasks = taskMap[taskDateId];
+            var updatedTasks = existingTasks.concat({task_id: task_id, task: task});
+            delete taskMap[taskDateId];
+            taskMap[taskDateId] = updatedTasks;
+          } else {
+            taskMap[taskDateId] = [{task_id: task_id, task: task}];
+          }
+      }
+      populateWeek();
+    }
+  }); 
+}
+
 function loadAllUserTasks() {
   db.get_user_tasks(sessionStorage.user_id, function (error, tasks) {
     for (var task_id in tasks) {
         if (tasks.hasOwnProperty(task_id)) {
           var task = tasks[task_id];
-          console.log(task)
           appendTask(task_id, task);
         }
     }
@@ -191,8 +213,14 @@ function populateTodaySample() {
         "progress": 0,
         "assigned_date": today.getTime(),
         "due_date": today.getTime(),
-        "tags": "",
-        "category": ""
+        "tags": "test",
+        "category": "",
+        "subtasks": [
+          {
+            "name": "subtask1",
+            "complete": true
+          }
+        ]
     };
 
   db.add_task_to_user(sessionStorage.user_id, sampleTask, function(error, taskId) {
@@ -202,7 +230,6 @@ function populateTodaySample() {
 
 /*
     populateWeek: Populates the next 7 days. Is called for use in the infinite scroll.
-    Not actually necessary to make this a lone function, but improves code readability!
 */
 function populateWeek() {
   for (i = 0; i < 7; i++) {
@@ -213,17 +240,28 @@ function populateWeek() {
 
     var currDateId = generateDateId(currDate);
 
+    if (taskMap[currDateId]) { 
+      for (var taskIndex in taskMap[currDateId]) {
+        var taskPair = taskMap[currDateId][taskIndex];
+          appendTask(taskPair.task_id, taskPair.task);
+        // }
+      }
+    }
+
+    // Cursor for add button
+    $('#' + currDateId + ' .taskButton').css("cursor", "pointer"); 
+
     // Event handlers for adding task (click and enter)
-    $('#' + currDateId + ' .taskButton').click(function (e) { 
+    $('#' + currDateId + ' .taskButton').click(function (e) {
       e.preventDefault();
       var dateId = $(this).parent().parent().parent().parent().attr('id');
       var taskName = $(this).prev().val();
       var taskToAdd =  {
             "name": taskName,
             "progress": 0,
-            "assigned_date": generateDateFromId(dateId),
-            // "due_date": today.getTime(),
-            "tags": "",
+            "assigned_date": generateDateFromId(dateId).getTime(),
+            "due_date": generateDateFromId(dateId).getTime(),
+            "tags": "test",
             "category": ""
         };
       db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
@@ -245,8 +283,14 @@ function populateWeek() {
                 "progress": 0,
                 "assigned_date": generateDateFromId(dateId).getTime(),
                 "due_date": generateDateFromId(dateId).getTime(),
-                "tags": "",
-                "category": ""
+                "tags": "test",
+                "category": "",
+                "subtasks": [
+                  {
+                    "name": "completed?",
+                    "complete": true
+                  }
+                ]
             };
           db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
             appendTask(taskId, taskToAdd);
@@ -280,7 +324,7 @@ function displayCalendarComponent() {
 function appendTask(taskId, task) {
 	var taskDetailsDOM = 
 		'<div class="taskDetails">' +
-			'<h4>Task Details</h4>' +
+			'<h4>' + task.name + '</h4>' +
 		  '<div class="progress">' +
 		    '<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">' +
 		      '<span class="sr-only">40% Complete (success)</span>' +
@@ -303,7 +347,7 @@ function appendTask(taskId, task) {
 		  '</div><br>' +
 
   	 '<h5>Subtasks</h5>' +
-		 '<div class="subtasks well" style="height: auto;overflow: auto;">  ' +
+		 '<div class="subtasks" style="height: auto;overflow: auto;">  ' +
           '<ul class="list-group checked-list-box"> ' +
           '</ul> ' +
             '<div class="input-group"> ' +
@@ -325,16 +369,23 @@ function appendTask(taskId, task) {
 		'</li>';
 
   $("#" + parseDate(task.assigned_date) + " .tasks").append(taskDOM);
+
+  // Load subtasks
+  for (var subtask in task.subtasks) {
+    console.log(task.subtasks[subtask]);
+    appendSubtask(taskId, task.subtasks[subtask].name, task.subtasks[subtask].complete);
+  }
   $('#' + taskId + ' .taskDetails').hide(); // Hide taskDetails until clicked.
 
-
+  // CSS cursor for add subtask button
+  $("#" + taskId + ' .subtaskButton').css("cursor", "pointer"); 
 
   // Event handlers for adding subtasks (click and enter key)
   $("#" + taskId + ' .subtaskButton').click(function (e) { 
     e.preventDefault();
     var taskId = $(this).parent().parent().parent().parent().attr('id');
     var subtaskName = $(this).prev().val();
-    appendSubtask(taskId, subtaskName);
+    appendSubtask(taskId, subtaskName, false);
 
     $(this).prev().val('');
   });
@@ -345,7 +396,7 @@ function appendTask(taskId, task) {
       e.preventDefault();
       var taskId = $(this).parent().parent().parent().parent().attr('id');
       var subtaskName = $(this).val();
-      appendSubtask(taskId, subtaskName);
+      appendSubtask(taskId, subtaskName, false);
       $(this).val('');
     }
   });   
@@ -358,22 +409,24 @@ function appendTask(taskId, task) {
     appendSubtask: Appends a subtask to a task - fired when a user clicks subtaskButton.
     @taskId - the ID of the task to append this subtask to
     @subtaskName - the name of the subtask
+    @isComplete - boolean of if complete or not (unchecked/check)
     #TODO Discuss if subtasks need any more values besides name?
     #TODO Should subtasks have subtaskIds?
 */
-function appendSubtask(taskId, subtaskName) {
+function appendSubtask(taskId, subtaskName, isComplete) {
 	var subtask = 
 		'<li class="list-group-item subtask" data-checked="false">' +
 			'<input class="subtaskCheckbox" type="checkbox"/>' + subtaskName +
 		'</li>';
-  // #TODO - for some reason these checkboxes dont click
-	  $("#" + taskId + " .subtasks > .list-group").append(subtask);
-    $("#" + taskId + " .subtasks > .list-group .subtaskCheckbox").click(function(e) {
-      var isChecked = $(this).is(':checked');
+    $subtask = $("#" + taskId + " .subtasks > .list-group").append(subtask);
+    $checkbox = $subtask.find('.subtaskCheckbox');
+    $checkbox.prop('checked', isComplete)
 
-      // Set the subtask's state (complete/incomplete)
-      $(this).data('state', (isChecked) ? "complete" : "incomplete");
-    })
+    $("#" + taskId + " .subtasks > .list-group .subtaskCheckbox").on('change', function () {
+        var isChecked = $(this).is(':checked');
+        // Set the button's state -- #TODO connect to db
+        $(this).data('state', (isChecked) ? "complete" : "incomplete");
+      });
 }
 
 

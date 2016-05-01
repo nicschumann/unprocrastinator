@@ -159,15 +159,15 @@ exports.add_task_to_user = function (user_id, task, callback) {
                     if (callback) { callback(error); }
                 } else {
                     tags = task.tags;
-                    users.child(user_id).child("tags").once("value", function (snapshot) {
-                        existing_tags = snapshot.val();
-                        existing_tags.forEach(function (exsisting_tag) {
-                            if (tags.indexOf(exsisting_tag) < 0) {
-                                tags.push(exsisting_tag);
-                            }
-                        });
-                        users.child(user_id).child("tags").set(tags);
-                    });
+                    // users.child(user_id).child("tags").once("value", function (snapshot) {
+                    //     existing_tags = snapshot.val();
+                    //     existing_tags.forEach(function (existing_tag) {
+                    //         if (tags.indexOf(existing_tag) < 0) {
+                    //             tags.push(existing_tag);
+                    //         }
+                    //     });
+                    //     users.child(user_id).child("tags").set(tags);
+                    // });
                     console.log("Successfully added task.");
                     if (callback) { callback(null, task_ref.key()); }
                 }
