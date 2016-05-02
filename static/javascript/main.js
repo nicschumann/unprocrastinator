@@ -321,7 +321,7 @@ function displayCalendarComponent() {
 function appendTask(taskId, task) {
 	var taskDetailsDOM = 
 		'<div class="taskDetails">' +
-			'<h4>' + task.name + '</h4>' +
+			'<h4>' + "[" + task.category + "]" + task.name + '</h4>' +
 		  '<div class="progress">' +
 		    '<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">' +
 		      '<span class="sr-only">40% Complete (success)</span>' +
@@ -361,7 +361,7 @@ function appendTask(taskId, task) {
 
 	var taskDOM = 
 		'<li id="'+ taskId +'" class="list-group-item" data-checked="false">' +
-			'<input class="taskCheckbox" type="checkbox"/>' + task.name + 
+			'<input class="taskCheckbox" type="checkbox"/>' + "[" + task.category + "]" + task.name + 
 			taskDetailsDOM + 
 		'</li>';
 
