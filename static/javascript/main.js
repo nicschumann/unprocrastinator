@@ -151,7 +151,7 @@ function generateDayTemplate(currDate) {
                   '<ul class="tasks list-group checked-list-box">' +
                   '</ul>'+ 
                     '<div class="input-group">' +
-                      '<input type="text" class="form-control taskInput" placeholder="category, taskname..." aria-describedby="basic-addon2">' +
+                      '<input type="text" class="form-control taskInput" placeholder="Category, Task name..." aria-describedby="basic-addon2">' +
                         '<span class="input-group-addon taskButton"> + </span>' +
                     '</div>'+
                 '</div>' +
@@ -270,7 +270,7 @@ function populateWeek() {
           e.preventDefault();
           var dateId = $(this).parent().parent().parent().parent().attr('id');
           
-          var input = $(this).prev().val();
+          var input = $(this).val();
           var category = input.split(",")[0];
           var name = input.split(",")[1];
 
