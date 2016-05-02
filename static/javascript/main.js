@@ -684,16 +684,16 @@ $("#unprocrastinator").click(function (event) { //automatically log user out
 });
 
 /*
-    displayUserInfo: For testing purposes - displays user info to
+    displayUserInfo: displays user info to
     make sure the sign in process worked!
 */
 function displayUserInfo() {
     db.get_user(sessionStorage.user_id, function (error, user) {
         if (!error) {
-            var info = "Username: " + user.username + "&nbsp;&nbsp; | &nbsp;&nbsp;"
-                    + "Email: " + user.email + "&nbsp;&nbsp; | &nbsp;&nbsp;"
-                    + "User ID: " + sessionStorage.user_id;
-            $("#user_account_label").html(info);
+            var info = user.username + "&nbsp;&nbsp; | &nbsp;&nbsp;";
+            $("#user_label").html(info);
         }
     });
 }
+
+displayUserInfo();
