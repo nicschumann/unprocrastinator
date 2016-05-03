@@ -375,7 +375,10 @@ function displayCalendarComponent() {
 function appendTask(taskId, task) {
 	var taskDetailsDOM = 
 		'<div class="taskDetails">' +
-			'<h4>' + "[" + task.category + "]" + task.name + '</h4>' +
+			'<h4 class="taskDetailsHeading">' + "[" + task.category + "]" + task.name + '</h4>' +
+      '<button class="editButton" type="button">' +
+          '<span id="editIcon" class="glyphicon glyphicon-edit"></span>' +
+      '</button>' +
 		  '<div class="progress">' +
 		    '<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">' +
 		      '<span class="sr-only">40% Complete (success)</span>' +
@@ -395,6 +398,9 @@ function appendTask(taskId, task) {
           '<div class="datepicker" style="color: black"></div>' +
           '<input type="hidden" class="newAssignedDate">' +
         '</div>' +
+        '<button class="trashButton" type="button" data-container="body" data-html="true" data-toggle="popover" data-content="Delete this task?" data-placement="left">' +
+            '<span id="trashIcon" class="glyphicon glyphicon-trash"></span>' +
+        '</button>' +
 		  '</div><br>' +
 
   	 '<h5>Subtasks</h5>' +
