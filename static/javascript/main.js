@@ -163,7 +163,7 @@ function generateDayTemplate(currDate) {
                   '<ul class="tasks list-group checked-list-box">' +
                   '</ul>'+ 
                     '<div class="input-group">' +
-                      '<input type="text" class="form-control taskInput" placeholder="Add a task..." aria-describedby="basic-addon2">' +
+                      '<input type="text" class="form-control taskInput" placeholder="Category, Task name..." aria-describedby="basic-addon2">' +
                         '<span class="input-group-addon taskButton"> + </span>' +
                     '</div>'+
                 '</div>' +
@@ -256,14 +256,18 @@ function populateWeek() {
     $('#' + currDateId + ' .taskButton').click(function (e) {
       e.preventDefault();
       var dateId = $(this).parent().parent().parent().parent().attr('id');
-      var taskName = $(this).prev().val();
+      
+      var input = $(this).prev().val();
+      var category = input.split(",")[0];
+      var name = input.split(",")[1];
+
       var taskToAdd =  {
-            "name": taskName,
+            "name": name,
             "progress": 0,
             "assigned_date": generateDateFromId(dateId).getTime(),
             "due_date": generateDateFromId(dateId).getTime(),
             "tags": "test",
-            "category": ""
+            "category": category
         };
       db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
         appendTask(taskId, taskToAdd);
@@ -277,15 +281,19 @@ function populateWeek() {
        if (key == 13) { // the enter key code
           e.preventDefault();
           var dateId = $(this).parent().parent().parent().parent().attr('id');
-          var taskName = $(this).val();
+          
+          var input = $(this).val();
+          var category = input.split(",")[0];
+          var name = input.split(",")[1];
+
 
           var taskToAdd =  {
-                "name": taskName,
+                "name": name,
                 "progress": 0,
                 "assigned_date": generateDateFromId(dateId).getTime(),
                 "due_date": generateDateFromId(dateId).getTime(),
                 "tags": "test",
-                "category": "",
+                "category": category,
                 "subtasks": [
                   {
                     "name": "completed?",
@@ -325,7 +333,7 @@ function displayCalendarComponent() {
 function appendTask(taskId, task) {
 	var taskDetailsDOM = 
 		'<div class="taskDetails">' +
-			'<h4>' + task.name + '</h4>' +
+			'<h4>' + "[" + task.category + "]" + task.name + '</h4>' +
 		  '<div class="progress">' +
 		    '<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">' +
 		      '<span class="sr-only">40% Complete (success)</span>' +
@@ -365,7 +373,7 @@ function appendTask(taskId, task) {
 
 	var taskDOM = 
 		'<li id="'+ taskId +'" class="list-group-item" data-checked="false">' +
-			'<input class="taskCheckbox" type="checkbox"/>' + task.name + 
+			'<input class="taskCheckbox" type="checkbox"/>' + "[" + task.category + "]" + task.name + 
 			taskDetailsDOM + 
 		'</li>';
 
@@ -696,16 +704,16 @@ $("#unprocrastinator").click(function (event) { //automatically log user out
 });
 
 /*
-    displayUserInfo: For testing purposes - displays user info to
+    displayUserInfo: displays user info to
     make sure the sign in process worked!
 */
 function displayUserInfo() {
     db.get_user(sessionStorage.user_id, function (error, user) {
         if (!error) {
-            var info = "Username: " + user.username + "&nbsp;&nbsp; | &nbsp;&nbsp;"
-                    + "Email: " + user.email + "&nbsp;&nbsp; | &nbsp;&nbsp;"
-                    + "User ID: " + sessionStorage.user_id;
-            $("#user_account_label").html(info);
+            var info = user.username + "&nbsp;&nbsp; | &nbsp;&nbsp;";
+            $("#user_label").html(info);
         }
     });
 }
+
+displayUserInfo();
