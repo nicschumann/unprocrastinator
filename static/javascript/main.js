@@ -60,6 +60,8 @@ $(document).ready(function(){
   loadTaskMap();
   loadTodayOverview();
 
+  $("#monthName").text(getMonthOfYear(today));
+
   // Required Bootstrap JS 
   $('[data-toggle="popover"]').popover(
     {html: true,
@@ -70,12 +72,21 @@ $(document).ready(function(){
 
     // As user scrolls, loads 7 more days infinitely. 
     // #TODO - Currently has bugs according to screen/zoom size
-    // #TODO - Make the #monthBar change from APRIL to MAY to JUNE, etc, as it scrolls
-    // through the days. (basic idea = keep track of when the monthBar div touches a div with
-    // a new month in its dateId)
     $(window).scroll(function(){
       if ($(window).scrollTop() == $(document).height()-$(window).height()){ // doesnt work if zoom is not at 100%
-      	populateWeek();
+        populateWeek();
+      }
+      if ($(window).scrollTop() == 0){
+        $("#monthName").text(getMonthOfYear(today));
+      } else {
+        // #monthBar changes from APRIL to MAY to JUNE, etc, as it scrolls through the days.
+        var days = $(".day.row");
+
+        for (var i = 0; i < days.length; i++) {
+          if (collide( $("#monthBarWrap"), $("#" + days[i].id) )) {
+            $("#monthName").text(getMonthByNum(days[i].id[0]));
+          }
+        }
       }
   });
 
@@ -100,6 +111,37 @@ function getDayOfWeek(date) {
    return ["SUN","MON","TUE","WED","THU","FRI","SAT"][(date.getDay())];
 }
 
+function getMonthOfYear(date) {
+  return ["January","February","March",
+          "April","May","June","July",
+          "August","September","October",
+          "November","December"][(date.getMonth())];
+}
+
+function getMonthByNum(i) {
+  return ["January","February","March",
+          "April","May","June","July",
+          "August","September","October",
+          "November","December"][i - 1];
+}
+
+function collide(div1, div2) {
+  var x1 = div1.offset().left;
+  var y1 = div1.offset().top;
+  var h1 = div1.outerHeight(true);
+  var w1 = div1.outerWidth(true);
+  var b1 = y1 + h1;
+  var r1 = x1 + w1;
+  var x2 = div2.offset().left;
+  var y2 = div2.offset().top;
+  var h2 = div2.outerHeight(true);
+  var w2 = div2.outerWidth(true);
+  var b2 = y2 + h2;
+  var r2 = x2 + w2;
+
+  if (b1 < y2 || y1 > b2 || r1 < x2 || x1 > r2) return false;
+  return true;
+}
 
 function generateDateId(date) {
   var month = date.getMonth() + 1; // js is ridiculous.
