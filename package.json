@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/nicschumann/unprocrastinator#readme",
   "dependencies": {
+    "autosize": "^3.0.15",
     "browserify": "^13.0.0",
     "colors": "^1.1.2",
     "dateformat": "^1.0.12",
