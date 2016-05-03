@@ -47,10 +47,26 @@ var dateCounter = 0;
 //Global task map for loading existing tasks
 var taskMap = {};
 
+var showPopover = $.fn.popover.Constructor.prototype.show;
+$.fn.popover.Constructor.prototype.show = function () {
+    showPopover.call(this);
+    if (this.options.showCallback) {
+        this.options.showCallback.call(this);
+    }
+}
+
 // Actions to happen on page load
 $(document).ready(function(){
   loadTaskMap();
   loadTodayOverview();
+
+  // Required Bootstrap JS 
+  $('[data-toggle="popover"]').popover(
+    {html: true,
+      showCallback: function () {
+        $('#datepicker1').datepicker();
+    }
+  });
 
     // As user scrolls, loads 7 more days infinitely. 
     // #TODO - Currently has bugs according to screen/zoom size
@@ -63,13 +79,9 @@ $(document).ready(function(){
       }
   });
 
-  // Required Bootstrap JS 
-  $('[data-toggle="popover"]').popover(
-    {html: true,
-     content: function() {
-           return $('#datepicker1-wrapper').html();
-         }
-  });
+
+
+
 
   $("#datepicker1").datepicker();
   $('#datepicker1').on("changeDate", function() {

@@ -6,6 +6,16 @@
 
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
+  font-family: 'Roboto', sans-serif;
+
+  h1 {
+    font-family: 'Roboto Slab', serif;
+  }
+
+  h2 {
+    font-family: 'Roboto Condensed', sans-serif;
+  }
+
   #logo {
     display:inline
   }
