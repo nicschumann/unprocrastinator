@@ -419,10 +419,16 @@ function appendTask(taskId, task) {
 		  '</div>' +
 		'</div>'
 
+  var due = new Date(task.due_date);
+  var d = due.getDate();
+  var m = due.getMonth() + 1;  //bc javascript is ridiculous
+  var dueDate = '<span class="dueDate">due ' + m + '/' + d + '</span>';  //TODO
+
 	var taskDOM = 
 		'<li id="'+ taskId +'" class="list-group-item" data-checked="false">' +
-			'<input class="taskCheckbox" type="checkbox"/>' + "[" + task.category + "]" + task.name + 
-			taskDetailsDOM + 
+			'<input class="taskCheckbox" type="checkbox"/>' + '<span class="taskName">' +
+      "[" + task.category + "]" + task.name + '</span>' +
+			dueDate + taskDetailsDOM + 
 		'</li>';
 
   $("#" + parseDate(task.assigned_date) + " .tasks").append(taskDOM);
