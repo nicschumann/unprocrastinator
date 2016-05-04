@@ -213,9 +213,22 @@ exports.get_user_tags = function (user_id, callback) {
     tasks.orderByChild("user").equalTo(user_id).once("value", function (snapshot) {
         var tags = new Set();
         snapshot.forEach(function (tasks_snap) {
-            tasks_snap.val().tags.forEach(function (tag) {
-                tags.add(tag);
-            });
+            /**
+             * @modification nic
+             * 
+             * Okay, I'm adding some guarded code to ignore malformed data.
+             * When we flush the database before production, we should no longer
+             * need this workaround.
+             */
+            console.log( tasks_snap.val().tags );
+            if ( Array.isArray( tasks_snap.val().tags ) ) {
+
+                tasks_snap.val().tags.forEach(function (tag) {
+                    tags.add(tag);
+                });
+
+            }
+
         });
         console.log("Successfully got user tags.");
         if (callback) { callback(null, tags); }
