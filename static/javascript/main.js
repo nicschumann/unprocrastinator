@@ -311,8 +311,17 @@ function populateWeek() {
             "tags": "test",
             "category": category
         };
+
+
+      if (name) {
+        console.log(name);
+      } else {
+        console.log('no name!!!')
+      }
+
       db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
-        appendTask(taskId, taskToAdd);
+        console.log('hi');
+        appendTask(taskId, sampleTask);
       });
 
       $(this).prev().val('');
@@ -328,6 +337,10 @@ function populateWeek() {
           var category = input.split(",")[0];
           var name = input.split(",")[1];
 
+          if (!name) {
+            alert('no name!!!');
+            return;
+          }
 
           var taskToAdd =  {
                 "name": name,
@@ -344,7 +357,8 @@ function populateWeek() {
                 ]
             };
           db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
-            appendTask(taskId, taskToAdd);
+            console.log('hey');
+            appendTask(taskId, sampleTask);
           });
 
           $(this).val('');
@@ -373,11 +387,11 @@ function displayCalendarComponent() {
     #TODO Currently uses a "dummy" random int as a task ID. Connect DB to use the real task ID.
 */
 function appendTask(taskId, task) {
-  var confirmDeleteString = "<button class='confirmDelete'>Delete this task?</button>"
+  var confirmDeleteString = "<span class='confirmDelete'>Delete this task?</span>"
 	var taskDetailsDOM = 
 		'<div class="taskDetails">' +
-      '<input type="text" class="form-control editName" placeholder="' + "[" + task.category + "]" + task.name + '" style="display: none">' +
-			'<h4 class="taskDetailsHeading">' + "[" + task.category + "]" + task.name + '</h4>' +
+      '<input type="text" class="form-control editName" placeholder="' + task.name + '" style="display: none">' +
+			'<h4 class="taskDetailsHeading">' + task.name + '</h4>' +
       '<button class="editButton" type="button">' +
           '<span id="editIcon" class="glyphicon glyphicon-edit"></span>' +
       '</button>' +
@@ -471,14 +485,10 @@ function appendTask(taskId, task) {
     if (key == 13) { // the enter key code
       e.preventDefault();
       var taskId = $(this).parent().parent().attr('id');
-      var input = $(this).val();
-      var category = input.split(",")[0];
-      var name = input.split(",")[1];
-      console.log(taskId);
+      var name = $(this).val();
 
       var taskPatch =  {
         "name": name,
-        "category": category
       };
 
       db.patch_task_for_user(taskId, taskPatch, function(error) {
@@ -486,11 +496,6 @@ function appendTask(taskId, task) {
         db.get_user_task(sessionStorage.user_id, taskId, function (error, task) {
           appendTask(taskId, task);
         });
-        /*$('#' + taskId + ' .taskDetailsHeading')[0].text = '[' + category + '] ' + name;
-        // TODO prob buggy and update task name as well
-        $('#' + taskId + ' .taskDetailsHeading')[0].style.display = 'inline-block';
-        $('#' + taskId + ' .editName')[0].style.display = 'none';
-        $('#' + taskId + ' .editName').val('');*/
       });
     }
   });   
@@ -548,7 +553,7 @@ function loadTask(taskId) {
     $editButton = $widget.find(".editButton"),
     $taskName = $widget.find(".taskDetailsHeading")[0],
     $editTaskInput = $widget.find(".editName")[0],
-    $confirmDelete = $widget.find(".confirmDelete"),
+    $confirmDelete = $widget.find(".confirmDelete"),  //TODO :(
     color = ($widget.data('color') ? $widget.data('color') : "primary"),
     style = ($widget.data('style') == "button" ? "btn-" : "list-group-item-");
     // settings = {
@@ -695,7 +700,7 @@ function loadTask(taskId) {
       //$editTaskInput.style.display = 'block';
     });
 
-    $confirmDelete.click(function(e) {
+    $confirmDelete.click(function(e) {  //TODO :(
       console.log('trash');
     });
 
