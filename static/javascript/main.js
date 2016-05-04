@@ -201,8 +201,14 @@ function checkReassignTasks() {
         var taskPair = taskMap[dateId][taskIndex];
         var reassignedTask = taskPair.task;
         reassignedTask.assigned_date = today.getTime();
-        appendTask(taskPair.task_id, reassignedTask);
-        $("#" + taskPair.task_id).find(".taskName").css("color", "red");
+
+        db.patch_task_for_user( taskPair.task_id, reassignedTask, function(err, task) {
+          
+          appendTask(taskPair.task_id, reassignedTask);
+          $("#" + taskPair.task_id).find(".taskName").css("color", "red");
+
+        })
+
       }
     }
   }
@@ -484,6 +490,8 @@ function appendTask(taskId, task) {
 			taskDetailsDOM + 
 		'</li>';
 
+    console.log( parseDate( task.assigned_date ) );
+
   $("#" + parseDate(task.assigned_date) + " .tasks").append(taskDOM);
 
   //hover text init
@@ -540,6 +548,7 @@ function appendTask(taskId, task) {
       db.patch_task_for_user(taskId, taskPatch, function(error) {
         $('#' + taskId).remove();
         db.get_user_task(sessionStorage.user_id, taskId, function (error, task) {
+          console.log( task );
           appendTask(taskId, task);
         });
       });
