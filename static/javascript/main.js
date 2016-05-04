@@ -41,34 +41,34 @@ var autosize = require('autosize');
 
 // Global date variables
 var today = new Date();
+    today.setHours(0,0,0,0);
+
 var todayId = generateDateId(today); 
 var dateCounter = 0;
 
 //Global task map for loading existing tasks
 var taskMap = {};
 
-var showPopover = $.fn.popover.Constructor.prototype.show;
-$.fn.popover.Constructor.prototype.show = function () {
-    showPopover.call(this);
-    if (this.options.showCallback) {
-        this.options.showCallback.call(this);
-    }
-}
+var colorArray = ["#ef4546", "#f37331", "#ffd83f", "#8ec742", "#90d6e8", "#5e843c", "#c04f9d", "#f4889c"];
+
+var colorCounter = 0; 
+
+var categoryMap = {};
 
 // Actions to happen on page load
 $(document).ready(function(){
   loadTaskMap();
   loadTodayOverview();
+  checkReassignTasks();
 
   $("#monthName").text(getMonthOfYear(today));
 
-  // Required Bootstrap JS 
-  $('[data-toggle="popover"]').popover(
-    {html: true,
-      showCallback: function () {
-        $('#datepicker1').datepicker();
-    }
-  });
+  // Load calendar jump datepicker
+  $("#jumpDate").val(todayId);
+  $('.date').datepicker()
+    .on('changeDate', function(e) {
+        scrollJump($('#jumpDate').datepicker('getDate'));
+    });
 
     // As user scrolls, loads 7 more days infinitely. 
     // #TODO - Currently has bugs according to screen/zoom size
@@ -90,11 +90,6 @@ $(document).ready(function(){
       }
   });
 
-
-
-
-
-  $("#datepicker1").datepicker();
   $('#datepicker1').on("changeDate", function() {
       $('#pickedDate').val(
           $('#datepicker1').datepicker('getFormattedDate')
@@ -123,6 +118,13 @@ function getMonthByNum(i) {
           "April","May","June","July",
           "August","September","October",
           "November","December"][i - 1];
+}
+
+function scrollJump(date) {
+  while ($("#" + generateDateId(date)).length == 0) {
+    populateWeek();
+  }
+  $.scrollTo($("#" + generateDateId(date)));
 }
 
 function collide(div1, div2) {
@@ -183,8 +185,27 @@ function loadTaskMap() {
           }
       }
       populateWeek();
+      checkReassignTasks();
     }
   }); 
+}
+
+function checkReassignTasks() {
+  console.log(taskMap);
+  for (var dateId in taskMap) {
+    console.log(taskMap[dateId]);
+    if (generateDateFromId(dateId).getTime() < today.getTime()) {
+      console.log('REASSIGN');
+
+      for (var taskIndex in taskMap[dateId]) {
+        var taskPair = taskMap[dateId][taskIndex];
+        var reassignedTask = taskPair.task;
+        reassignedTask.assigned_date = today.getTime();
+        appendTask(taskPair.task_id, reassignedTask);
+        $("#" + taskPair.task_id).find(".taskName").css("color", "red");
+      }
+    }
+  }
 }
 
 /*
@@ -194,12 +215,12 @@ function loadTaskMap() {
 function generateDayTemplate(currDate) {
   var currDateId = generateDateId(currDate);
   return '<div class="day row" id="' + currDateId + '">' + 
-            '<div class="dates col-md-1">' + 
+            '<div class="dates col-xs-1">' + 
               '<div class="row">' + 
                 '<h2>' + currDate.getDate() + '<br>' + getDayOfWeek(currDate) + '</h2>' + 
               '</div>' + 
             '</div>' + 
-            '<div class="col-md-11">' + 
+            '<div class="col-xs-11">' + 
               '<p>' + 
                 '<div class="well" style="height: auto;overflow: auto;">' + 
                   '<ul class="tasks list-group checked-list-box">' +
@@ -219,21 +240,23 @@ function generateDayTemplate(currDate) {
     #TODO interact/connect with DB data.
 */
 function generateTodayOverview() {
-  return '<div class= id="todayOverview">' + 
+  return '<div id="todayOverview">' + 
             '<div class="row">' + 
-              '<div class="col-sm-3">' +
+              '<div class="col-xs-3">' +
                 '<h4>Today\'s Overview:</h4>' +
               '</div>' +
-              '<div class="progress">' +
-                '<div class="progress-bar progress-bar-success" style="width: 35%">' +
-                  '<span class="sr-only">35% Complete (success)</span>' +
-                '</div>' +
-                '<div class="progress-bar progress-bar-warning progress-bar-striped" style="width: 20%">' +
-                  '<span class="sr-only">20% Complete (warning)</span>' +
-                '</div>' +
-                '<div class="progress-bar progress-bar-danger" style="width: 10%">' +
-                  '<span class="sr-only">10% Complete (danger)</span>' +
-                '</div>' +
+              '<div class="col-xs-9">' +
+                '<div class="progress" style="margin-top: 13px;">' +
+                  '<div class="progress-bar progress-bar-success" style="width: 35%">' +
+                    '<span class="sr-only">35% Complete (success)</span>' +
+                  '</div>' +
+                  '<div class="progress-bar progress-bar-warning progress-bar-striped" style="width: 20%">' +
+                    '<span class="sr-only">20% Complete (warning)</span>' +
+                  '</div>' +
+                  '<div class="progress-bar progress-bar-danger" style="width: 10%">' +
+                    '<span class="sr-only">10% Complete (danger)</span>' +
+                  '</div>' +
+                '</div>'+
               '</div>' +
             '</div>' +
           '</div>';
@@ -256,8 +279,8 @@ function populateTodaySample() {
         "progress": 0,
         "assigned_date": today.getTime(),
         "due_date": today.getTime(),
-        "tags": "test",
-        "category": "",
+        "tags": ["test1", "test2"],
+        "category": "food",
         "subtasks": [
           {
             "name": "subtask1",
@@ -308,7 +331,7 @@ function populateWeek() {
             "progress": 0,
             "assigned_date": generateDateFromId(dateId).getTime(),
             "due_date": generateDateFromId(dateId).getTime(),
-            "tags": "test",
+            "tags": ["test1", "test2"],
             "category": category
         };
 
@@ -347,7 +370,7 @@ function populateWeek() {
                 "progress": 0,
                 "assigned_date": generateDateFromId(dateId).getTime(),
                 "due_date": generateDateFromId(dateId).getTime(),
-                "tags": "test",
+                "tags": ["test1", "test2"],
                 "category": category,
                 "subtasks": [
                   {
@@ -387,14 +410,29 @@ function displayCalendarComponent() {
     #TODO Currently uses a "dummy" random int as a task ID. Connect DB to use the real task ID.
 */
 function appendTask(taskId, task) {
-  var taskDetailsDOM = 
+
+  // Assign task category color
+  var taskColor;
+  if (task.category in categoryMap) {
+    taskColor = categoryMap[task.category];
+  } else {
+    if (colorCounter > 7) {
+      alert("You have too many categories! Please delete one before adding this task.")
+    } else {
+      categoryMap[task.category] = colorArray[colorCounter];
+      taskColor = categoryMap[task.category];
+      colorCounter++;
+    }
+  }
+
+	var taskDetailsDOM = 
 		'<div class="taskDetails">' +
-      '<input type="text" class="form-control editName" placeholder="' + task.name + '" style="display: none">' +
-			'<h4 class="taskDetailsHeading">' + task.name + '</h4>' +
-      '<button class="editButton" type="button">' +
-          '<span id="editIcon" class="glyphicon glyphicon-edit"></span>' +
-      '</button>' +
-		  '<div class="progress">' +
+          '<input type="text" class="form-control editName" placeholder="' + task.name + '" style="display: none;">' +
+			'<h4>' + '<span style="color: '+ taskColor+'" >' + task.category.toUpperCase() + '</span>' + task.name + '</h4>' +
+		'<button class="editButton" type="button">' +
+        '<span id="editIcon" class="glyphicon glyphicon-edit"></span>' +
+      '</button>' +  
+      '<div class="progress">' +
 		    '<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">' +
 		      '<span class="sr-only">40% Complete (success)</span>' +
 		    '</div>' +
@@ -402,21 +440,22 @@ function appendTask(taskId, task) {
       '<p class="progressText"></p>' +
 
 		  '<div class="taskIcons">' +
-		    '<span class="plusIcon glyphicon glyphicon-plus-sign"></span>' +
-        '<div class="plusWrapper"></div>' +
-		    '<span class="timeIcon glyphicon glyphicon-time"></span>' +
-        '<div class="timerWrapper"></div>' +
-        '<button class="calButton" type="button" title="Reschedule Task" data-container="body" data-toggle="popover" data-placement="bottom">' +
-            '<span id="calIcon" class="glyphicon glyphicon-calendar"></span>' +
-        '</button>' +
-        '<div class="datepicker-wrapper" style="display:none;">' +
-          '<div class="datepicker" style="color: black"></div>' +
-          '<input type="hidden" class="newAssignedDate">' +
-        '</div>' +
-        '<button class="trashButton" type="button">' +
+		    '<span class="plusIcon glyphicon glyphicon-plus-sign" data-toggle="tooltip" title="Add progress"></span>' +
+          '<div class="plusWrapper"></div>' +
+		    '<span class="timeIcon glyphicon glyphicon-time" data-toggle="tooltip" title="Progress timer"></span>' +
+          '<div class="timerWrapper"></div>' +
+          '<span class="calIcon glyphicon glyphicon-calendar" data-toggle="tooltip" title="Reschedule"></span>' +
+          '<div class="dateWrapper" style="width: 50%; display: inline-block; vertical-align: middle;"></div>' +
+          '<button class="trashButton" type="button">' +
             '<span id="trashIcon" class="glyphicon glyphicon-trash"></span>' +
-        '</button>' +
+          '</button>' +
 		  '</div><br>' +
+
+      '<div class="tagsContainer">' +
+        '<h5>Tags</h5>' +
+        '<input name="tags" class="tags" value=""/>' +
+        '</ul>' +
+      '</div>' +
 
   	 '<h5>Subtasks</h5>' +
 		 '<div class="subtasks" style="height: auto;overflow: auto;">  ' +
@@ -440,13 +479,22 @@ function appendTask(taskId, task) {
   var dueDate = '<span class="dueDate">due ' + m + '/' + d + '</span>';  //TODO
 
 	var taskDOM = 
-		'<li id="'+ taskId +'" class="list-group-item" data-checked="false">' +
-			'<input class="taskCheckbox" type="checkbox"/>' + '<span class="taskName">' +
-      "[" + task.category + "]" + task.name + '</span>' +
-			dueDate + taskDetailsDOM + 
+		'<li id="'+ taskId +'" class="task list-group-item" data-checked="false">' +
+			'<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + taskColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + '</span>' + 
+			taskDetailsDOM + 
 		'</li>';
 
   $("#" + parseDate(task.assigned_date) + " .tasks").append(taskDOM);
+
+  //hover text init
+  $('[data-toggle="tooltip"]').tooltip(); 
+
+  // Display tags
+  $('#' + taskId + ' .tags').tagsInput({'width': '100%', 'height': 'auto'});
+
+  for (var tag in task.tags) {
+     $('#' + taskId + ' .tags').addTag(task.tags[tag]);
+  }
 
   // Load subtasks
   for (var subtask in task.subtasks) {
@@ -499,7 +547,7 @@ function appendTask(taskId, task) {
   });   
 
   // Call loadTask to load the interactive features of a task (toggle, details, etc.)
-  loadTask(taskId);
+  loadTask(taskId, task);
 }
 
 /*
@@ -550,7 +598,7 @@ function appendSubtask(taskId, subtasks, subtaskName, isComplete) {
     
     #TODO - Jina is working on this, but: Interactivity for notes, and icon interactions!
 */
-function loadTask(taskId) {
+function loadTask(taskId, task) {
 
 	$('#' + taskId).each(function () {
     // Settings
@@ -579,23 +627,59 @@ function loadTask(taskId) {
 
     $widget.css('cursor', 'pointer'); // Change cursor to indicate clickable
     autosize($('.noteInput')); // Autosize note textarea
-    $widget.find( ".datepicker" ).datepicker(); // Datepicker JS
-    $widget.find('[data-toggle="popover"]').popover(
-      {html: true,
-       content: function() {
-             return $widget.find('.datepicker-wrapper').html(); //need to initialize datepicker AFTER
-           }
-      }
-    );
 
-    $widget.find('.newAssignedDate').on("changeDate", function() {
-        $widget.find('.newAssignedDate').val(
-            $widget.find('.datepicker').datepicker('getFormattedDate')
-        );
+    $widget.find('.calIcon').click(function(e) {
+      if ($widget.find('.input-daterange').length == 0) {
+        $widget.find('.dateWrapper').append(
+          '<div class="input-group input-daterange">' +
+              '<span class="input-group-addon">Assigned:</span>' +
+              '<input type="text" class="form-control assign-date" value="' + parseDate(task.assigned_date) + '">' +
+              '<span class="input-group-addon">Due:</span>' +
+              '<input type="text" class="form-control due-date" value="' + parseDate(task.due_date) + '">' +
+          '</div>')
+
+        $widget.find('.input-daterange input').each(function() {
+          $(this).datepicker();
+          // $(this).on('changeDate', function (e) {
+          //   console.log($(this).datepicker('getDate'));
+          // });
+        });
+
+        $widget.find('.input-daterange .assign-date').each(function() {
+          $(this).on('changeDate', function (e) {
+            var taskToPatch = task;
+            var newAssignedDate = $(this).datepicker('getDate');
+            taskToPatch.assigned_date = $(this).datepicker('getDate').getTime();
+
+            db.patch_task_for_user(taskId, taskToPatch);
+
+            $(this).on('hide', function (e) {
+              $widget.remove();
+              scrollJump(newAssignedDate);
+              appendTask(taskId, taskToPatch);
+            });
+
+          });
+        });
+
+        $widget.find('.input-daterange .due-date').each(function() {
+          $(this).on('changeDate', function (e) {
+            var taskToPatch = task;
+            taskToPatch.due_date = $(this).datepicker('getDate').getTime();
+            db.patch_task_for_user(taskId, taskToPatch);
+          });
+        });
+
+      } else {
+        $widget.find('.dateWrapper').empty();
+      }
     });
-   
+
     // Event Handlers
     // -----------------------
+    // Datepicker event handlers
+
+
     // Handle clicking the task outside of the checkbox
     $widget.on('click', function () {
         $widget.find('.taskDetails').slideToggle();
@@ -618,6 +702,11 @@ function loadTask(taskId) {
     $checkbox.on('change', function () {
         var isChecked = $checkbox.is(':checked');
         // Set the button's state
+
+        // TODO: patch task to mark complete or not. needs DB field
+        // var taskToPatch = task;
+        // db.patch_task_for_user(taskId, task_object, {callback})
+
         $widget.data('state', (isChecked) ? "complete" : "incomplete");
       });
 
