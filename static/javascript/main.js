@@ -387,8 +387,7 @@ function displayCalendarComponent() {
     #TODO Currently uses a "dummy" random int as a task ID. Connect DB to use the real task ID.
 */
 function appendTask(taskId, task) {
-  var confirmDeleteString = "<span class='confirmDelete'>Delete this task?</span>"
-	var taskDetailsDOM = 
+  var taskDetailsDOM = 
 		'<div class="taskDetails">' +
       '<input type="text" class="form-control editName" placeholder="' + task.name + '" style="display: none">' +
 			'<h4 class="taskDetailsHeading">' + task.name + '</h4>' +
@@ -414,7 +413,7 @@ function appendTask(taskId, task) {
           '<div class="datepicker" style="color: black"></div>' +
           '<input type="hidden" class="newAssignedDate">' +
         '</div>' +
-        '<button class="trashButton" type="button" data-container="body" data-html="true" data-toggle="popover" data-content="' + confirmDeleteString + '" data-placement="left">' +
+        '<button class="trashButton" type="button">' +
             '<span id="trashIcon" class="glyphicon glyphicon-trash"></span>' +
         '</button>' +
 		  '</div><br>' +
@@ -452,7 +451,7 @@ function appendTask(taskId, task) {
   // Load subtasks
   for (var subtask in task.subtasks) {
     console.log(task.subtasks[subtask]);
-    appendSubtask(taskId, task.subtasks[subtask].name, task.subtasks[subtask].complete);
+    appendSubtask(taskId, task.subtasks, task.subtasks[subtask].name, task.subtasks[subtask].complete);
   }
   $('#' + taskId + ' .taskDetails').hide(); // Hide taskDetails until clicked.
 
@@ -464,8 +463,7 @@ function appendTask(taskId, task) {
     e.preventDefault();
     var taskId = $(this).parent().parent().parent().parent().attr('id');
     var subtaskName = $(this).prev().val();
-    appendSubtask(taskId, subtaskName, false);
-
+    appendSubtask(taskId, task.subtasks, subtaskName, false);
     $(this).prev().val('');
   });
 
@@ -475,7 +473,7 @@ function appendTask(taskId, task) {
       e.preventDefault();
       var taskId = $(this).parent().parent().parent().parent().attr('id');
       var subtaskName = $(this).val();
-      appendSubtask(taskId, subtaskName, false);
+      appendSubtask(taskId, task.subtasks, subtaskName, false);
       $(this).val('');
     }
   });
@@ -512,7 +510,20 @@ function appendTask(taskId, task) {
     #TODO Discuss if subtasks need any more values besides name?
     #TODO Should subtasks have subtaskIds?
 */
-function appendSubtask(taskId, subtaskName, isComplete) {
+function appendSubtask(taskId, subtasks, subtaskName, isComplete) {
+  var newSubtasks = subtasks.slice(0);
+  newSubtasks.push( { "name": subtaskName, "complete": isComplete } );
+
+  var taskPatch = {
+    "subtasks": newSubtasks
+  };
+
+  db.patch_task_for_user(taskId, taskPatch, function (error) {
+    if (error) {
+      console.log(error);
+    }
+  });
+
 	var subtask = 
 		'<li class="list-group-item subtask" data-checked="false">' +
 			'<input class="subtaskCheckbox" type="checkbox"/>' + subtaskName +
@@ -553,7 +564,7 @@ function loadTask(taskId) {
     $editButton = $widget.find(".editButton"),
     $taskName = $widget.find(".taskDetailsHeading")[0],
     $editTaskInput = $widget.find(".editName")[0],
-    $confirmDelete = $widget.find(".confirmDelete"),  //TODO :(
+    $deleteTask = $widget.find(".trashButton"),
     color = ($widget.data('color') ? $widget.data('color') : "primary"),
     style = ($widget.data('style') == "button" ? "btn-" : "list-group-item-");
     // settings = {
@@ -700,8 +711,13 @@ function loadTask(taskId) {
       //$editTaskInput.style.display = 'block';
     });
 
-    $confirmDelete.click(function(e) {  //TODO :(
-      console.log('trash');
+    $deleteTask.click(function(e) {
+      $('#' + taskId).remove();
+      db.remove_task_from_user(sessionStorage.user_id, taskId, function(error) {
+        if (error) {
+          console.log(error);  //TODO?
+        }
+      })
     });
 
 
