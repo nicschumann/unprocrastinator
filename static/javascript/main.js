@@ -198,11 +198,11 @@ function loadTaskMap() {
 }
 
 function checkReassignTasks() {
-  console.log(taskMap);
+ // console.log(taskMap);
   for (var dateId in taskMap) {
-    console.log(taskMap[dateId]);
+  //  console.log(taskMap[dateId]);
     if (generateDateFromId(dateId).getTime() < today.getTime()) {
-      console.log('REASSIGN');
+     // console.log('REASSIGN');
 
       for (var taskIndex in taskMap[dateId]) {
         var taskPair = taskMap[dateId][taskIndex];
@@ -302,9 +302,9 @@ function populateTodaySample() {
         ]
     };
 
-  db.add_task_to_user(sessionStorage.user_id, sampleTask, function(error, taskId) {
-    appendTask(taskId, sampleTask);
-  });
+  // db.add_task_to_user(sessionStorage.user_id, sampleTask, function(error, taskId) {
+  //   appendTask(taskId, sampleTask);
+  // });
 }
 
 /*
@@ -364,7 +364,7 @@ function populateWeek() {
 
       db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
         console.log('hi');
-        appendTask(taskId, sampleTask);
+        appendTask(taskId, taskToAdd);
       });
 
       $(this).prev().val('');
@@ -387,6 +387,13 @@ function populateWeek() {
             return;
           }
 
+          /**
+           * Push categories as a string,
+           * even though they are {name: category-name, color: "#xxxxxx"}
+           * in the database
+           * 
+           * @type {TaskObject}
+           */
           var taskToAdd =  {
                 "name": name,
                 "progress": 0,
@@ -395,19 +402,19 @@ function populateWeek() {
                 "tags": ["test1", "test2"],
                 "category": category,
                 "subtasks": [
-                  {
-                    "name": "completed?",
-                    "complete": true
-                  }
+                  // {
+                  //   "name": "completed?",
+                  //   "complete": true
+                  // }
                 ]
             };
 
           db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
             console.log('hey');
-            appendTask(taskId, sampleTask);
+            appendTask(taskId, taskToAdd);
           });
 
-            console.log( taskToAdd );
+            //console.log( taskToAdd );
           // db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
           //   appendTask(taskId, taskToAdd);
           // });
@@ -536,7 +543,8 @@ function appendTask(taskId, task) {
      * I'm removing this log statement, as it's currently confusing me.
      */
    // console.log(task.subtasks[subtask]);
-    appendSubtask(taskId, task.subtasks[subtask].name, task.subtasks[subtask].complete);
+    //appendSubtask(taskId, task.subtasks, task.subtasks[subtask].name, task.subtasks[subtask].complete);
+    renderSubtask( taskId, task.subtasks, task.subtasks[subtask].name, task.subtasks[subtask].complete );
   }
   $('#' + taskId + ' .taskDetails').hide(); // Hide taskDetails until clicked.
 
@@ -549,6 +557,7 @@ function appendTask(taskId, task) {
     var taskId = $(this).parent().parent().parent().parent().attr('id');
     var subtaskName = $(this).prev().val();
     appendSubtask(taskId, task.subtasks, subtaskName, false);
+    renderSubtask( taskId, task.subtasks, subtaskName, false );
     $(this).prev().val('');
   });
 
@@ -559,6 +568,7 @@ function appendTask(taskId, task) {
       var taskId = $(this).parent().parent().parent().parent().attr('id');
       var subtaskName = $(this).val();
       appendSubtask(taskId, task.subtasks, subtaskName, false);
+      renderSubtask( taskId, task.subtasks, subtaskName, false );
       $(this).val('');
     }
   });
@@ -597,12 +607,20 @@ function appendTask(taskId, task) {
     #TODO Should subtasks have subtaskIds?
 */
 function appendSubtask(taskId, subtasks, subtaskName, isComplete) {
-  var newSubtasks = subtasks.slice(0);
-  newSubtasks.push( { "name": subtaskName, "complete": isComplete } );
+
+  //console.log( newSubtasks );
+  console.log('subtasks');
+  // console.log( subtasks );
+  
+   var newSubtasks = subtasks;
 
   var taskPatch = {
-    "subtasks": newSubtasks
+      "subtasks": newSubtasks
   };
+
+
+
+  newSubtasks.push( { "name": subtaskName, "complete": isComplete } );
 
   db.patch_task_for_user(taskId, taskPatch, function (error) {
     if (error) {
@@ -610,19 +628,35 @@ function appendSubtask(taskId, subtasks, subtaskName, isComplete) {
     }
   });
 
-	var subtask = 
-		'<li class="list-group-item subtask" data-checked="false">' +
-			'<input class="subtaskCheckbox" type="checkbox"/>' + subtaskName +
-		'</li>';
+
+}
+
+/**
+ * this routine renders a subtask given by the parameters to the dom.
+ * 
+ * @param  {String}  taskId      the id of the task to render the subtask for.
+ * @param  {SubtaskObjects}  subtasks    the existing set of subtasks to render
+ * @param  {String}  subtaskName the name of the subtask to render
+ * @param  {Boolean} isComplete  whether the subtask is complete
+ */
+function renderSubtask( taskId, subtasks, subtaskName, isComplete ) {
+
+  console.log('render');
+
+    var subtask = 
+    '<li class="list-group-item subtask" data-checked="false">' +
+      '<input class="subtaskCheckbox" type="checkbox"/>' + subtaskName +
+    '</li>';
     $subtask = $("#" + taskId + " .subtasks > .list-group").append(subtask);
     $checkbox = $subtask.find('.subtaskCheckbox');
-    $checkbox.prop('checked', isComplete)
+    $checkbox.prop('checked', isComplete);
 
     $("#" + taskId + " .subtasks > .list-group .subtaskCheckbox").on('change', function () {
         var isChecked = $(this).is(':checked');
         // Set the button's state -- #TODO connect to db
         $(this).data('state', (isChecked) ? "complete" : "incomplete");
       });
+
 }
 
 
@@ -914,7 +948,8 @@ $('#createaccount').on('click', function(event) {
     var user = {
     	"username": $("#newusername").val(),
         "email": $("#newemail").val(),
-        "password": $("#newpassword").val()
+        "password": $("#newpassword").val(),
+        "categories": []
     };
     db.add_user(user, function (error, user_id) {
         if (!error) {

@@ -55,7 +55,17 @@ module.exports = function( db ) {
 
 		if ( typeof sessionStorage.user_id !== "undefined" ) {
 
+			/**
+			 * @todo 
+			 * 
+			 * replace this with the user's categories by
+			 * getting the user and using the categories passed
+			 * instead of the tags. Just using the tags for testing
+			 * purposes.
+			 */
 			db.get_user_tags( sessionStorage.user_id, function( err, tags ) {
+
+				console.log( tags );
 
 				if ( err ) {
 
@@ -94,6 +104,8 @@ module.exports = function( db ) {
 		 * @return {[Tag]}    a formatted array of tag elements.
 		 */
 		function searchableArrayFromTagSet( set ) {
+
+			// return [ set.map( function( category ) { return category.name; } ) ];
 
 			return [Array.from( set.entries() ).map( function( tag_bucket ) { return tag_bucket[0]; } )];
 
