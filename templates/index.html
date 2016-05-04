@@ -18,6 +18,7 @@
   <link href="/static/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-datepicker.css"> 
   <link rel="stylesheet" type="text/css" href="/static/css/jquery.countdown.css"> 
+  <link rel="stylesheet" type="text/css" href="/static/css/jquery.tagsinput.min.css"> 
   <link href="/static/bundle.css" rel="stylesheet">
 
   <!-- Fonts -->
@@ -54,16 +55,15 @@
   </nav>
 
   <div id="monthBarWrap">
-    <div class="container divide-nav" id="monthBar" style="color: black">
+    <div class="container divide-nav" id="monthBar" style="color: black;">
       <h2 id="monthName" style="color: white">April</h2>
-      <button id="calendarIcon" type="button" title="Jump To" class="btn btn-default" data-toggle="popover" data-placement="bottom" style="float:right;" data-content='
-        <div id="datepicker1" style="color: black"></div>'>
-          <span class="glyphicon glyphicon-calendar"></span>
-      </button>
-
-      <div id="datepicker1-wrapper" style="display:none;">
-        
-        <input type="hidden" id="pickedDate">
+      <div class="jumpDatepicker" style="max-width: 20%;  display: inline; float:right;">
+        <div class="input-group date" data-provide="datepicker">
+            <input id="jumpDate" type="text" class="form-control">
+            <div class="input-group-addon">
+                <span class="glyphicon glyphicon-th"></span>
+            </div>
+        </div>
       </div>
     </div> 
   </div>
@@ -86,9 +86,10 @@
   <script src="/static/javascript/countdown/jquery.plugin.js"></script> 
   <script src="/static/javascript/countdown/jquery.countdown.js"></script>
   <script src="/static/javascript/bootstrap-datepicker.min.js"></script>
-  <script src="/static/bundle.js"></script>
-  <script src="/static/javascript/custom.js"></script>
+  <script src="/static/javascript/jquery.scrollTo.min.js"></script>
+  <script src="/static/javascript/jquery.tagsinput.min.js"></script>
   <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+  <script src="/static/bundle.js"></script>
 
 
 </body>

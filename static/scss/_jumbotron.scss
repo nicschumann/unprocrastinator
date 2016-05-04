@@ -56,12 +56,20 @@ body {
       width: 70%;
       word-break: break-all; 
 
+      #todayOverview {
+        h4 {
+          font-size: 1.8vw;
+        }
+      }
       input[type="checkbox"] {
         margin-right:5px;
       }
 
       .dates {
         text-align: center;
+        h2 {
+          font-size: 3vw;
+        }
       }
 
       .well {
@@ -94,6 +102,11 @@ body {
             cursor: pointer;
           }
         }
+
+        .tags {
+          width: 100%;
+        }
+
         .timerWrapper {
           display: inline-block;
 
