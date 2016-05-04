@@ -39,7 +39,7 @@ Ask Jina about the front end code anytime!!! :)
 var db = require('../../queries/queries.js');
 var autosize = require('autosize');
 
-var tag_search = require('./tag-search')( db );
+var tag_search = require('./tag-search')( db, $ );
 
 
 // Global date variables
@@ -58,6 +58,8 @@ var colorCounter = 0;
 
 var categoryMap = {};
 
+
+
 // Actions to happen on page load
 $(document).ready(function(){
   loadTaskMap();
@@ -72,8 +74,6 @@ $(document).ready(function(){
     .on('changeDate', function(e) {
         scrollJump($('#jumpDate').datepicker('getDate'));
     });
-
-  tag_search( $('.taskInput') );
 
 
 
@@ -339,6 +339,13 @@ function populateWeek() {
       var category = input.split(",")[0];
       var name = input.split(",")[1];
 
+      /**
+       * @modification nic
+       * I'm changing the "add" logic so the category is added to the set of tags,
+       * and the tags to be a collection – it should be an array of "tag" values, which
+       * in this case are just strings.
+       */
+
       var taskToAdd =  {
             "name": name,
             "progress": 0,
@@ -363,13 +370,15 @@ function populateWeek() {
       $(this).prev().val('');
     });
 
-    $("#" + currDateId + ' .taskInput').keypress(function (e) {
-       var key = e.which;
-       if (key == 13) { // the enter key code
+   tag_search( $( "#" + currDateId + ' .taskInput'), {
+    post: function( element ) {
+      return function ( e ) {
+
           e.preventDefault();
-          var dateId = $(this).parent().parent().parent().parent().attr('id');
-          
-          var input = $(this).val();
+
+          var dateId = element.parent().parent().parent().parent().attr('id');
+
+          var input = element.val();
           var category = input.split(",")[0];
           var name = input.split(",")[1];
 
@@ -392,14 +401,23 @@ function populateWeek() {
                   }
                 ]
             };
+
           db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
             console.log('hey');
             appendTask(taskId, sampleTask);
           });
 
-          $(this).val('');
-        }
-    });   
+            console.log( taskToAdd );
+          // db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
+          //   appendTask(taskId, taskToAdd);
+          // });
+
+          element.val('');
+
+        };
+
+    }
+   }); 
   
     dateCounter++;
   }
@@ -513,8 +531,12 @@ function appendTask(taskId, task) {
 
   // Load subtasks
   for (var subtask in task.subtasks) {
-    console.log(task.subtasks[subtask]);
-    appendSubtask(taskId, task.subtasks, task.subtasks[subtask].name, task.subtasks[subtask].complete);
+    /**
+     * @modification nic
+     * I'm removing this log statement, as it's currently confusing me.
+     */
+   // console.log(task.subtasks[subtask]);
+    appendSubtask(taskId, task.subtasks[subtask].name, task.subtasks[subtask].complete);
   }
   $('#' + taskId + ' .taskDetails').hide(); // Hide taskDetails until clicked.
 
