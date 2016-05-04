@@ -373,8 +373,10 @@ function displayCalendarComponent() {
     #TODO Currently uses a "dummy" random int as a task ID. Connect DB to use the real task ID.
 */
 function appendTask(taskId, task) {
+  var confirmDeleteString = "<button class='confirmDelete'>Delete this task?</button>"
 	var taskDetailsDOM = 
 		'<div class="taskDetails">' +
+      '<input type="text" class="form-control editName" placeholder="' + "[" + task.category + "]" + task.name + '" style="display: none">' +
 			'<h4 class="taskDetailsHeading">' + "[" + task.category + "]" + task.name + '</h4>' +
       '<button class="editButton" type="button">' +
           '<span id="editIcon" class="glyphicon glyphicon-edit"></span>' +
@@ -398,7 +400,7 @@ function appendTask(taskId, task) {
           '<div class="datepicker" style="color: black"></div>' +
           '<input type="hidden" class="newAssignedDate">' +
         '</div>' +
-        '<button class="trashButton" type="button" data-container="body" data-html="true" data-toggle="popover" data-content="Delete this task?" data-placement="left">' +
+        '<button class="trashButton" type="button" data-container="body" data-html="true" data-toggle="popover" data-content="' + confirmDeleteString + '" data-placement="left">' +
             '<span id="trashIcon" class="glyphicon glyphicon-trash"></span>' +
         '</button>' +
 		  '</div><br>' +
@@ -462,6 +464,35 @@ function appendTask(taskId, task) {
       appendSubtask(taskId, subtaskName, false);
       $(this).val('');
     }
+  });
+
+  $("#" + taskId + ' .editName').keypress(function (e) {
+    var key = e.which;
+    if (key == 13) { // the enter key code
+      e.preventDefault();
+      var taskId = $(this).parent().parent().attr('id');
+      var input = $(this).val();
+      var category = input.split(",")[0];
+      var name = input.split(",")[1];
+      console.log(taskId);
+
+      var taskPatch =  {
+        "name": name,
+        "category": category
+      };
+
+      db.patch_task_for_user(taskId, taskPatch, function(error) {
+        $('#' + taskId).remove();
+        db.get_user_task(sessionStorage.user_id, taskId, function (error, task) {
+          appendTask(taskId, task);
+        });
+        /*$('#' + taskId + ' .taskDetailsHeading')[0].text = '[' + category + '] ' + name;
+        // TODO prob buggy and update task name as well
+        $('#' + taskId + ' .taskDetailsHeading')[0].style.display = 'inline-block';
+        $('#' + taskId + ' .editName')[0].style.display = 'none';
+        $('#' + taskId + ' .editName').val('');*/
+      });
+    }
   });   
 
   // Call loadTask to load the interactive features of a task (toggle, details, etc.)
@@ -514,6 +545,10 @@ function loadTask(taskId) {
     $timerButton = $widget.find(".timeIcon"),
     $plusButton = $widget.find(".plusIcon"),
     $plusWrapper = $widget.find(".plusWrapper"),
+    $editButton = $widget.find(".editButton"),
+    $taskName = $widget.find(".taskDetailsHeading")[0],
+    $editTaskInput = $widget.find(".editName")[0],
+    $confirmDelete = $widget.find(".confirmDelete"),
     color = ($widget.data('color') ? $widget.data('color') : "primary"),
     style = ($widget.data('style') == "button" ? "btn-" : "list-group-item-");
     // settings = {
@@ -524,6 +559,7 @@ function loadTask(taskId) {
     //         icon: 'glyphicon glyphicon-unchecked'
     //     }
     // };
+    console.log($editTaskInput);
 
     $widget.css('cursor', 'pointer'); // Change cursor to indicate clickable
     autosize($('.noteInput')); // Autosize note textarea
@@ -646,6 +682,23 @@ function loadTask(taskId) {
           $timer.remove();
       }
     });
+
+    $editButton.click(function(e) {
+      if ($taskName.style.display == 'none') {
+        $taskName.style.display = 'inline-block';
+        $editTaskInput.style.display = 'none';
+      } else {
+        $taskName.style.display = 'none';
+        $editTaskInput.style.display = 'inline-block';
+        $editTaskInput.focus();
+      }
+      //$editTaskInput.style.display = 'block';
+    });
+
+    $confirmDelete.click(function(e) {
+      console.log('trash');
+    });
+
 
     // Actions
     function updateDisplay() {
