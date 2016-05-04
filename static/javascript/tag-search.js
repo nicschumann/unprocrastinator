@@ -2,7 +2,7 @@
 
 var $ = require('jquery');
 
-var autocomplete = require('jquery-autocomplete');
+require('jquery-autocomplete');
 
 /**
  * Given a reference to the database, this routine
@@ -45,15 +45,21 @@ module.exports = function( db ) {
 
 				} else {
 
-					var arr = Array.from( tags.entries() ).map( function( tag_bucket ){ return [ tag_bucket[0] ]; } );
+					var arr = [Array.from( tags.entries() ).map( function( tag_bucket ) { return tag_bucket[0]; } )];
 
 					console.log( arr );
 
-					element.autocomplete($.extend({
+					element.autocomplete($.extend({ 
 
-						source: arr
+						source: arr,
 
-					}, options));
+					}, options ))
+
+					.on( 'selected.xdsoft', function( event, datum ) {
+
+						console.log( datum );
+
+					});
 
 				}
 
