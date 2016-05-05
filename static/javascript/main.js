@@ -459,11 +459,10 @@ function appendTask(taskId, task) {
   var due = new Date(task.due_date);
   var d = due.getDate();
   var m = due.getMonth() + 1;  
-  var dueDate = '<span class="dueDate">due ' + m + '/' + d + '</span>';  //TODO
 
 	var taskDOM = 
 		'<li id="'+ taskId +'" class="task list-group-item" data-checked="false">' +
-			'<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + taskColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + '</span>' + 
+			'<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + taskColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + " [Due " + m + "/" + d + "]" + '</span>' + 
 			taskDetailsDOM + 
 		'</li>';
 
@@ -481,7 +480,6 @@ function appendTask(taskId, task) {
 
   // Load subtasks
   for (var subtask in task.subtasks) {
-    //appendSubtask(taskId, task.subtasks, task.subtasks[subtask].name, task.subtasks[subtask].complete);
     renderSubtask( taskId, task.subtasks, task.subtasks[subtask].name, task.subtasks[subtask].complete );
   }
   $('#' + taskId + ' .taskDetails').hide(); // Hide taskDetails until clicked.
@@ -494,7 +492,7 @@ function appendTask(taskId, task) {
     e.preventDefault();
     var taskId = $(this).parent().parent().parent().parent().attr('id');
     var subtaskName = $(this).prev().val();
-    appendSubtask(taskId, task.subtasks, subtaskName, false);
+    appendSubtask(taskId, task.subtasks, subtaskName);
     renderSubtask( taskId, task.subtasks, subtaskName, false );
     $(this).prev().val('');
   });
@@ -505,7 +503,7 @@ function appendTask(taskId, task) {
       e.preventDefault();
       var taskId = $(this).parent().parent().parent().parent().attr('id');
       var subtaskName = $(this).val();
-      appendSubtask(taskId, task.subtasks, subtaskName, false);
+      appendSubtask(taskId, task.subtasks, subtaskName);
       renderSubtask( taskId, task.subtasks, subtaskName, false );
       $(this).val('');
     }
@@ -541,14 +539,14 @@ function appendTask(taskId, task) {
     @subtaskName - the name of the subtask
     @isComplete - boolean of if complete or not (unchecked/check)
 */
-function appendSubtask(taskId, subtasks, subtaskName, isComplete) {
+function appendSubtask(taskId, subtasks, subtaskName) {
   var newSubtasks = subtasks;
 
   var taskPatch = {
       "subtasks": newSubtasks
   };
 
-  newSubtasks.push( { "name": subtaskName, "complete": isComplete } );
+  newSubtasks.push( { "name": subtaskName, "complete": false } );
 
   db.patch_task_for_user(taskId, taskPatch, function (error) {
     if (error) {
@@ -827,20 +825,6 @@ function loadTask(taskId, task) {
         // }
       }
 
-      /*
-    displayUserInfo: displays user info to
-    make sure the sign in process worked!
-    */
-    function displayUserInfo() {
-        db.get_user(sessionStorage.user_id, function (error, user) {
-            if (!error) {
-                var info = user.username + "&nbsp;&nbsp; | &nbsp;&nbsp;";
-                $("#user_label").html(info);
-            }
-        });
-    }
-    displayUserInfo();
-
     // Initialization
     function init() {
 
@@ -929,4 +913,18 @@ $("#unprocrastinator").click(function (event) { //automatically log user out
         }
     });
 });
+
+/*
+displayUserInfo: displays user info to
+make sure the sign in process worked!
+*/
+function displayUserInfo() {
+    db.get_user(sessionStorage.user_id, function (error, user) {
+        if (!error) {
+            var info = user.username + "&nbsp;&nbsp; | &nbsp;&nbsp;";
+            $("#user_label").html(info);
+        }
+    });
+}
+displayUserInfo();
 
