@@ -298,6 +298,12 @@ function populateWeek() {
       var category = input.split(",")[0];
       var name = input.split(",")[1]
 
+      var tags = [category];
+      var words = name.split(" ");
+
+      for (word in words) {
+        tags.push(words[word]);
+      }
       /**
        * @modification nic
        * I'm changing the "add" logic so the category is added to the set of tags,
@@ -307,12 +313,11 @@ function populateWeek() {
 
       var taskToAdd =  {
           "name": name,
-          "progress": 0,
           "hours": 0,
           "complete": false,
           "assigned_date": generateDateFromId(dateId).getTime(),
           "due_date": generateDateFromId(dateId).getTime(),
-          "tags": [category],
+          "tags": tags,
           "category": category,
           "subtasks": [],
           "notes": "Write a note..."
@@ -337,7 +342,6 @@ function populateWeek() {
           var category = input.split(", ")[0];
           var name = input.split(", ")[1];
 
-
           var tags = [category];
           var words = name.split(" ");
  
@@ -354,7 +358,6 @@ function populateWeek() {
            */
           var taskToAdd =  {
                 "name": name,
-                "progress": 0,
                 "hours": 0,
                 "complete": false,
                 "assigned_date": generateDateFromId(dateId).getTime(),
