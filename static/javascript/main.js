@@ -415,29 +415,32 @@ function appendTask(taskId, task) {
 	var taskDetailsDOM = 
 		'<div class="taskDetails">' +
           '<input type="text" class="form-control editName" placeholder="' + task.name + '" style="display: none;">' +
-			'<h4 class="taskDetailsHeading">' + '<span style="color: '+ taskColor+'" >' + task.category.toUpperCase() + '</span> ' + task.name + '</h4>' +
+			'<h4 class="taskDetailsHeading">' + '<span style="color: '+ taskColor+'" >' + task.category.toUpperCase() + '</span> ' + task.name +'</h4>' +
 		'<button class="editButton" type="button">' +
         '<span id="editIcon" class="glyphicon glyphicon-edit"></span>' +
-      '</button>' +  
+      '</button>' + 
+
+    '<span class="targetTimeIcon glyphicon glyphicon-screenshot" data-toggle="tooltip" title="Target time"></span>' +
+      '<div class="targetTimeWrapper"></div>' +
+      '<p class="targetTimeText" style="text-align: right"></p>' +
+
       '<div class="progress">' +
 		    '<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">' +
 		      '<span class="sr-only">40% Complete (success)</span>' +
 		    '</div>' +
 		  '</div>' +
       '<p class="progressText"></p>' +
-
 		  '<div class="taskIcons">' +
 		    '<span class="plusIcon glyphicon glyphicon-plus-sign" data-toggle="tooltip" title="Add progress"></span>' +
           '<div class="plusWrapper"></div>' +
 		    '<span class="timeIcon glyphicon glyphicon-time" data-toggle="tooltip" title="Progress timer"></span>' +
           '<div class="timerWrapper"></div>' +
-          '<span class="calIcon glyphicon glyphicon-calendar" data-toggle="tooltip" title="Reschedule"></span>' +
-          '<div class="dateWrapper" style="width: 50%; display: inline-block; vertical-align: middle;"></div>' +
-          '<button class="trashButton" type="button">' +
-            '<span id="trashIcon" class="glyphicon glyphicon-trash"></span>' +
-          '</button>' +
+        '<span class="calIcon glyphicon glyphicon-calendar" data-toggle="tooltip" title="Reschedule"></span>' +
+          '<div class="dateWrapper" style="width: 50%; display: inline-block; vertical-align: middle;"></div>' + 
+        '<button class="trashButton" type="button">' +
+          '<span id="trashIcon" class="glyphicon glyphicon-trash"></span>' +
+        '</button>' +
 		  '</div><br>' +
-
       '<div class="tagsContainer">' +
         '<h5>Tags</h5>' +
         '<input name="tags" class="tags" value=""/>' +
@@ -610,6 +613,8 @@ function loadTask(taskId, task) {
     $taskName = $widget.find(".taskDetailsHeading")[0],
     $editTaskInput = $widget.find(".editName")[0],
     $deleteTask = $widget.find(".trashButton"),
+    $targetTimeButton = $widget.find(".targetTimeIcon"),
+    $targetTimeWrapper = $widget.find(".targetTimeWrapper")
     color = ($widget.data('color') ? $widget.data('color') : "primary"),
     style = ($widget.data('style') == "button" ? "btn-" : "list-group-item-");
     // settings = {
@@ -746,7 +751,7 @@ function loadTask(taskId, task) {
           var progressTime = $(this).val().split(/[ ,]+/);
 
           $widget.find('.progressText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
-          $widget.find('.progressText').text(progressTime[0] + " hours, " + progressTime[1] + " minutes, and " + progressTime[2] + " seconds of progress time have been added.");
+          $widget.find('.progressText').text(progressTime[0] + " hour(s), " + progressTime[1] + " minute(s), and " + progressTime[2] + " second(s) of progress time have been added.");
           $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});
 
           $plusWrapper.empty();
@@ -756,6 +761,34 @@ function loadTask(taskId, task) {
         $plusWrapper.empty();
       }
     })
+
+    $targetTimeButton.click(function(e) {
+
+      if ($targetTimeWrapper.find('.targetTime').length == 0) { // check that this doesnt already exist
+        $targetTimeWrapper.append("<input type='text' placeholder='HRS, MIN, SEC' class='targetTime'></input>");
+        $targetTimeWrapper.find('.targetTime').focus();  
+
+        $targetTimeWrapper.find('.targetTime').keypress(function (e) {
+         var key = e.which;
+         if (key == 13) { // the enter key code
+          e.preventDefault();
+          var targetTime = $(this).val().split(/[ ,]+/);
+          var hours = targetTime[0];
+          var minutes = targetTime[1];
+          var seconds = targetTime[2];
+
+          $widget.find('.targetTimeText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
+          $widget.find('.targetTimeText').text("Estimated time " + hours + ": " + minutes + ": " + seconds);
+
+          $targetTimeWrapper.empty();
+        }
+      });   
+      } else if ($targetTimeWrapper.find('.targetTime').length == 1) {
+        $targetTimeWrapper.empty();
+      }
+    })
+
+  
 
     // Loads and handles timer actions 
     $timerButton.click(function(e) {
