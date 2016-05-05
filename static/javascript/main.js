@@ -313,6 +313,8 @@ function populateWeek() {
       var taskToAdd =  {
           "name": name,
           "progress": 0,
+          "hours": 0,
+          "complete": false,
           "assigned_date": generateDateFromId(dateId).getTime(),
           "due_date": generateDateFromId(dateId).getTime(),
           "tags": [category],
@@ -354,6 +356,8 @@ function populateWeek() {
           var taskToAdd =  {
                 "name": name,
                 "progress": 0,
+                "hours": 0,
+                "complete": false,
                 "assigned_date": generateDateFromId(dateId).getTime(),
                 "due_date": generateDateFromId(dateId).getTime(),
                 "tags": [category],
@@ -575,6 +579,17 @@ function renderSubtask( taskId, subtasks, subtaskName, isComplete ) {
     $("#" + taskId + " .subtasks > .list-group .subtaskCheckbox").on('change', function () {
         var isChecked = $(this).is(':checked');
         // Set the button's state -- #TODO connect to db
+        
+        var taskPatch = {
+            "complete": true
+        };
+
+        db.patch_task_for_user(taskId, taskPatch, function (error) {
+          if (error) {
+            console.log("ERROR: patch task " + error);
+          }
+        });
+
         $(this).data('state', (isChecked) ? "complete" : "incomplete");
       });
 
