@@ -57,7 +57,7 @@ $(document).ready(function () {
         function parseDate(date_value) {
             var date = new Date(date_value);
             var month = date.getMonth() + 1; // js is ridiculous.
-            return month + "/" + date.getDate() + "/" + date.getFullYear();
+            return month + "-" + date.getDate() + "-" + date.getFullYear();
         }
         db.get_user_tasks(sessionStorage.user_id, function (error, tasks) {
             if (!error) {
