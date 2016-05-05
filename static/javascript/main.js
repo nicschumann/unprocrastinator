@@ -319,7 +319,8 @@ function populateWeek() {
           "due_date": generateDateFromId(dateId).getTime(),
           "tags": [category],
           "category": category,
-          "subtasks": []
+          "subtasks": [],
+          "notes": "Write a note..."
       };
 
       db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
@@ -362,7 +363,8 @@ function populateWeek() {
                 "due_date": generateDateFromId(dateId).getTime(),
                 "tags": [category],
                 "category": category,
-                "subtasks": []
+                "subtasks": [],
+                "notes": "Write a note..."
             };
 
           db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
@@ -456,7 +458,7 @@ function appendTask(taskId, task) {
 
 		  '<div class="notes">' +
 		  	'<h5>Notes</h5>' +
-		    '<textarea class="noteInput form-control" placeholder="Write a note..." rows="1" aria-describedby="sizing-addon1"></textarea>' +
+		    '<textarea class="noteInput form-control" placeholder="' + task.notes + '" rows="1" aria-describedby="sizing-addon1"></textarea>' +
 		  '</div>' +
 		'</div>'
 
@@ -577,21 +579,10 @@ function renderSubtask( taskId, subtasks, subtaskName, isComplete ) {
     $checkbox.prop('checked', isComplete);
 
     $("#" + taskId + " .subtasks > .list-group .subtaskCheckbox").on('change', function () {
-        var isChecked = $(this).is(':checked');
-        // Set the button's state -- #TODO connect to db
-        
-        var taskPatch = {
-            "complete": true
-        };
-
-        db.patch_task_for_user(taskId, taskPatch, function (error) {
-          if (error) {
-            console.log("ERROR: patch task " + error);
-          }
-        });
-
-        $(this).data('state', (isChecked) ? "complete" : "incomplete");
-      });
+      var isChecked = $(this).is(':checked');
+      // Set the button's state -- #TODO connect to db
+      $(this).data('state', (isChecked) ? "complete" : "incomplete");
+    });
 
 }
 
@@ -722,7 +713,17 @@ function loadTask(taskId, task) {
     $notes.keypress(function (e) {
        var key = e.which;
        if (key == 13) { // the enter key code
-          // update notes in DB with $(this).val()
+
+          var taskPatch = {
+              "notes": $notes.val()
+          };
+
+          db.patch_task_for_user(taskId, taskPatch, function (error) {
+            if (error) {
+              console.log("ERROR: patch task " + error);
+            }
+          });
+
           if (e.shiftKey === true)
         {
             return true;
