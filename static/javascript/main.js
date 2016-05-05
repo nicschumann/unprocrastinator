@@ -411,7 +411,7 @@ function appendTask(taskId, task) {
 	var taskDetailsDOM = 
 		'<div class="taskDetails">' +
           '<input type="text" class="form-control editName" placeholder="' + task.name + '" style="display: none;">' +
-			'<h4 class="taskDetailsHeading">' + '<span style="color: '+ taskColor+'" >' + task.category.toUpperCase() + '</span>' + task.name + '</h4>' +
+			'<h4 class="taskDetailsHeading">' + '<span style="color: '+ taskColor+'" >' + task.category.toUpperCase() + '</span> ' + task.name + '</h4>' +
 		'<button class="editButton" type="button">' +
         '<span id="editIcon" class="glyphicon glyphicon-edit"></span>' +
       '</button>' +  
@@ -534,10 +534,9 @@ function appendTask(taskId, task) {
 }
 
 /*
-    appendSubtask: Appends a subtask to a task - fired when a user clicks subtaskButton.
+    appendSubtask: Appends a new subtask to a task - fired when a user clicks subtaskButton.
     @taskId - the ID of the task to append this subtask to
     @subtaskName - the name of the subtask
-    @isComplete - boolean of if complete or not (unchecked/check)
 */
 function appendSubtask(taskId, subtasks, subtaskName) {
   var newSubtasks = subtasks;
