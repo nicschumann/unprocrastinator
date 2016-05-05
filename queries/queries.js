@@ -1,27 +1,37 @@
 var firebase = require("firebase");
-
 var root = new Firebase("https://unprocrastinatordb.firebaseio.com");
 var users = root.child("users");
 var tasks = root.child("tasks");
+var colors = [
+    "#c04f9d",
+    "#f4889c",
+    "#ef4546",
+    "#f37331",
+    "#ffd83f",
+    "#8ec742",
+    "#90d6e8",
+    "#5e84c3"
+ ]
 
 // User
 
 exports.add_user = function (user, callback) {
     root.createUser(user, function (error, userData) {
         if (error) {
-            console.log("ERROR: creating user ", error);
+            console.log("Error creating user: ", error);
             if (callback) { callback(error); }
         } else {
             var user_id = userData.uid;
             root.authWithPassword(user, function (error, authData) {
                 if (error) {
-                    console.log("ERROR: creating user ", error);
+                    console.log("Error creating user: ", error);
                     if (callback) { callback(error); }
                 } else {
                     users.child(authData.uid).set({
                         email: authData.password.email,
-                        username: user.username
+                        username: user.username,
                     });
+                    console.log("Successfully created user acoount with uid: ", user_id);
                     if (callback) { callback(null, user_id); }
                 }
                 // root.unauth();
@@ -33,14 +43,17 @@ exports.add_user = function (user, callback) {
 exports.log_in = function (user, callback) {
     root.authWithPassword(user, function (error, authData) {
         if (error) {
+            console.log("Login Failed!", error);
             if (callback) { callback(error); }
         } else {
+            console.log(user.email + " has logged in");
             if (callback) { callback(null, authData.uid); }
         }
     });
 };
 
 exports.log_out = function (callback) {
+    console.log("User logged out.");
     root.unauth();
     if (callback) { callback(); }
 };
@@ -50,7 +63,7 @@ exports.delete_user = function (user_id, user, callback) {
         snapshot.forEach(function (task_id) {
             tasks.child(task_id.val()).remove(function (error) {
                 if (error) {
-                    console.log("ERROR: deleting user tasks before deleting user ", error);
+                    console.log("Error when deleting user tasks before deleting user: ", error);
                     if (callback) { callback(error); }
                 } else {
                     console.log("Deleted user tasks");
@@ -59,12 +72,12 @@ exports.delete_user = function (user_id, user, callback) {
         });
         users.child(user_id).remove(function (error) {
             if (error) {
-                console.log("ERROR: removing user ", error);
+                console.log("Error removing user: ", error);
                 if (callback) { callback(error); }
             } else {
                 root.removeUser(user, function (error) {
                     if (error) {
-                        console.log("ERROR: removing user ", error);
+                        console.log("Error removing user:", error);
                         if (callback) { callback(error); }
                     } else {
                         console.log("User removed successfully");
@@ -74,7 +87,7 @@ exports.delete_user = function (user_id, user, callback) {
             }
         });
     }, function (error) {
-        console.log("ERROR: deleting user tasks before deleting user ", error);
+        console.log("Error when deleting user tasks before deleting user: ", error);
         if (callback) { callback(error); }
     });
 };
@@ -82,15 +95,10 @@ exports.delete_user = function (user_id, user, callback) {
 exports.get_user = function (user_id, callback) {
     users.child(user_id).once("value", function(snapshot) {
         var user = snapshot.val();
-        if (!user) {
-            var err = 'The specified user ID does not exist in the database.';
-            console.log("ERROR: getting user ", err);
-            if (callback) { callback(err); }
-            return;
-        }
+        console.log("Successfully got user.");
         if (callback) { callback(null, user); }
     }, function (error) {
-        console.log("ERROR: getting user ", error);
+        console.log("Error getting user: ", error);
         if (callback) { callback(error); }
     });
 };
@@ -102,7 +110,7 @@ exports.change_email = function (old_email, new_email, password, callback) {
         password: password
     }, function (error) {
         if (error) {
-            console.log("ERROR: changing email ", error);
+            console.log("Error changing email: ", error);
             if (callback) { callback(error); }
         } else {
             console.log("Email changed successfully.");
@@ -118,7 +126,7 @@ exports.change_password = function (email, old_password, new_password, callback)
         newPassword: new_password
     }, function (error) {
         if (error) {
-            console.log("ERROR: changing password ", error);
+            console.log("Error changing password: ", error);
             if (callback) { callback(error); }
         } else {
             console.log("Password changed successfully.");
@@ -130,7 +138,7 @@ exports.change_password = function (email, old_password, new_password, callback)
 exports.patch_user = function (user_id, user, callback) {
     users.child(user_id).update(user, function (error) {
         if (error) {
-            console.log("ERROR: patching user: ", error);
+            console.log("Error when patching user: ", error);
             if (callback) { callback(error); }
         } else {
             console.log("Successfully patched user");
@@ -143,39 +151,93 @@ exports.patch_user = function (user_id, user, callback) {
 
 exports.add_task_to_user = function (user_id, task, callback) {
     task.user = user_id;
-    var task_ref = tasks.push(task, function (error) {
-        if (error) {
-            console.log("ERROR: adding task to user");
-            if (callback) { callback(error); }
-        } else {
-            var task_id = task_ref.key();
-            users.child(user_id).child("tasks").push(task_id, function (error) {
+    task.progress = 0;
+    task.complete = false;
+    // calculate estimated hours
+    tags = task.tags;
+    users.child(user_id).child("tags").once("value", function (snapshot) {
+        var user_tags = snapshot.exists() ? snapshot.val() : [];
+        var tag_hours = []
+        var tag_update_indexes = []
+        var user_defined_hours = task.hours !== undefined;
+        tags.forEach(function (tag) {
+            user_tag = user_tags.find(function (t, i) {
+                var found = t.name === tag
+                if (found) {
+                    tag_update_indexes.push(i);
+                }
+                return found
+            })
+            if (user_tag) {
+                tag_hours.push(user_tag.avg_hours);
+            } else {
+                new_hours = user_defined_hours ? task.hours : 1
+                user_tags.push(
+                    {
+                        "name": tag,
+                        "hours": new_hours,
+                        "avg_hours": new_hours,
+                        "num_tasks": 1
+                    }
+                );
+            }
+        });
+
+        if (!user_defined_hours) {
+            var sum = tag_hours.reduce(function (a, b) { return a + b; });
+            task.hours = sum / tag_hours.length;
+        }
+
+        tag_update_indexes.forEach(function (i) {
+            user_tags[i].hours += task.hours;
+            user_tags[i].num_tasks += 1;
+            user_tags[i].avg_hours = user_tags[i].hours / user_tags[i].num_tasks;
+        });
+
+        users.child(user_id).child("tags").set(user_tags);
+
+        // add new category and its color into user categories
+
+        users.child(user_id).child("categories").once("value", function (snapshot) {
+            user_categories = snapshot.exists() ? snapshot.val() : [];
+            user_has_category = user_categories.some(function (cat) {
+                return cat.name === task.category;
+            });
+            if (!user_has_category) {
+                user_categories.push(
+                    {
+                        "name": task.category,
+                        "color": colors[user_categories.length % colors.length]
+                    }
+                )
+                users.child(user_id).child("categories").set(user_categories);
+            }
+
+            var task_ref = tasks.push(task, function (error) {
                 if (error) {
-                    console.log("ERROR: adding task to user");
+                    console.log("Error adding task to user.");
                     if (callback) { callback(error); }
                 } else {
-                    tags = task.tags;
-                    // users.child(user_id).child("tags").once("value", function (snapshot) {
-                    //     existing_tags = snapshot.val();
-                    //     existing_tags.forEach(function (existing_tag) {
-                    //         if (tags.indexOf(existing_tag) < 0) {
-                    //             tags.push(existing_tag);
-                    //         }
-                    //     });
-                    //     users.child(user_id).child("tags").set(tags);
-                    // });
-                    console.log("Successfully added task.");
-                    if (callback) { callback(null, task_ref.key()); }
+                    var task_id = task_ref.key();
+                    users.child(user_id).child("tasks").push(task_id, function (error) {
+                        if (error) {
+                            console.log("Error adding task.");
+                            if (callback) { callback(error); }
+                        } else {
+                            console.log("Successfully added task.");
+                            if (callback) { callback(null, task_ref.key()); }
+                        }
+                    });
                 }
             });
-        }
+        });
     });
 };
 
 exports.patch_task_for_user = function (task_id, task_object, callback) {
     tasks.child(task_id).update(task_object, function (error) {
         if (error) {
-            console.log("ERROR: patching task");
+            console.log("Error patching task.");
             if (callback) { callback(error); }
         } else {
             console.log("Successfully patched task.");
@@ -187,13 +249,13 @@ exports.patch_task_for_user = function (task_id, task_object, callback) {
 exports.remove_task_from_user = function (user_id, task_id, callback) {
     tasks.child(task_id).remove(function (error) {
         if (error) {
-            console.log("ERROR: removing task ");
+            console.log("Error removing task.");
             if (callback) { callback(error); }
         } else {
             users.child(user_id).child("tasks").orderByValue().equalTo(task_id)
                 .ref().remove(function (error) {
                     if (error) {
-                        console.log("ERROR: removing task ");
+                        console.log("Error removing task from user.");
                         if (callback) { callback(error); }
                     } else {
                         if (callback) { callback(null); }
@@ -209,26 +271,14 @@ exports.get_user_tags = function (user_id, callback) {
     tasks.orderByChild("user").equalTo(user_id).once("value", function (snapshot) {
         var tags = new Set();
         snapshot.forEach(function (tasks_snap) {
-            /**
-             * @modification nic
-             * 
-             * Okay, I'm adding some guarded code to ignore malformed data.
-             * When we flush the database before production, we should no longer
-             * need this workaround.
-             */
-            // console.log( tasks_snap.val().tags );
-            if ( Array.isArray( tasks_snap.val().tags ) ) {
-
-                tasks_snap.val().tags.forEach(function (tag) {
-                    tags.add(tag);
-                });
-
-            }
-
+            tasks_snap.val().tags.forEach(function (tag) {
+                tags.add(tag);
+            });
         });
+        console.log("Successfully got user tags.");
         if (callback) { callback(null, tags); }
     }, function (error) {
-        console.log("ERROR: listing user tags: ", error);
+        console.log("Error when listing user tags: ", error);
         if (callback) { callback(error); }
     });
 };
@@ -237,7 +287,7 @@ exports.get_user_task = function (user_id, task_id, callback) {
     tasks.child(task_id).once("value", function (snapshot) {
         if (callback) { callback(null, snapshot.val()); }
     }, function (error) {
-        console.log("ERROR: getting user task ", error);
+        console.log("Error getting user task: ", error);
         if (callback) { callback(error); }
     });
 }
@@ -249,8 +299,9 @@ exports.get_user_tasks = function (user_id, callback) {
         //     user_tasks.push(task_snapshot.val());
         // });
         if (callback) { callback(null, snapshot.val()); }
+        console.log("Successfully got user tasks.");
     }, function (error) {
-            console.log("ERROR: getting user task ", error);
+            console.log("Error getting user tasks: ", error);
             if (callback) { callback(error); }
     });
 };
@@ -268,7 +319,7 @@ exports.get_task_by_category = function (user_id, category, callback) {
         console.log("Successfully filtered by category.");
         if (callback) { callback(null, filtered_tasks); }
     }, function (error) {
-            console.log("ERROR: filtering by category ", error);
+            console.log("Error filtering by category: ", error);
             if (callback) { callback(error); }
         }
     );
@@ -286,7 +337,7 @@ exports.get_task_by_tags = function (user_id, tags, callback) {
         if (callback) { callback(null, filtered_tasks); }
         console.log("Successfully filtered by tags.");
     }, function (error) {
-            console.log("ERROR: filtering by tags ", error);
+            console.log("Error filtering by tags: ", error);
             if (callback) { callback(error); }
         }
     );
