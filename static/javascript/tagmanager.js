@@ -70,7 +70,6 @@
           var suggestion = $.inArray(tag.toLowerCase(), $tagList);
 
           if (-1 === suggestion) {
-            //console.log("tag:" + tag + " not in tagList, not adding it");
             return;
           }
         }
@@ -99,7 +98,6 @@
       idx = $.inArray(tag.toLowerCase(), tlisLowerCase);
 
       if (-1 !== idx) {
-        // console.log("tag:" + tag + " !!already in list!!");
         alreadyInList = true;
       }
 
@@ -143,8 +141,6 @@
               $.post(opts.AjaxPush, $.extend({ tag: tag }, opts.AjaxPushParameters));
             }
           }
-
-        // console.log("tagList: " + tlis);
 
         newTagId = $self.data("tm_rndid") + '_' + tagId;
         newTagRemoveId = $self.data("tm_rndid") + '_Remover_' + tagId;
@@ -208,11 +204,9 @@
         $self.trigger('tm:popping', [tagBeingRemoved, tagId]);
         tlis.pop();
 
-        // console.log("TagIdToRemove: " + tagId);
         $("#" + $self.data("tm_rndid") + "_" + tagId).remove();
         privateMethods.refreshHiddenTagList.call($self);
         $self.trigger('tm:popped', [tagBeingRemoved, tagId]);
-        // console.log(tlis);
       }
     },
 
@@ -222,10 +216,8 @@
       while (tlid.length > 0) {
         tagId = tlid.pop();
         tlis.pop();
-        // console.log("TagIdToRemove: " + tagId);
         $("#" + $self.data("tm_rndid") + "_" + tagId).remove();
         privateMethods.refreshHiddenTagList.call($self);
-        // console.log(tlis);
       }
       $self.trigger('tm:emptied', null);
 
@@ -337,9 +329,6 @@
       var $self = this, tlis = $self.data("tlis"), tlid = $self.data("tlid"), idx = $.inArray(tagId, tlid),
       tagBeingRemoved;
 
-      // console.log("TagIdToRemove: " + tagId);
-      // console.log("position: " + idx);
-
       if (-1 !== idx) {
         tagBeingRemoved = tlis[idx];
         $self.trigger('tm:splicing', [tagBeingRemoved, tagId]);
@@ -348,7 +337,6 @@
         tlid.splice(idx, 1);
         privateMethods.refreshHiddenTagList.call($self);
         $self.trigger('tm:spliced', [tagBeingRemoved, tagId]);
-        // console.log(tlis);
       }
 
       privateMethods.showOrHide.call($self);
@@ -427,7 +415,6 @@
         if (opts.isClearInputOnEsc) {
           $self.on('keyup', function (e) {
             if (e.which === 27) {
-              // console.log('esc detected');
               $(this).val('');
               privateMethods.killEvent(e);
             }
@@ -459,7 +446,6 @@
         if (opts.deleteTagsOnBackspace) {
           $self.on('keydown', function (e) {
             if (privateMethods.keyInArray(e, opts.backspace)) {
-              // console.log("backspace detected");
               if ($(this).val().length <= 0) {
                 publicMethods.popTag.call($self);
                 privateMethods.killEvent(e);

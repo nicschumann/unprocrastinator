@@ -24,13 +24,6 @@ for readability, but its nbd if you don't read the HTML templates - you shouldn'
 I have tagged all things that need to be done soon with a #TODO tag. Please look for these and 
 pick out any you'd like to tackle!
 
-DESIGN QUESTIONS
-Editing task name?
-Due date display?
-Category display?
-Notes saving?
-
-
 ANY QUESTIONS? 
 Ask Jina about the front end code anytime!!! :)
 
@@ -59,7 +52,6 @@ var colorCounter = 0;
 var categoryMap = {};
 
 
-
 // Actions to happen on page load
 $(document).ready(function(){
   loadTaskMap();
@@ -75,10 +67,9 @@ $(document).ready(function(){
         scrollJump($('#jumpDate').datepicker('getDate'));
     });
 
-
-
     // As user scrolls, loads 7 more days infinitely. 
-    // #TODO - Currently has bugs according to screen/zoom size
+    // #TODO - Currently has bugs according to screen/zoom size 
+    // where screen has to be 100%
     $(window).scroll(function(){
       if ($(window).scrollTop() == $(document).height()-$(window).height()){ // doesnt work if zoom is not at 100%
         populateWeek();
@@ -101,7 +92,6 @@ $(document).ready(function(){
       $('#pickedDate').val(
           $('#datepicker1').datepicker('getFormattedDate')
       );
-      console.log( $('#pickedDate').val());
   });
 });
 
@@ -179,7 +169,7 @@ function loadTaskMap() {
             var task = tasks[task_id];
             var taskDateId = parseDate(task.assigned_date);
           } else {
-            console.log('invalid task to load')
+            console.log('ERROR: tasks are invalid')
           }
    
           if (taskMap[taskDateId]) {
@@ -198,12 +188,8 @@ function loadTaskMap() {
 }
 
 function checkReassignTasks() {
- // console.log(taskMap);
   for (var dateId in taskMap) {
-  //  console.log(taskMap[dateId]);
     if (generateDateFromId(dateId).getTime() < today.getTime()) {
-     // console.log('REASSIGN');
-
       for (var taskIndex in taskMap[dateId]) {
         var taskPair = taskMap[dateId][taskIndex];
         var reassignedTask = taskPair.task;
@@ -250,7 +236,6 @@ function generateDayTemplate(currDate) {
 
 /*
     Generates the Today Overview Bar.
-    #TODO interact/connect with DB data.
 */
 function generateTodayOverview() {
   return '<div id="todayOverview">' + 
@@ -283,31 +268,6 @@ function loadTodayOverview() {
 }
 
 /*
-    populateTodaySample: Populates just the current day with a sample task. 
-    #TODO - Delete later on; this is for testing purposes.
-*/
-function populateTodaySample() {
-  var sampleTask =  {
-        "name": "Eat lunch",
-        "progress": 0,
-        "assigned_date": today.getTime(),
-        "due_date": today.getTime(),
-        "tags": ["test1", "test2"],
-        "category": "food",
-        "subtasks": [
-          {
-            "name": "subtask1",
-            "complete": true
-          }
-        ]
-    };
-
-  // db.add_task_to_user(sessionStorage.user_id, sampleTask, function(error, taskId) {
-  //   appendTask(taskId, sampleTask);
-  // });
-}
-
-/*
     populateWeek: Populates the next 7 days. Is called for use in the infinite scroll.
 */
 function populateWeek() {
@@ -322,8 +282,7 @@ function populateWeek() {
     if (taskMap[currDateId]) { 
       for (var taskIndex in taskMap[currDateId]) {
         var taskPair = taskMap[currDateId][taskIndex];
-          appendTask(taskPair.task_id, taskPair.task);
-        // }
+        appendTask(taskPair.task_id, taskPair.task);
       }
     }
 
@@ -346,24 +305,22 @@ function populateWeek() {
        * in this case are just strings.
        */
 
-      var taskToAdd =  {
-            "name": name,
-            "progress": 0,
-            "assigned_date": generateDateFromId(dateId).getTime(),
-            "due_date": generateDateFromId(dateId).getTime(),
-            "tags": ["test1", "test2"],
-            "category": category
-        };
-
-
-      if (name) {
-        console.log(name);
-      } else {
-        console.log('no name!!!')
+      if (!name) {
+        alert("Please enter a name for your task!");
+        return;
       }
 
+      var taskToAdd =  {
+          "name": name,
+          "progress": 0,
+          "assigned_date": generateDateFromId(dateId).getTime(),
+          "due_date": generateDateFromId(dateId).getTime(),
+          "tags": [category],
+          "category": category,
+          "subtasks": []
+      };
+
       db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
-        console.log('hi');
         appendTask(taskId, taskToAdd);
       });
 
@@ -383,7 +340,7 @@ function populateWeek() {
           var name = input.split(",")[1];
 
           if (!name) {
-            alert('no name!!!');
+            alert("Please enter a name for your task!");
             return;
           }
 
@@ -399,28 +356,16 @@ function populateWeek() {
                 "progress": 0,
                 "assigned_date": generateDateFromId(dateId).getTime(),
                 "due_date": generateDateFromId(dateId).getTime(),
-                "tags": ["test1", "test2"],
+                "tags": [category],
                 "category": category,
-                "subtasks": [
-                  // {
-                  //   "name": "completed?",
-                  //   "complete": true
-                  // }
-                ]
+                "subtasks": []
             };
 
           db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
-            console.log('hey');
             appendTask(taskId, taskToAdd);
           });
 
-            //console.log( taskToAdd );
-          // db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
-          //   appendTask(taskId, taskToAdd);
-          // });
-
           element.val('');
-
         };
 
     }
@@ -444,7 +389,6 @@ function displayCalendarComponent() {
     appendTask: Appends a task to a date.
     @dateId - the date ID for the date to append this task to
     @taskName - the name of the task.
-    #TODO need to add: @category and @dueDate
     #TODO Currently uses a "dummy" random int as a task ID. Connect DB to use the real task ID.
 */
 function appendTask(taskId, task) {
@@ -454,6 +398,7 @@ function appendTask(taskId, task) {
   if (task.category in categoryMap) {
     taskColor = categoryMap[task.category];
   } else {
+    //#TODO add more colors and not throw this alert
     if (colorCounter > 7) {
       alert("You have too many categories! Please delete one before adding this task.")
     } else {
@@ -513,7 +458,7 @@ function appendTask(taskId, task) {
 
   var due = new Date(task.due_date);
   var d = due.getDate();
-  var m = due.getMonth() + 1;  //bc javascript is ridiculous
+  var m = due.getMonth() + 1;  
   var dueDate = '<span class="dueDate">due ' + m + '/' + d + '</span>';  //TODO
 
 	var taskDOM = 
@@ -521,8 +466,6 @@ function appendTask(taskId, task) {
 			'<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + taskColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + '</span>' + 
 			taskDetailsDOM + 
 		'</li>';
-
-    console.log( parseDate( task.assigned_date ) );
 
   $("#" + parseDate(task.assigned_date) + " .tasks").append(taskDOM);
 
@@ -538,11 +481,6 @@ function appendTask(taskId, task) {
 
   // Load subtasks
   for (var subtask in task.subtasks) {
-    /**
-     * @modification nic
-     * I'm removing this log statement, as it's currently confusing me.
-     */
-   // console.log(task.subtasks[subtask]);
     //appendSubtask(taskId, task.subtasks, task.subtasks[subtask].name, task.subtasks[subtask].complete);
     renderSubtask( taskId, task.subtasks, task.subtasks[subtask].name, task.subtasks[subtask].complete );
   }
@@ -587,7 +525,6 @@ function appendTask(taskId, task) {
       db.patch_task_for_user(taskId, taskPatch, function(error) {
         $('#' + taskId).remove();
         db.get_user_task(sessionStorage.user_id, taskId, function (error, task) {
-          console.log( task );
           appendTask(taskId, task);
         });
       });
@@ -603,32 +540,21 @@ function appendTask(taskId, task) {
     @taskId - the ID of the task to append this subtask to
     @subtaskName - the name of the subtask
     @isComplete - boolean of if complete or not (unchecked/check)
-    #TODO Discuss if subtasks need any more values besides name?
-    #TODO Should subtasks have subtaskIds?
 */
 function appendSubtask(taskId, subtasks, subtaskName, isComplete) {
-
-  //console.log( newSubtasks );
-  console.log('subtasks');
-  // console.log( subtasks );
-  
-   var newSubtasks = subtasks;
+  var newSubtasks = subtasks;
 
   var taskPatch = {
       "subtasks": newSubtasks
   };
 
-
-
   newSubtasks.push( { "name": subtaskName, "complete": isComplete } );
 
   db.patch_task_for_user(taskId, taskPatch, function (error) {
     if (error) {
-      console.log(error);
+      console.log("ERROR: patch task " + error);
     }
   });
-
-
 }
 
 /**
@@ -640,8 +566,6 @@ function appendSubtask(taskId, subtasks, subtaskName, isComplete) {
  * @param  {Boolean} isComplete  whether the subtask is complete
  */
 function renderSubtask( taskId, subtasks, subtaskName, isComplete ) {
-
-  console.log('render');
 
     var subtask = 
     '<li class="list-group-item subtask" data-checked="false">' +
@@ -695,7 +619,6 @@ function loadTask(taskId, task) {
     //         icon: 'glyphicon glyphicon-unchecked'
     //     }
     // };
-    console.log($editTaskInput);
 
     $widget.css('cursor', 'pointer'); // Change cursor to indicate clickable
     autosize($('.noteInput')); // Autosize note textarea
@@ -876,7 +799,8 @@ function loadTask(taskId, task) {
       $('#' + taskId).remove();
       db.remove_task_from_user(sessionStorage.user_id, taskId, function(error) {
         if (error) {
-          console.log(error);  //TODO?
+          alert("There was an error removing task!");
+          console.log("ERROR: remove task " + error); 
         }
       })
     });
@@ -903,6 +827,20 @@ function loadTask(taskId, task) {
         // }
       }
 
+      /*
+    displayUserInfo: displays user info to
+    make sure the sign in process worked!
+    */
+    function displayUserInfo() {
+        db.get_user(sessionStorage.user_id, function (error, user) {
+            if (!error) {
+                var info = user.username + "&nbsp;&nbsp; | &nbsp;&nbsp;";
+                $("#user_label").html(info);
+            }
+        });
+    }
+    displayUserInfo();
+
     // Initialization
     function init() {
 
@@ -911,7 +849,7 @@ function loadTask(taskId, task) {
     	}
 
     	updateDisplay();
-
+   
         // Inject the icon if applicable
         // if ($widget.find('.state-icon').length == 0) {
         //     $widget.prepend('<span class="state-icon ' + settings[$widget.data('state')].icon + '"></span>');
@@ -920,7 +858,6 @@ function loadTask(taskId, task) {
     // init();
   });
 
-    // #TODO - delete this. This is probably not needed, but commenting out just in case.
 	// $('#get-checked-data').on('click', function(event) {
 	// 	event.preventDefault(); 
 	// 	var checkedItems = {}, counter = 0;
@@ -993,17 +930,3 @@ $("#unprocrastinator").click(function (event) { //automatically log user out
     });
 });
 
-/*
-    displayUserInfo: displays user info to
-    make sure the sign in process worked!
-*/
-function displayUserInfo() {
-    db.get_user(sessionStorage.user_id, function (error, user) {
-        if (!error) {
-            var info = user.username + "&nbsp;&nbsp; | &nbsp;&nbsp;";
-            $("#user_label").html(info);
-        }
-    });
-}
-
-displayUserInfo();

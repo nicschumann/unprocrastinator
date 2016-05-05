@@ -58,8 +58,6 @@ exports.create_bad_account = function(test) {
 exports.create_account_test = function(test) {
   test.expect(2);
 
-  console.log(email);
-
   db.add_user(testUser, function (error, user_id) {
     err = error;
     uid = user_id;
@@ -98,8 +96,6 @@ exports.log_in_test = function(test) {
 exports.no_user_test = function(test) {
   test.expect(1);
   db.get_user(randomString(10), function (error, user) {
-    console.log(error);
-    console.log(user);
     test.ok(error, "uid doesn't exist error");
     test.done();
   })

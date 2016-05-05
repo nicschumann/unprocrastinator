@@ -65,8 +65,6 @@ module.exports = function( db ) {
 			 */
 			db.get_user_tags( sessionStorage.user_id, function( err, tags ) {
 
-				console.log( tags );
-
 				if ( err ) {
 
 					console.log("ERROR: Couldn't attach autocomplete to the given element");
@@ -236,11 +234,7 @@ module.exports = function( db ) {
 		function ifKeyIsComma( continuation ) {
 			return function( event ) {
 				if ( event.keyCode === 188 ) {
-
-					console.log('manual');
-
 					continuation( event );
-
 				}
 			};
 		} 

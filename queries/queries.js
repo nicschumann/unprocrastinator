@@ -9,20 +9,19 @@ var tasks = root.child("tasks");
 exports.add_user = function (user, callback) {
     root.createUser(user, function (error, userData) {
         if (error) {
-            console.log("Error creating user: ", error);
+            console.log("ERROR: creating user ", error);
             if (callback) { callback(error); }
         } else {
             var user_id = userData.uid;
             root.authWithPassword(user, function (error, authData) {
                 if (error) {
-                    console.log("Error creating user: ", error);
+                    console.log("ERROR: creating user ", error);
                     if (callback) { callback(error); }
                 } else {
                     users.child(authData.uid).set({
                         email: authData.password.email,
                         username: user.username
                     });
-                    console.log("Successfully created user acoount with uid: ", user_id);
                     if (callback) { callback(null, user_id); }
                 }
                 // root.unauth();
@@ -34,17 +33,14 @@ exports.add_user = function (user, callback) {
 exports.log_in = function (user, callback) {
     root.authWithPassword(user, function (error, authData) {
         if (error) {
-            console.log("Login Failed!", error);
             if (callback) { callback(error); }
         } else {
-            console.log(user.email + " has logged in");
             if (callback) { callback(null, authData.uid); }
         }
     });
 };
 
 exports.log_out = function (callback) {
-    console.log("User logged out.");
     root.unauth();
     if (callback) { callback(); }
 };
@@ -54,7 +50,7 @@ exports.delete_user = function (user_id, user, callback) {
         snapshot.forEach(function (task_id) {
             tasks.child(task_id.val()).remove(function (error) {
                 if (error) {
-                    console.log("Error when deleting user tasks before deleting user: ", error);
+                    console.log("ERROR: deleting user tasks before deleting user ", error);
                     if (callback) { callback(error); }
                 } else {
                     console.log("Deleted user tasks");
@@ -63,12 +59,12 @@ exports.delete_user = function (user_id, user, callback) {
         });
         users.child(user_id).remove(function (error) {
             if (error) {
-                console.log("Error removing user: ", error);
+                console.log("ERROR: removing user ", error);
                 if (callback) { callback(error); }
             } else {
                 root.removeUser(user, function (error) {
                     if (error) {
-                        console.log("Error removing user:", error);
+                        console.log("ERROR: removing user ", error);
                         if (callback) { callback(error); }
                     } else {
                         console.log("User removed successfully");
@@ -78,7 +74,7 @@ exports.delete_user = function (user_id, user, callback) {
             }
         });
     }, function (error) {
-        console.log("Error when deleting user tasks before deleting user: ", error);
+        console.log("ERROR: deleting user tasks before deleting user ", error);
         if (callback) { callback(error); }
     });
 };
@@ -88,13 +84,13 @@ exports.get_user = function (user_id, callback) {
         var user = snapshot.val();
         if (!user) {
             var err = 'The specified user ID does not exist in the database.';
-            console.log("Error getting user: ", err);
+            console.log("ERROR: getting user ", err);
             if (callback) { callback(err); }
             return;
         }
         if (callback) { callback(null, user); }
     }, function (error) {
-        console.log("Error getting user: ", error);
+        console.log("ERROR: getting user ", error);
         if (callback) { callback(error); }
     });
 };
@@ -106,7 +102,7 @@ exports.change_email = function (old_email, new_email, password, callback) {
         password: password
     }, function (error) {
         if (error) {
-            console.log("Error changing email: ", error);
+            console.log("ERROR: changing email ", error);
             if (callback) { callback(error); }
         } else {
             console.log("Email changed successfully.");
@@ -122,7 +118,7 @@ exports.change_password = function (email, old_password, new_password, callback)
         newPassword: new_password
     }, function (error) {
         if (error) {
-            console.log("Error changing password: ", error);
+            console.log("ERROR: changing password ", error);
             if (callback) { callback(error); }
         } else {
             console.log("Password changed successfully.");
@@ -134,7 +130,7 @@ exports.change_password = function (email, old_password, new_password, callback)
 exports.patch_user = function (user_id, user, callback) {
     users.child(user_id).update(user, function (error) {
         if (error) {
-            console.log("Error when patching user: ", error);
+            console.log("ERROR: patching user: ", error);
             if (callback) { callback(error); }
         } else {
             console.log("Successfully patched user");
@@ -149,13 +145,13 @@ exports.add_task_to_user = function (user_id, task, callback) {
     task.user = user_id;
     var task_ref = tasks.push(task, function (error) {
         if (error) {
-            console.log("Error adding task to user.");
+            console.log("ERROR: adding task to user");
             if (callback) { callback(error); }
         } else {
             var task_id = task_ref.key();
             users.child(user_id).child("tasks").push(task_id, function (error) {
                 if (error) {
-                    console.log("Error adding task.");
+                    console.log("ERROR: adding task to user");
                     if (callback) { callback(error); }
                 } else {
                     tags = task.tags;
@@ -179,7 +175,7 @@ exports.add_task_to_user = function (user_id, task, callback) {
 exports.patch_task_for_user = function (task_id, task_object, callback) {
     tasks.child(task_id).update(task_object, function (error) {
         if (error) {
-            console.log("Error patching task.");
+            console.log("ERROR: patching task");
             if (callback) { callback(error); }
         } else {
             console.log("Successfully patched task.");
@@ -191,13 +187,13 @@ exports.patch_task_for_user = function (task_id, task_object, callback) {
 exports.remove_task_from_user = function (user_id, task_id, callback) {
     tasks.child(task_id).remove(function (error) {
         if (error) {
-            console.log("Error removing task.");
+            console.log("ERROR: removing task ");
             if (callback) { callback(error); }
         } else {
             users.child(user_id).child("tasks").orderByValue().equalTo(task_id)
                 .ref().remove(function (error) {
                     if (error) {
-                        console.log("Error removing task from user.");
+                        console.log("ERROR: removing task ");
                         if (callback) { callback(error); }
                     } else {
                         if (callback) { callback(null); }
@@ -220,7 +216,7 @@ exports.get_user_tags = function (user_id, callback) {
              * When we flush the database before production, we should no longer
              * need this workaround.
              */
-            console.log( tasks_snap.val().tags );
+            // console.log( tasks_snap.val().tags );
             if ( Array.isArray( tasks_snap.val().tags ) ) {
 
                 tasks_snap.val().tags.forEach(function (tag) {
@@ -230,10 +226,9 @@ exports.get_user_tags = function (user_id, callback) {
             }
 
         });
-        console.log("Successfully got user tags.");
         if (callback) { callback(null, tags); }
     }, function (error) {
-        console.log("Error when listing user tags: ", error);
+        console.log("ERROR: listing user tags: ", error);
         if (callback) { callback(error); }
     });
 };
@@ -242,7 +237,7 @@ exports.get_user_task = function (user_id, task_id, callback) {
     tasks.child(task_id).once("value", function (snapshot) {
         if (callback) { callback(null, snapshot.val()); }
     }, function (error) {
-        console.log("Error getting user task: ", error);
+        console.log("ERROR: getting user task ", error);
         if (callback) { callback(error); }
     });
 }
@@ -254,9 +249,8 @@ exports.get_user_tasks = function (user_id, callback) {
         //     user_tasks.push(task_snapshot.val());
         // });
         if (callback) { callback(null, snapshot.val()); }
-        console.log("Successfully got user tasks.");
     }, function (error) {
-            console.log("Error getting user tasks: ", error);
+            console.log("ERROR: getting user task ", error);
             if (callback) { callback(error); }
     });
 };
@@ -274,7 +268,7 @@ exports.get_task_by_category = function (user_id, category, callback) {
         console.log("Successfully filtered by category.");
         if (callback) { callback(null, filtered_tasks); }
     }, function (error) {
-            console.log("Error filtering by category: ", error);
+            console.log("ERROR: filtering by category ", error);
             if (callback) { callback(error); }
         }
     );
@@ -292,7 +286,7 @@ exports.get_task_by_tags = function (user_id, tags, callback) {
         if (callback) { callback(null, filtered_tasks); }
         console.log("Successfully filtered by tags.");
     }, function (error) {
-            console.log("Error filtering by tags: ", error);
+            console.log("ERROR: filtering by tags ", error);
             if (callback) { callback(error); }
         }
     );
