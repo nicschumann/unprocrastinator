@@ -296,7 +296,7 @@ function populateWeek() {
       
       var input = $(this).prev().val();
       var category = input.split(",")[0];
-      var name = input.split(",")[1];
+      var name = input.split(",")[1]
 
       /**
        * @modification nic
@@ -304,11 +304,6 @@ function populateWeek() {
        * and the tags to be a collection – it should be an array of "tag" values, which
        * in this case are just strings.
        */
-
-      if (!name) {
-        alert("Please enter a name for your task!");
-        return;
-      }
 
       var taskToAdd =  {
           "name": name,
@@ -339,12 +334,15 @@ function populateWeek() {
           var dateId = element.parent().parent().parent().parent().attr('id');
 
           var input = element.val();
-          var category = input.split(",")[0];
-          var name = input.split(",")[1];
+          var category = input.split(", ")[0];
+          var name = input.split(", ")[1];
 
-          if (!name) {
-            alert("Please enter a name for your task!");
-            return;
+
+          var tags = [category];
+          var words = name.split(" ");
+ 
+          for (word in words) {
+            tags.push(words[word]);
           }
 
           /**
@@ -361,7 +359,7 @@ function populateWeek() {
                 "complete": false,
                 "assigned_date": generateDateFromId(dateId).getTime(),
                 "due_date": generateDateFromId(dateId).getTime(),
-                "tags": [category],
+                "tags": tags,
                 "category": category,
                 "subtasks": [],
                 "notes": "Write a note..."
@@ -812,7 +810,6 @@ function loadTask(taskId, task) {
       $('#' + taskId).remove();
       db.remove_task_from_user(sessionStorage.user_id, taskId, function(error) {
         if (error) {
-          alert("There was an error removing task!");
           console.log("ERROR: remove task " + error); 
         }
       })
