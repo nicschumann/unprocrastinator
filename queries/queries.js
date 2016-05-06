@@ -103,6 +103,32 @@ exports.get_user = function (user_id, callback) {
     });
 };
 
+
+/**
+ *
+ * @modification nic
+ * I'm adding a routine to poll the user's state for 
+ * modifications to the category.
+ * 
+ * Given a user_id, This routine polls that user's 
+ * categories for changes, invoking the passed
+ * callback with the updated values whenever they change.
+ * 
+ * @param  {String}   user_id  the user to watch.
+ * @param  {Function} callback the continuation to invoke
+ */
+exports.watch_user_categories = function( user_id, callback ) {
+    users.child( user_id ).child('categories').on('value', function( snapshot ) {
+        var categories = snapshot.val();
+        console.log( 'Successfully received category update' );
+        if ( typeof callback !== "undefined" ) { callback( null, categories ); }
+    }, function ( error ) {
+        console.error('Error receiving categories for user');
+         if ( typeof callback !== "undefined" ) { callback( error ); }
+    });
+
+};
+
 exports.change_email = function (old_email, new_email, password, callback) {
     root.changeEmail({
         oldEmail: old_email,
