@@ -8,6 +8,8 @@ var keyevent = 'keyup';
 
 var stored_value = "unprocrastinator-stored-value";
 
+var category_update = "unprocrastinator-category-update";
+
 
 /**
  * Given a reference to the database, this routine
@@ -26,6 +28,32 @@ module.exports = function( db ) {
 	 * @type {[Tag]}
 	 */
 	var TAGS = [];
+
+	if ( typeof sessionStorage.user_id !== "undefined" ) {
+
+		db.watch_user_categories( sessionStorage.user_id, function( err, categories ) {
+
+			if ( err ) {
+
+				console.log("ERROR: Couldn't attach autocomplete to the given element");
+
+			} else {
+
+				console.log( categories );
+
+				TAGS = searchableArrayFromTagSet( categories );
+
+				$(document).trigger(category_update, TAGS);
+
+			}
+
+		});
+
+	} else {
+
+		throw new Error('ERROR: Tried to attach an autocomplete instance with no logged-in user!');
+
+	}
 
 	/**	 
 	 * This is the actual function which attaches an autocomplete
@@ -53,70 +81,14 @@ module.exports = function( db ) {
 
 		options = options || {};
 
-		if ( typeof sessionStorage.user_id !== "undefined" ) {
+		//$(document).on( category_update, setAutocompleteSource );
 
-			/**
-			 * @todo 
-			 * 
-			 * replace this with the user's categories by
-			 * getting the user and using the categories passed
-			 * instead of the tags. Just using the tags for testing
-			 * purposes.
-			 */
-			db.watch_user_categories( sessionStorage.user_id, function( err, categories ) {
+		initializeAutocomplete();
 
-				if ( err ) {
-
-					console.log("ERROR: Couldn't attach autocomplete to the given element");
-
-				} else {
-
-					TAGS = searchableArrayFromTagSet( categories );
-
-					console.log( TAGS );
-
-					/**
-					 * @todo 
-					 * 
-					 * we need to replace this one-time invocation
-					 * with something that polls tag values from the database.
-					 * that way modifications to a user's tagset can be 
-					 * recorded and reacted to in realtime.
-					 */
-
-					initializeAutocomplete();
-
-				}
-
-			});
-
-		} else {
-			throw new Error('ERROR: Tried to attach an autocomplete instance with no logged-in user!');
-		}
+		
 
 
-		/**
-		 * given a set of tags from the database,
-		 * this routine formats the tag set such that the autocomplete mechanism
-		 * can work with them.
-		 * 
-		 * @param  {Set} set a set of tag elements.
-		 * @return {[Tag]}    a formatted array of tag elements.
-		 */
-		function searchableArrayFromTagSet( set ) {
 
-			return [{
-				data: set,
-				getTitle: function( data ) { console.log( data ); return data['name']; },
-				getValue: function( data ) { console.log( data ); return data['name']; }
-			}];
-
-
-			//return [ set.map( function( category ) { return category.name; } ) ];
-
-			//return [Array.from( set.entries() ).map( function( tag_bucket ) { return tag_bucket[0]; } )];
-
-		}
 
 		/**
 		 * This routine sets up the autocomplete instance, as well as the associated events.
@@ -141,9 +113,9 @@ module.exports = function( db ) {
 
 			.on( keyevent, recordValue );
 
-			element.autocomplete('setSource', TAGS );
+			setAutocompleteSource( null, TAGS );
 
-			//element.focus();
+			element.focus();
 
 		}
 
@@ -170,8 +142,6 @@ module.exports = function( db ) {
 		 */
 		function setCategory( event, datum ) {
 
-			datum = datum.name;
-
 			destroyAutocomplete();
 
 			if (!datum) { 
@@ -193,6 +163,15 @@ module.exports = function( db ) {
 			element.on( keyevent, ifNoCommas( initializeAutocomplete ) );
 
 			element.on( keyevent, ifEnterAndNonEmpty( options.post( element ) ) );
+
+		}
+
+		function setAutocompleteSource( event, categories ) {
+
+			console.log( event );
+			console.log( categories );
+
+			element.autocomplete('setSource', TAGS );
 
 		}
 
@@ -280,3 +259,28 @@ module.exports = function( db ) {
 
 	};
 };
+
+/**
+ * given a set of tags from the database,
+ * this routine formats the tag set such that the autocomplete mechanism
+ * can work with them.
+ * 
+ * @param  {Set} set a set of tag elements.
+ * @return {[Tag]}    a formatted array of tag elements.
+ */
+function searchableArrayFromTagSet( set ) {
+
+	//return [ set.map]
+
+	// return [{
+	// 	data: set,
+	// 	getTitle: function( data ) { console.log( data ); return data['name']; },
+	// 	getValue: function( data ) { console.log( data ); return data['name']; }
+	// }];
+
+
+	return [ set.map( function( category ) { return category.name; } ) ];
+
+	//return [Array.from( set.entries() ).map( function( tag_bucket ) { return tag_bucket[0]; } )];
+
+}
