@@ -548,13 +548,13 @@ function appendTask(taskId, task) {
     @subtaskName - the name of the subtask
 */
 function appendSubtask(taskId, subtasks, subtaskName) {
-  var newSubtasks = subtasks;
-
+  var newSubtasks = subtasks ? subtasks : [];
+  console.log(newSubtasks);
+  newSubtasks.push( { "name": subtaskName, "complete": false } );
   var taskPatch = {
       "subtasks": newSubtasks
   };
 
-  newSubtasks.push( { "name": subtaskName, "complete": false } );
 
   db.patch_task_for_user(taskId, taskPatch, function (error) {
     if (error) {
