@@ -63,7 +63,7 @@ module.exports = function( db ) {
 			 * instead of the tags. Just using the tags for testing
 			 * purposes.
 			 */
-			db.get_user_tags( sessionStorage.user_id, function( err, tags ) {
+			db.watch_user_categories( sessionStorage.user_id, function( err, categories ) {
 
 				if ( err ) {
 
@@ -71,7 +71,9 @@ module.exports = function( db ) {
 
 				} else {
 
-					TAGS = searchableArrayFromTagSet( tags );
+					TAGS = searchableArrayFromTagSet( categories );
+
+					console.log( TAGS );
 
 					/**
 					 * @todo 
@@ -103,9 +105,16 @@ module.exports = function( db ) {
 		 */
 		function searchableArrayFromTagSet( set ) {
 
-			// return [ set.map( function( category ) { return category.name; } ) ];
+			return [{
+				data: set,
+				getTitle: function( data ) { console.log( data ); return data['name']; },
+				getValue: function( data ) { console.log( data ); return data['name']; }
+			}];
 
-			return [Array.from( set.entries() ).map( function( tag_bucket ) { return tag_bucket[0]; } )];
+
+			//return [ set.map( function( category ) { return category.name; } ) ];
+
+			//return [Array.from( set.entries() ).map( function( tag_bucket ) { return tag_bucket[0]; } )];
 
 		}
 
@@ -119,8 +128,9 @@ module.exports = function( db ) {
 
 			element.off( keyevent );
 
-			element.autocomplete($.extend({ 
+			element.autocomplete($.extend({
 
+				titleKey: 'name',
 				source: []
 
 			}, options ))
@@ -133,9 +143,23 @@ module.exports = function( db ) {
 
 			element.autocomplete('setSource', TAGS );
 
-			element.focus();
+			//element.focus();
 
-		} 
+		}
+
+		/**
+		 * This routine destroys the state of the current 
+		 * autocomplete instance on the bound element.
+		 */
+		function destroyAutocomplete() {
+
+			element.off( keyevent );
+
+			element.autocomplete('destroy');
+
+			element.removeClass('xdsoft_input');
+
+		}
 
 		/**
 		 * This routine transitions the target autocomplete element 
@@ -146,15 +170,17 @@ module.exports = function( db ) {
 		 */
 		function setCategory( event, datum ) {
 
-			element.off( keyevent );
+			datum = datum.name;
 
-			element.autocomplete('destroy');
-
-			element.removeClass('xdsoft_input');
+			destroyAutocomplete();
 
 			if (!datum) { 
 
-				element.val( [element.data( stored_value ), ', '].join('') );
+				var text = element.data( stored_value );
+
+				element.val( 
+					( text.indexOf(',') !== -1 ) ? text : [ text, ', ' ].join('') 
+				);
 
 			} else {
 
