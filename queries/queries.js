@@ -153,86 +153,75 @@ exports.add_task_to_user = function (user_id, task, callback) {
     task.user = user_id;
     task.progress = 0;
     task.complete = false;
-    // calculate estimated hours
-    tags = task.tags;
-    users.child(user_id).child("tags").once("value", function (snapshot) {
-        var user_tags = snapshot.exists() ? snapshot.val() : [];
-        var tag_hours = []
-        var tag_update_indexes = []
-        var user_defined_hours = task.hours !== undefined;
-        tags.forEach(function (tag) {
-            user_tag = user_tags.find(function (t, i) {
-                var found = t.name === tag
-                if (found) {
-                    tag_update_indexes.push(i);
-                }
-                return found
-            })
-            if (user_tag) {
-                tag_hours.push(user_tag.avg_hours);
-            } else {
-                new_hours = user_defined_hours ? task.hours : 1
-                user_tags.push(
-                    {
-                        "name": tag,
-                        "hours": new_hours,
-                        "avg_hours": new_hours,
-                        "num_tasks": 1
-                    }
-                );
-            }
-        });
 
-        if (!user_defined_hours) {
-            var sum = tag_hours.reduce(function (a, b) { return a + b; });
-            task.hours = sum / tag_hours.length;
+    // add new category and its color into user categories
+    users.child(user_id).child("categories").once("value", function (snapshot) {
+        user_categories = snapshot.exists() ? snapshot.val() : [];
+        user_has_category = user_categories.some(function (cat) {
+            return cat.name === task.category;
+        });
+        if (!user_has_category) {
+            user_categories.push(
+                {
+                    "name": task.category,
+                    "color": colors[user_categories.length % colors.length]
+                }
+            )
+            users.child(user_id).child("categories").set(user_categories);
         }
 
-        tag_update_indexes.forEach(function (i) {
-            user_tags[i].hours += task.hours;
-            user_tags[i].num_tasks += 1;
-            user_tags[i].avg_hours = user_tags[i].hours / user_tags[i].num_tasks;
-        });
-
-        users.child(user_id).child("tags").set(user_tags);
-
-        // add new category and its color into user categories
-
-        users.child(user_id).child("categories").once("value", function (snapshot) {
-            user_categories = snapshot.exists() ? snapshot.val() : [];
-            user_has_category = user_categories.some(function (cat) {
-                return cat.name === task.category;
-            });
-            if (!user_has_category) {
-                user_categories.push(
-                    {
-                        "name": task.category,
-                        "color": colors[user_categories.length % colors.length]
+        var task_ref = tasks.push(task, function (error) {
+            if (error) {
+                console.log("Error adding task to user.");
+                if (callback) { callback(error); }
+            } else {
+                var task_id = task_ref.key();
+                users.child(user_id).child("tasks").push(task_id, function (error) {
+                    if (error) {
+                        console.log("Error adding task.");
+                        if (callback) { callback(error); }
+                    } else {
+                        console.log("Successfully added task.");
+                        if (callback) { callback(null, task_ref.key()); }
                     }
-                )
-                users.child(user_id).child("categories").set(user_categories);
+                });
             }
 
-            var task_ref = tasks.push(task, function (error) {
-                if (error) {
-                    console.log("Error adding task to user.");
-                    if (callback) { callback(error); }
-                } else {
-                    var task_id = task_ref.key();
-                    users.child(user_id).child("tasks").push(task_id, function (error) {
-                        if (error) {
-                            console.log("Error adding task.");
-                            if (callback) { callback(error); }
+            task_ref.child("tags").on("value", function (tags_snapshot) {
+                console.log("calculating estimated_hour");
+                users.child(user_id).child("tags").once("value", function (snapshot) {
+                    var user_tags = snapshot.exists() ? snapshot.val() : [];
+                    var tag_hours = []
+                    tags_snapshot.val().forEach(function (tag) {
+                        user_tag = user_tags.find(function (t, i) {
+                            return t.name === tag
+                        })
+                        if (user_tag) {
+                            tag_hours.push(user_tag.avg_hours);
                         } else {
-                            console.log("Successfully added task.");
-                            if (callback) { callback(null, task_ref.key()); }
+                            user_tags.push(
+                                {
+                                    "name": tag,
+                                    "hours": 1,
+                                    "avg_hours": 1,
+                                    "num_tasks": 1
+                                }
+                            );
+                            tag_hours.push(1);
                         }
                     });
-                }
+
+                    var sum = tag_hours.reduce(function (a, b) { return a + b; });
+                    var estimated_hour = sum / tag_hours.length;
+
+                    users.child(user_id).child("tags").set(user_tags);
+                    task_ref.child("hours").set(estimated_hour);
+                });
             });
         });
     });
 };
+
 
 exports.patch_task_for_user = function (task_id, task_object, callback) {
     tasks.child(task_id).update(task_object, function (error) {
@@ -240,6 +229,27 @@ exports.patch_task_for_user = function (task_id, task_object, callback) {
             console.log("Error patching task.");
             if (callback) { callback(error); }
         } else {
+            if (task_object.hours !== undefined) {
+                // Nic, this line causes problem.
+                // tasks.child(task_id).child("tags").off("value");
+            }
+            if (task_object.complete) {
+                console.log("completing task");
+                tasks.child(task_id).once("value", function (task_snapshot) {
+                    var task = task_snapshot.val();
+                    users.child(task.user).child("tags").once("value", function (tags_snapshot) {
+                        var user_tags = tags_snapshot.val(); // tags_snapshot.exists() ? tags_snapshot.val() : [];
+                        for (var i = 0; i < user_tags.length; i++) {
+                            if (task.tags.indexOf(user_tags[i].name) >= 0) {
+                                user_tags[i].hours += task.hours;
+                                user_tags[i].num_tasks += 1;
+                                user_tags[i].avg_hours = user_tags[i].hours / user_tags[i].num_tasks;
+                            }
+                        }
+                        users.child(task.user).child("tags").set(user_tags);
+                    });
+                });
+            }
             console.log("Successfully patched task.");
             if (callback) { callback(null); }
         }
@@ -264,7 +274,6 @@ exports.remove_task_from_user = function (user_id, task_id, callback) {
                 });
         }
     });
-
 };
 
 exports.get_user_tags = function (user_id, callback) {
