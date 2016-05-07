@@ -414,11 +414,11 @@ function appendTask(taskId, task) {
     }
   }
 
-	var taskDetailsDOM = 
-		'<div class="taskDetails">' +
+  var taskDetailsDOM = 
+    '<div class="taskDetails">' +
           '<input type="text" class="form-control editName" placeholder="' + task.name + '" style="display: none;">' +
-			'<h4 class="taskDetailsHeading">' + '<span style="color: '+ taskColor+'" >' + task.category.toUpperCase() + '</span> ' + task.name +'</h4>' +
-		'<button class="editButton" type="button">' +
+      '<h4 class="taskDetailsHeading">' + '<span style="color: '+ taskColor+'" >' + task.category.toUpperCase() + '</span> ' + task.name +'</h4>' +
+    '<button class="editButton" type="button">' +
         '<span id="editIcon" class="glyphicon glyphicon-edit"></span>' +
       '</button>' + 
 
@@ -427,30 +427,30 @@ function appendTask(taskId, task) {
       '<p class="targetTimeText" style="text-align: right"></p>' +
 
       '<div class="progress">' +
-		    '<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">' +
-		      '<span class="sr-only">40% Complete (success)</span>' +
-		    '</div>' +
-		  '</div>' +
+        '<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">' +
+          '<span class="sr-only">40% Complete (success)</span>' +
+        '</div>' +
+      '</div>' +
       '<p class="progressText"></p>' +
-		  '<div class="taskIcons">' +
-		    '<span class="plusIcon glyphicon glyphicon-plus-sign" data-toggle="tooltip" title="Add progress"></span>' +
+      '<div class="taskIcons">' +
+        '<span class="plusIcon glyphicon glyphicon-plus-sign" data-toggle="tooltip" title="Add progress"></span>' +
           '<div class="plusWrapper"></div>' +
-		    '<span class="timeIcon glyphicon glyphicon-time" data-toggle="tooltip" title="Progress timer"></span>' +
+        '<span class="timeIcon glyphicon glyphicon-time" data-toggle="tooltip" title="Progress timer"></span>' +
           '<div class="timerWrapper"></div>' +
         '<span class="calIcon glyphicon glyphicon-calendar" data-toggle="tooltip" title="Reschedule"></span>' +
           '<div class="dateWrapper" style="width: 50%; display: inline-block; vertical-align: middle;"></div>' + 
         '<button class="trashButton" type="button">' +
           '<span id="trashIcon" class="glyphicon glyphicon-trash"></span>' +
         '</button>' +
-		  '</div><br>' +
+      '</div><br>' +
       '<div class="tagsContainer">' +
         '<h5>Tags</h5>' +
         '<input name="tags" class="tags" value=""/>' +
         '</ul>' +
       '</div>' +
 
-  	 '<h5>Subtasks</h5>' +
-		 '<div class="subtasks" style="height: auto;overflow: auto;">  ' +
+     '<h5>Subtasks</h5>' +
+     '<div class="subtasks" style="height: auto;overflow: auto;">  ' +
           '<ul class="list-group checked-list-box"> ' +
           '</ul> ' +
             '<div class="input-group"> ' +
@@ -459,21 +459,21 @@ function appendTask(taskId, task) {
             '</div>' +
         '</div> ' +
 
-		  '<div class="notes">' +
-		  	'<h5>Notes</h5>' +
-		    '<textarea class="noteInput form-control" placeholder="' + task.notes + '" rows="1" aria-describedby="sizing-addon1"></textarea>' +
-		  '</div>' +
-		'</div>'
+      '<div class="notes">' +
+        '<h5>Notes</h5>' +
+        '<textarea class="noteInput form-control" placeholder="' + task.notes + '" rows="1" aria-describedby="sizing-addon1"></textarea>' +
+      '</div>' +
+    '</div>'
 
   var due = new Date(task.due_date);
   var d = due.getDate();
   var m = due.getMonth() + 1;  
 
-	var taskDOM = 
-		'<li id="'+ taskId +'" class="task list-group-item" data-checked="false">' +
-			'<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + taskColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + " [Due " + m + "/" + d + "]" + '</span>' + 
-			taskDetailsDOM + 
-		'</li>';
+  var taskDOM = 
+    '<li id="'+ taskId +'" class="task list-group-item" data-checked="false">' +
+      '<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + taskColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + " [Due " + m + "/" + d + "]" + '</span>' + 
+      taskDetailsDOM + 
+    '</li>';
 
   $("#" + parseDate(task.assigned_date) + " .tasks").append(taskDOM);
 
@@ -611,7 +611,7 @@ function renderEstimate(estimatedTime) {
 */
 function loadTask(taskId, task) {
 
-	$('#' + taskId).each(function () {
+  $('#' + taskId).each(function () {
     // Settings
     var $widget = $(this),
     $checkbox = $('#' + taskId + " .taskCheckbox"),
@@ -798,10 +798,24 @@ function loadTask(taskId, task) {
          if (key == 13) { // the enter key code
           e.preventDefault();
           var progressTime = $(this).val().split(/[ ,]+/);
+          var hours = Math.floor(progressTime[0]);
+          var minutes = Math.floor(progressTime[1]);
+          var seconds = Math.floor(progressTime[2]);
+
+          var total = 3600 * hours + 60 * minutes + seconds; //total is in seconds
 
           $widget.find('.progressText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
-          $widget.find('.progressText').text(progressTime[0] + " hour(s), " + progressTime[1] + " minute(s), and " + progressTime[2] + " second(s) of progress time have been added.");
+          $widget.find('.progressText').text(hours + " hour(s), " + minutes + " minute(s), and " + seconds + " second(s) of progress time have been added.");
           $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});
+
+          var taskToPatch = task;
+          console.log("task.hours " + task.hours);
+          console.log("adding " + total);
+          
+          taskToPatch.hours = task.hours + total;
+          db.patch_task_for_user(taskId, taskToPatch);
+
+          console.log("Time spent: " + taskToPatch.hours);
 
           $plusWrapper.empty();
         }
@@ -872,7 +886,7 @@ function loadTask(taskId, task) {
 
     // Actions
     function updateDisplay() {
-    	var isChecked = $checkbox.is(':checked');
+      var isChecked = $checkbox.is(':checked');
 
         // Set the button's state
         $widget.data('state', (isChecked) ? "on" : "off");
@@ -894,11 +908,11 @@ function loadTask(taskId, task) {
     // Initialization
     function init() {
 
-    	if ($widget.data('checked') == true) {
-    		$checkbox.prop('checked', !$checkbox.is(':checked'));
-    	}
+      if ($widget.data('checked') == true) {
+        $checkbox.prop('checked', !$checkbox.is(':checked'));
+      }
 
-    	updateDisplay();
+      updateDisplay();
    
         // Inject the icon if applicable
         // if ($widget.find('.state-icon').length == 0) {
@@ -908,15 +922,15 @@ function loadTask(taskId, task) {
     // init();
   });
 
-	// $('#get-checked-data').on('click', function(event) {
-	// 	event.preventDefault(); 
-	// 	var checkedItems = {}, counter = 0;
-	// 	$("#check-list-box li.active").each(function(idx, li) {
-	// 		checkedItems[counter] = $(li).text();
-	// 		counter++;
-	// 	});
-	// 	$('#display-json').html(JSON.stringify(checkedItems, null, '\t'));
-	// });
+  // $('#get-checked-data').on('click', function(event) {
+  //  event.preventDefault(); 
+  //  var checkedItems = {}, counter = 0;
+  //  $("#check-list-box li.active").each(function(idx, li) {
+  //    checkedItems[counter] = $(li).text();
+  //    counter++;
+  //  });
+  //  $('#display-json').html(JSON.stringify(checkedItems, null, '\t'));
+  // });
 }
 
 // -----------------------------------------------------------
@@ -931,35 +945,35 @@ $('#myModal').on('shown.bs.modal', function () {
 })
 
 $('#createaccount').on('click', function(event) {
-	event.preventDefault();
+  event.preventDefault();
     var user = {
-    	"username": $("#newusername").val(),
+      "username": $("#newusername").val(),
         "email": $("#newemail").val(),
         "password": $("#newpassword").val(),
         "categories": []
     };
     db.add_user(user, function (error, user_id) {
         if (!error) {
-         	sessionStorage.user_id = user_id;
+          sessionStorage.user_id = user_id;
             window.location.href = "/user";
         } 
     });
 }); 
 
 $('#signin').on('click', function(event) {
-	event.preventDefault();
-	var user = {
-		"email": $("#email").val(),
-		"password": $("#password").val()
-	};
-	db.log_in(user, function (error, user_id) {
-		if (!error) {
-		   	sessionStorage.user_id = user_id;
-		    window.location.href = "/user";
-		} else {
-		    alert(error);
-		}
-	});	
+  event.preventDefault();
+  var user = {
+    "email": $("#email").val(),
+    "password": $("#password").val()
+  };
+  db.log_in(user, function (error, user_id) {
+    if (!error) {
+        sessionStorage.user_id = user_id;
+        window.location.href = "/user";
+    } else {
+        alert(error);
+    }
+  }); 
 });
 
 $("#logout").click(function (event) {
@@ -994,3 +1008,4 @@ function displayUserInfo() {
 }
 displayUserInfo();
 
+a
