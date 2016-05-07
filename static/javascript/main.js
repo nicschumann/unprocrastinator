@@ -809,13 +809,16 @@ function loadTask(taskId, task) {
           $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});
 
           var taskToPatch = task;
-          console.log("task.hours " + task.hours);
-          console.log("adding " + total);
-          
+
           taskToPatch.hours = task.hours + total;
+          console.log("estimate: " + task.estimate);
+          var progress = (taskToPatch.hours / task.estimate) * 100;
+          taskToPatch.progress = progress;
+
           db.patch_task_for_user(taskId, taskToPatch);
 
-          console.log("Time spent: " + taskToPatch.hours);
+          console.log("Total time spent: " + taskToPatch.hours);
+          console.log("Progress: " + progress);
 
           $plusWrapper.empty();
         }
