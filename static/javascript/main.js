@@ -487,7 +487,7 @@ function appendTask(taskId, task) {
      $('#' + taskId + ' .tags').addTag(task.tags[tag]);
   }
 
-  // Load subtasks
+// Load subtasks
   for (var subtask in task.subtasks) {
     renderSubtask( taskId, task.subtasks, task.subtasks[subtask].name, task.subtasks[subtask].complete );
   }
@@ -549,7 +549,6 @@ function appendTask(taskId, task) {
 */
 function appendSubtask(taskId, subtasks, subtaskName) {
   var newSubtasks = subtasks ? subtasks : [];
-  console.log(newSubtasks);
   newSubtasks.push( { "name": subtaskName, "complete": false } );
   var taskPatch = {
       "subtasks": newSubtasks
@@ -563,6 +562,60 @@ function appendSubtask(taskId, subtasks, subtaskName) {
   });
 }
 
+/*
+    removeSubtask: Removes the given subtask from a task - fired when a user 
+    clicks delete on a subtask.
+    @taskId - the ID of the task to delete this subtask from
+    @subtaskName - the name of the subtask to delete
+*/
+function deleteSubtask(taskId, subtasks, subtaskName) {
+  var newSubtasks = subtasks;
+
+  for (var i = 0; i < newSubtasks.length; i++) {
+    if (newSubtasks[i].name == subtaskName) {
+      newSubtasks.splice(i, 1);
+    }
+  }
+
+  var taskPatch = {
+      "subtasks": newSubtasks
+  };
+
+  db.patch_task_for_user(taskId, taskPatch, function (error) {
+    if (error) {
+      console.log("ERROR: patch task " + error);
+    }
+  });
+}
+
+/*
+    checkSubtask: Checks or unchecks the given subtask from a task - fired when a user 
+    clicks the check box next to a subtask.
+    @taskId - the ID of the task this subtask falls under
+    @subtaskName - the name of the subtask
+    @isChecked - whether the subtask should be checked or no
+*/
+function checkSubtask(taskId, subtasks, subtaskName, isChecked) {
+  var newSubtasks = subtasks;
+
+  for (var i = 0; i < newSubtasks.length; i++) {
+    if (newSubtasks[i].name == subtaskName) {
+      newSubtasks[i].complete = isChecked;
+    }
+  }
+
+  var taskPatch = {
+      "subtasks": newSubtasks
+  };
+
+  db.patch_task_for_user(taskId, taskPatch, function (error) {
+    if (error) {
+      console.log("ERROR: patch task " + error);
+    }
+  });
+}
+
+
 /**
  * this routine renders a subtask given by the parameters to the dom.
  * 
@@ -572,19 +625,51 @@ function appendSubtask(taskId, subtasks, subtaskName) {
  * @param  {Boolean} isComplete  whether the subtask is complete
  */
 function renderSubtask( taskId, subtasks, subtaskName, isComplete ) {
+    var isCompleteDom = isComplete ? 'checked' : '';
+    var isCompleteDomClass = isComplete ? 'class="checked"' : '';
 
     var subtask = 
     '<li class="list-group-item subtask" data-checked="false">' +
-      '<input class="subtaskCheckbox" type="checkbox"/>' + subtaskName +
+      '<input class="subtaskCheckbox" type="checkbox"' + isCompleteDom + '/>' + 
+      '<span ' + isCompleteDomClass + '>' + subtaskName + '</span>' +
+      '<span id="trashIcon" class="glyphicon glyphicon-trash">' +
     '</li>';
     $subtask = $("#" + taskId + " .subtasks > .list-group").append(subtask);
     $checkbox = $subtask.find('.subtaskCheckbox');
-    $checkbox.prop('checked', isComplete);
+    $deleteButton = $subtask.find('.glyphicon-trash');
+
+    $("#" + taskId + " .subtasks > .list-group .glyphicon-trash").on('click', function () {
+      var subtaskName = $(this).parent()[0].childNodes[1];
+      $(this).parent().remove();
+      db.get_user_task(sessionStorage.user_id, taskId, function (error, task) {
+        if (error) {
+          console.log(error);
+          return;
+        }
+        var subtasks = task.subtasks;
+        deleteSubtask(taskId, subtasks, subtaskName.textContent);
+      })
+    });
 
     $("#" + taskId + " .subtasks > .list-group .subtaskCheckbox").on('change', function () {
       var isChecked = $(this).is(':checked');
-      // Set the button's state -- #TODO connect to db
+
+      if (isChecked) {
+        $(this).next().addClass('checked');
+      } else {
+        $(this).next().removeClass('checked');
+      }
+      
       $(this).data('state', (isChecked) ? "complete" : "incomplete");
+      var subtaskName = $(this).parent()[0].childNodes[1];
+      db.get_user_task(sessionStorage.user_id, taskId, function (error, task) {
+        if (error) {
+          console.log(error);
+          return;
+        }
+        var subtasks = task.subtasks;
+        checkSubtask(taskId, subtasks, subtaskName.textContent, isChecked);
+      })
     });
 
 }
@@ -612,13 +697,19 @@ function loadTask(taskId, task) {
     $plusButton = $widget.find(".plusIcon"),
     $plusWrapper = $widget.find(".plusWrapper"),
     $editButton = $widget.find(".editButton"),
-    $taskName = $widget.find(".taskDetailsHeading")[0],
+    $taskName = $widget.find(".taskName"),
+    $taskDetailsHeading = $widget.find(".taskDetailsHeading")[0],
     $editTaskInput = $widget.find(".editName")[0],
     $deleteTask = $widget.find(".trashButton"),
     $targetTimeButton = $widget.find(".targetTimeIcon"),
     $targetTimeWrapper = $widget.find(".targetTimeWrapper")
     color = ($widget.data('color') ? $widget.data('color') : "primary"),
     style = ($widget.data('style') == "button" ? "btn-" : "list-group-item-");
+
+    if (task.complete) {
+      $taskName.addClass('checked');
+      $checkbox.prop('checked', true);
+    }
     // settings = {
     //     on: {
     //         icon: 'glyphicon glyphicon-check'
@@ -703,12 +794,25 @@ function loadTask(taskId, task) {
 
     // Handles changing the task checkbox state (complete/incomplete)
     $checkbox.on('change', function () {
-        var isChecked = $checkbox.is(':checked');
         // Set the button's state
+        var isChecked = $checkbox.is(':checked');
+        var taskToPatch = task;
+        if (isChecked) {
+          $(this).next().next().addClass('checked');
+          task.complete = true;
+        } else {
+          $(this).next().next().removeClass('checked');
+          task.complete = false;
+        }
 
-        // TODO: patch task to mark complete or not. needs DB field
-        // var taskToPatch = task;
-        // db.patch_task_for_user(taskId, task_object, {callback})
+        console.log(task);
+
+        // patch task to mark complete or not. needs DB field
+        db.patch_task_for_user(taskId, taskToPatch, function(error) {
+          if (error) {
+            console.log(error);
+          }
+        })
 
         $widget.data('state', (isChecked) ? "complete" : "incomplete");
       });
@@ -830,11 +934,11 @@ function loadTask(taskId, task) {
     });
 
     $editButton.click(function(e) {
-      if ($taskName.style.display == 'none') {
-        $taskName.style.display = 'inline-block';
+      if ($taskDetailsHeading.style.display == 'none') {
+        $taskDetailsHeading.style.display = 'inline-block';
         $editTaskInput.style.display = 'none';
       } else {
-        $taskName.style.display = 'none';
+        $taskDetailsHeading.style.display = 'none';
         $editTaskInput.style.display = 'inline-block';
         $editTaskInput.focus();
       }
