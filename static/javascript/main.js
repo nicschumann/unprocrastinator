@@ -810,15 +810,10 @@ function loadTask(taskId, task) {
           var taskToPatch = task;
 
           taskToPatch.hours = task.hours + total;
-          console.log("estimate: " + task.estimate);
           var progress = Math.round((taskToPatch.hours / task.estimate) * 100);
           taskToPatch.progress = progress;
 
           db.patch_task_for_user(taskId, taskToPatch);
-
-          console.log("Total time spent: " + taskToPatch.hours);
-          console.log("Progress: " + progress);
-
           $plusWrapper.empty();
         }
       });   
@@ -863,15 +858,10 @@ function loadTask(taskId, task) {
           var taskToPatch = task;
 
           taskToPatch.hours = task.hours + total;
-          console.log("estimate: " + task.estimate);
           var progress = Math.round((taskToPatch.hours / task.estimate) * 100);
           taskToPatch.progress = progress;
 
           db.patch_task_for_user(taskId, taskToPatch);
-
-          console.log("Total time spent: " + taskToPatch.hours);
-          console.log("Progress: " + progress);
-
 
         });
       } else if ($timerWrapper.find('.timer').length == 1) {
