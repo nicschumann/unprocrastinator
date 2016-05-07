@@ -487,6 +487,9 @@ function appendTask(taskId, task) {
      $('#' + taskId + ' .tags').addTag(task.tags[tag]);
   }
 
+  // Load estimated time
+  renderEstimate(task.estimate);
+
   // Load subtasks
   for (var subtask in task.subtasks) {
     renderSubtask( taskId, task.subtasks, task.subtasks[subtask].name, task.subtasks[subtask].complete );
@@ -549,12 +552,10 @@ function appendTask(taskId, task) {
 */
 function appendSubtask(taskId, subtasks, subtaskName) {
   var newSubtasks = subtasks ? subtasks : [];
-  console.log(newSubtasks);
   newSubtasks.push( { "name": subtaskName, "complete": false } );
   var taskPatch = {
       "subtasks": newSubtasks
   };
-
 
   db.patch_task_for_user(taskId, taskPatch, function (error) {
     if (error) {
@@ -589,7 +590,15 @@ function renderSubtask( taskId, subtasks, subtaskName, isComplete ) {
 
 }
 
+function renderEstimate(estimatedTime) {
+  if (estimatedTime !== undefined) {
+    var hours = Math.floor(estimatedTime / 3600);
+    var minutes = Math.floor((estimatedTime - 3600 * hours) / 60);
+    var seconds = estimatedTime - 3600 * hours - 60 * minutes;
 
+    $('.targetTimeText').text("Estimated time " + hours + ": " + minutes + ": " + seconds);
+  }
+}
 /*
     loadTask: Loads the interactive features of a task, such as click to toggle, and
     task details. 
@@ -678,6 +687,44 @@ function loadTask(taskId, task) {
       }
     });
 
+
+
+    $targetTimeButton.click(function(e) {
+
+      if ($targetTimeWrapper.find('.targetTime').length == 0) { // check that this doesnt already exist
+        $targetTimeWrapper.append("<input type='text' placeholder='HRS, MIN, SEC' class='targetTime'></input>");
+        $targetTimeWrapper.find('.targetTime').focus();  
+
+        var hours;
+        var minutes;
+        var seconds;
+
+        $targetTimeWrapper.find('.targetTime').keypress(function (e) {
+         var key = e.which;
+         if (key == 13) { // the enter key code
+          e.preventDefault();
+          var targetTime = $(this).val().split(/[ ,]+/);
+          hours = Math.floor(targetTime[0]);
+          minutes = Math.floor(targetTime[1]);
+          seconds = Math.floor(targetTime[2]);
+
+          var total = 3600 * hours + 60 * minutes + seconds; //total is in seconds
+
+          $widget.find('.targetTimeText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
+          $widget.find('.targetTimeText').text("Estimated time " + hours + ": " + minutes + ": " + seconds);
+
+          var taskToPatch = task;
+          taskToPatch.estimate = total;
+          db.patch_task_for_user(taskId, taskToPatch);
+
+          $targetTimeWrapper.empty();
+        }
+      });   
+      } else if ($targetTimeWrapper.find('.targetTime').length == 1) {
+        $targetTimeWrapper.empty();
+      }
+    })
+
     // Event Handlers
     // -----------------------
     // Datepicker event handlers
@@ -763,34 +810,6 @@ function loadTask(taskId, task) {
         $plusWrapper.empty();
       }
     })
-
-    $targetTimeButton.click(function(e) {
-
-      if ($targetTimeWrapper.find('.targetTime').length == 0) { // check that this doesnt already exist
-        $targetTimeWrapper.append("<input type='text' placeholder='HRS, MIN, SEC' class='targetTime'></input>");
-        $targetTimeWrapper.find('.targetTime').focus();  
-
-        $targetTimeWrapper.find('.targetTime').keypress(function (e) {
-         var key = e.which;
-         if (key == 13) { // the enter key code
-          e.preventDefault();
-          var targetTime = $(this).val().split(/[ ,]+/);
-          var hours = targetTime[0];
-          var minutes = targetTime[1];
-          var seconds = targetTime[2];
-
-          $widget.find('.targetTimeText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
-          $widget.find('.targetTimeText').text("Estimated time " + hours + ": " + minutes + ": " + seconds);
-
-          $targetTimeWrapper.empty();
-        }
-      });   
-      } else if ($targetTimeWrapper.find('.targetTime').length == 1) {
-        $targetTimeWrapper.empty();
-      }
-    })
-
-  
 
     // Loads and handles timer actions 
     $timerButton.click(function(e) {
