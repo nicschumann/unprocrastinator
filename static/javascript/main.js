@@ -812,7 +812,7 @@ function loadTask(taskId, task) {
 
           taskToPatch.hours = task.hours + total;
           console.log("estimate: " + task.estimate);
-          var progress = (taskToPatch.hours / task.estimate) * 100;
+          var progress = Math.round((taskToPatch.hours / task.estimate) * 100);
           taskToPatch.progress = progress;
 
           db.patch_task_for_user(taskId, taskToPatch);
@@ -851,9 +851,28 @@ function loadTask(taskId, task) {
           $timer.parent().empty();
           $timer.remove();
 
+          var hours = Math.floor(progressTime[4]);
+          var minutes = Math.floor(progressTime[5]);
+          var seconds = Math.floor(progressTime[6]);
+
+          var total = 3600 * hours + 60 * minutes + seconds; //total is in seconds
+
           $widget.find('.progressText').css({ opacity: 1, "height": "auto", "padding-bottom": "10px"});
-          $widget.find('.progressText').text(progressTime[4] + " hours, " + progressTime[5] + " minutes, and " + progressTime[6] + " seconds of progress time have been added.");
+          $widget.find('.progressText').text(progressTime[4] + " hour(s), " + progressTime[5] + " minute(s), and " + progressTime[6] + " second(s) of progress time have been added.");
           $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});
+
+          var taskToPatch = task;
+
+          taskToPatch.hours = task.hours + total;
+          console.log("estimate: " + task.estimate);
+          var progress = Math.round((taskToPatch.hours / task.estimate) * 100);
+          taskToPatch.progress = progress;
+
+          db.patch_task_for_user(taskId, taskToPatch);
+
+          console.log("Total time spent: " + taskToPatch.hours);
+          console.log("Progress: " + progress);
+
 
         });
       } else if ($timerWrapper.find('.timer').length == 1) {
