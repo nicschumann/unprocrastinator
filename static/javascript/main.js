@@ -313,6 +313,7 @@ function populateWeek() {
       var taskToAdd =  {
           "name": name,
           "hours": 0,
+          "progress": 0,
           "complete": false,
           "assigned_date": generateDateFromId(dateId).getTime(),
           "due_date": generateDateFromId(dateId).getTime(),
@@ -358,6 +359,7 @@ function populateWeek() {
           var taskToAdd =  {
                 "name": name,
                 "hours": 0,
+                "progress": 0,
                 "complete": false,
                 "assigned_date": generateDateFromId(dateId).getTime(),
                 "due_date": generateDateFromId(dateId).getTime(),
@@ -714,7 +716,7 @@ function loadTask(taskId, task) {
     $targetTimeButton.click(function(e) {
 
       if ($targetTimeWrapper.find('.targetTime').length == 0) { // check that this doesnt already exist
-        $targetTimeWrapper.append("<input type='text' placeholder='HRS, MIN, SEC' class='targetTime'></input>");
+        $targetTimeWrapper.append("<input type='text' placeholder='hr min' class='targetTime'></input>");
         $targetTimeWrapper.find('.targetTime').focus();  
 
         var hours;
@@ -725,12 +727,28 @@ function loadTask(taskId, task) {
          var key = e.which;
          if (key == 13) { // the enter key code
           e.preventDefault();
-          var targetTime = $(this).val().split(/[ ,]+/);
-          hours = Math.floor(targetTime[0]);
-          minutes = Math.floor(targetTime[1]);
-          seconds = Math.floor(targetTime[2]);
+          //var targetTime = $(this).val().split(/[ ,]+/);
+          var targetTime = $(this).val().split(" ");
+          var hours = 0;
+          var minutes = 0;
 
-          var total = 3600 * hours + 60 * minutes + seconds; //total is in seconds
+          for (chunk in targetTime) {
+            if (targetTime[chunk] == "hr") {
+              hours = Math.floor(targetTime[chunk - 1]);
+            } else { //no space before "hr"
+              var nums = $(this).val().split("hr");
+              if (nums == $(this).val()) { //no hour
+                var num = $(this).val().split("min");
+                minutes = Math.floor(num[0]);
+              } else {
+                hours = Math.floor(nums[0]);
+                var num = nums[1].split("min");
+                minutes = Math.floor(num[0]);
+              }  
+            }
+          }
+
+          var total = 3600 * hours + 60 * minutes; //total is in seconds
 
           $widget.find('.targetTimeText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
           //$widget.find('.targetTimeText').text("Estimated time " + hours + ": " + minutes + ": " + seconds);
@@ -815,19 +833,36 @@ function loadTask(taskId, task) {
 
     $plusButton.click(function(e) {
       if ($plusWrapper.find('.plusProgress').length == 0) { // check that this doesnt already exist
-        $plusWrapper.append("<input type='text' placeholder='HRS, MIN, SEC' class='plusProgress'></input>");
+        $plusWrapper.append("<input type='text' placeholder='hr min' class='plusProgress'></input>");
         $plusWrapper.find('.plusProgress').focus();  
 
         $plusWrapper.find('.plusProgress').keypress(function (e) {
          var key = e.which;
          if (key == 13) { // the enter key code
           e.preventDefault();
-          var progressTime = $(this).val().split(/[ ,]+/);
-          var hours = Math.floor(progressTime[0]);
-          var minutes = Math.floor(progressTime[1]);
-          var seconds = Math.floor(progressTime[2]);
+          //var progressTime = $(this).val().split(/[ ,]+/);
+          var progressTime = $(this).val().split(" ");
+          var hours = 0;
+          var minutes = 0;
 
-          var total = 3600 * hours + 60 * minutes + seconds; //total is in seconds
+          for (chunk in progressTime) {
+            if (progressTime[chunk] == "hr") {
+              hours = Math.floor(progressTime[chunk - 1]);
+            } else { //no space before "hr"
+              var nums = $(this).val().split("hr");
+
+              if (nums == $(this).val()) { //no hour
+                var num = $(this).val().split("min");
+                minutes = Math.floor(num[0]);
+              } else {
+                hours = Math.floor(nums[0]);
+                var num = nums[1].split("min");
+                minutes = Math.floor(num[0]);
+              }  
+            }
+          }
+
+          var total = 3600 * hours + 60 * minutes; //total is in seconds
 
           $widget.find('.progressText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
           $widget.find('.progressText').text(hours + " hr " + minutes + " min of progress time have been added.");
