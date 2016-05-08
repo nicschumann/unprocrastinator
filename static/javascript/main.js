@@ -325,7 +325,7 @@ function populateWeek() {
           "tags": tags,
           "category": category,
           "subtasks": [],
-          "notes": "Write a note..."
+          "notes": ""
       };
 
       db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
@@ -371,7 +371,7 @@ function populateWeek() {
                 "tags": tags,
                 "category": category,
                 "subtasks": [],
-                "notes": "Write a note..."
+                "notes": ""
             };
 
           db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
@@ -467,7 +467,7 @@ function appendTask(taskId, task) {
 
       '<div class="notes">' +
         '<h5>Notes</h5>' +
-        '<textarea class="noteInput form-control" placeholder="Write a note..." value="' + task.notes + '" rows="1" aria-describedby="sizing-addon1"></textarea>' +
+        '<textarea class="noteInput form-control" rows="1" placeholder="Write a note..." aria-describedby="sizing-addon1"></textarea>' +
       '</div>' +
     '</div>'
 
