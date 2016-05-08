@@ -594,7 +594,6 @@ function renderSubtask( taskId, subtasks, subtaskName, isComplete ) {
 }
 
 function renderEstimate(estimatedTime) {
-  console.log("estimated time: " + estimatedTime);
   if (estimatedTime) {
     var hours = Math.floor(estimatedTime / 3600);
     var minutes = Math.floor((estimatedTime - 3600 * hours) / 60);
@@ -719,6 +718,9 @@ function loadTask(taskId, task) {
 
           var taskToPatch = task;
           taskToPatch.estimate = total;
+          var progress = Math.round((taskToPatch.hours / taskToPatch.estimate) * 100);
+          taskToPatch.progress = progress;
+
           db.patch_task_for_user(taskId, taskToPatch);
 
           $targetTimeWrapper.empty();
