@@ -374,8 +374,16 @@ function populateWeek() {
                 "notes": "Write a note..."
             };
 
-          db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
-            appendTask(taskId, taskToAdd);
+          db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId, task) {
+
+            db.get_user_task( sessionStorage.user_id, taskId, function( err, task ) {
+
+              console.log( task );
+
+              appendTask(taskId, task);
+
+            });
+
           });
 
           element.val('');
@@ -422,7 +430,7 @@ function appendTask(taskId, task) {
   }
 
 // Took out estimated time part:
-// '<p class="targetTimeText" style="text-align: right"></p>' +
+
   var taskDetailsDOM = 
     '<div class="taskDetails">' +
           '<input type="text" class="form-control editName" placeholder="' + task.name + '" style="display: none;">' +
@@ -434,6 +442,7 @@ function appendTask(taskId, task) {
       '<div class="targetTimeWrapper"></div>' +
       
       '<p class="remainderTimeText" style="text-align: right"></p>' +
+      '<p class="targetTimeText" style="text-align: right"></p>' +
       '<div class="progress">' +
         '<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: ' + task.progress + '%">' +
         '</div>' +
@@ -499,7 +508,7 @@ function appendTask(taskId, task) {
   }
 
   // Load estimated time
-  //renderEstimate(task.estimate);
+  renderEstimate(task.estimate);
 
   renderRemainder(task.estimate, task.hours);
 
@@ -779,9 +788,9 @@ function renderEstimate(estimatedTime) {
 function renderRemainder(estimatedTime, timeSpent) {
   if (estimatedTime) {
     var difference = estimatedTime - timeSpent;
-    var hoursLeft = Math.floor(difference / 3600);
-    var minutesLeft = Math.floor((difference - 3600 * hoursLeft) / 60);
-    var secondsLeft = Math.floor(difference - 3600 * hoursLeft - 60 * minutesLeft);
+    var hoursLeft = Math.round(difference / 3600);
+    var minutesLeft = Math.round((difference - 3600 * hoursLeft) / 60);
+    var secondsLeft = Math.round(difference - 3600 * hoursLeft - 60 * minutesLeft);
 
     if (hoursLeft > 0) {
       if (minutesLeft > 0) {
@@ -1152,18 +1161,21 @@ function loadTask(taskId, task) {
 
     db.watch_task_progress( taskId, function( err, progress ) {
         console.log( 'update_progress' );
+        console.log( progress );
         $( '#'+taskId ).find('.progress-bar').css({ width: progress + '%' });
         $( '#'+taskId ).find('.progress-indicator').text( progress + '%' );
     });
 
     db.watch_task_hours( taskId, function( err, hours ) {
         console.log( 'update_hours' );
+        console.log( hours );
         task.hours = hours;
         renderRemainder( task.estimate, hours );
     })
 
     db.watch_task_estimate( taskId, function( err, estimate ) {
         console.log( 'update_estimate' );
+        console.log( estimate );
         task.estimate = estimate;
         renderRemainder( estimate, task.hours );
     });
