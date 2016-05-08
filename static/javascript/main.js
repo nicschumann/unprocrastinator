@@ -421,7 +421,6 @@ function appendTask(taskId, task) {
     '<button class="editButton" type="button">' +
         '<span id="editIcon" class="glyphicon glyphicon-edit"></span>' +
       '</button>' + 
-
     '<span class="targetTimeIcon glyphicon glyphicon-screenshot" data-toggle="tooltip" title="Target time"></span>' +
       '<div class="targetTimeWrapper"></div>' +
       '<p class="targetTimeText" style="text-align: right"></p>' +
@@ -447,7 +446,6 @@ function appendTask(taskId, task) {
         '<input name="tags" class="tags" value=""/>' +
         '</ul>' +
       '</div>' +
-
      '<h5>Subtasks</h5>' +
      '<div class="subtasks" style="height: auto;overflow: auto;">  ' +
           '<ul class="list-group checked-list-box"> ' +
@@ -470,7 +468,7 @@ function appendTask(taskId, task) {
 
   var taskDOM = 
     '<li id="'+ taskId +'" class="task list-group-item" data-checked="false">' +
-      '<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + taskColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + " [Due " + m + "/" + d + "]" + '</span>' + 
+      '<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + taskColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + " [Due " + m + "/" + d + "] " + "<b>" + "<i>" + task.progress + "%" + "</i>" + "</b>" + '</span>' + 
       taskDetailsDOM + 
     '</li>';
 
