@@ -39,7 +39,7 @@ var today = new Date();
     today.setHours(0,0,0,0);
 
     //TODO get rid of this later!!! it is for testing!!
-    //today.setDate(today.getDate() + 1)
+    today.setDate(today.getDate() + 1)
 
 var todayId = generateDateId(today); 
 var dateCounter = 0;
@@ -467,7 +467,7 @@ function appendTask(taskId, task) {
 
       '<div class="notes">' +
         '<h5>Notes</h5>' +
-        '<textarea class="noteInput form-control" placeholder="' + task.notes + '" rows="1" aria-describedby="sizing-addon1"></textarea>' +
+        '<textarea class="noteInput form-control" placeholder="Write a note..." value="' + task.notes + '" rows="1" aria-describedby="sizing-addon1"></textarea>' +
       '</div>' +
     '</div>'
 
@@ -486,6 +486,8 @@ function appendTask(taskId, task) {
   if (task.due_date < today.getTime()) {
     $("#" + taskId).find(".taskName").css("color", "red");
   }
+
+  $("#" + taskId).find(".noteInput").val(task.notes);
 
   //hover text init
   $('[data-toggle="tooltip"]').tooltip(); 
