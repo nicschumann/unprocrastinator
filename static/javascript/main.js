@@ -598,7 +598,7 @@ function renderEstimate(estimatedTime) {
   if (estimatedTime) {
     var hours = Math.floor(estimatedTime / 3600);
     var minutes = Math.floor((estimatedTime - 3600 * hours) / 60);
-    var seconds = estimatedTime - 3600 * hours - 60 * minutes;
+    var seconds = Math.floor(estimatedTime - 3600 * hours - 60 * minutes);
 
     $('.targetTimeText').text("Estimated time " + hours + ": " + minutes + ": " + seconds);
   }
