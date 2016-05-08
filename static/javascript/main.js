@@ -326,8 +326,6 @@ function populateWeek() {
         appendTask(taskId, taskToAdd);
       });
 
-      renderEstimate(taskToAdd.estimate);
-
       $(this).prev().val('');
     });
 
@@ -372,8 +370,6 @@ function populateWeek() {
           db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
             appendTask(taskId, taskToAdd);
           });
-
-          renderEstimate(taskToAdd.estimate);
 
           element.val('');
         };
@@ -429,7 +425,7 @@ function appendTask(taskId, task) {
     '<span class="targetTimeIcon glyphicon glyphicon-screenshot" data-toggle="tooltip" title="Target time"></span>' +
       '<div class="targetTimeWrapper"></div>' +
       '<p class="targetTimeText" style="text-align: right"></p>' +
-
+      '<p class="remainderTimeText" style="text-align: right"></p>' +
       '<div class="progress">' +
         '<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: ' + task.progress + '%">' +
         '</div>' +
@@ -492,6 +488,8 @@ function appendTask(taskId, task) {
 
   // Load estimated time
   renderEstimate(task.estimate);
+
+  renderRemainder(task.estimate, task.hours);
 
   // Load subtasks
   for (var subtask in task.subtasks) {
@@ -600,6 +598,18 @@ function renderEstimate(estimatedTime) {
     var seconds = Math.floor(estimatedTime - 3600 * hours - 60 * minutes);
 
     $('.targetTimeText').text("Estimated time " + hours + ": " + minutes + ": " + seconds);
+  }
+}
+
+function renderRemainder(estimatedTime, timeSpent) {
+  if (estimatedTime) {
+
+    var difference = estimatedTime - timeSpent;
+    var hoursLeft = Math.floor(difference / 3600);
+    var minutesLeft = Math.floor((difference - 3600 * hoursLeft) / 60);
+    var secondsLeft = Math.floor(difference - 3600 * hoursLeft - 60 * minutesLeft);
+
+    $('.remainderTimeText').text("Time left " + hoursLeft + ": " + minutesLeft + ": " + secondsLeft);
   }
 }
 /*
