@@ -467,7 +467,7 @@ function appendTask(taskId, task) {
 
       '<div class="notes">' +
         '<h5>Notes</h5>' +
-        '<textarea class="noteInput form-control" placeholder="' + task.notes + '" rows="1" aria-describedby="sizing-addon1"></textarea>' +
+        '<textarea class="noteInput form-control" rows="1" aria-describedby="sizing-addon1">'+ task.notes +'</textarea>' +
       '</div>' +
     '</div>'
 
@@ -477,7 +477,7 @@ function appendTask(taskId, task) {
 
   var taskDOM = 
     '<li id="'+ taskId +'" class="task list-group-item" data-checked="false">' +
-      '<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + taskColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + " [Due " + m + "/" + d + "] " + "<b>" + "<i>" + task.progress + "%" + "</i>" + "</b>" + '</span>' + 
+      '<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + taskColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + " [Due " + m + "/" + d + "] " + "<b>" + "<i><span class='progress-indicator'>" + task.progress + "%" + "</span></i>" + "</b>" + '</span>' + 
       taskDetailsDOM + 
     '</li>';
 
@@ -1067,6 +1067,8 @@ function loadTask(taskId, task) {
           var progress = Math.round((taskToPatch.hours / task.estimate) * 100);
           taskToPatch.progress = progress;
 
+          console.log( taskToPatch );
+
           db.patch_task_for_user(taskId, taskToPatch);
           $plusWrapper.empty();
         }
@@ -1146,6 +1148,24 @@ function loadTask(taskId, task) {
           console.log("ERROR: remove task " + error); 
         }
       })
+    });
+
+    db.watch_task_progress( taskId, function( err, progress ) {
+        console.log( 'update_progress' );
+        $( '#'+taskId ).find('.progress-bar').css({ width: progress + '%' });
+        $( '#'+taskId ).find('.progress-indicator').text( progress + '%' );
+    });
+
+    db.watch_task_hours( taskId, function( err, hours ) {
+        console.log( 'update_hours' );
+        task.hours = hours;
+        renderRemainder( task.estimate, hours );
+    })
+
+    db.watch_task_estimate( taskId, function( err, estimate ) {
+        console.log( 'update_estimate' );
+        task.estimate = estimate;
+        renderRemainder( estimate, task.hours );
     });
 
 

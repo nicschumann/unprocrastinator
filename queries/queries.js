@@ -129,6 +129,39 @@ exports.watch_user_categories = function( user_id, callback ) {
 
 };
 
+/**
+ * @modification nic
+ * I'm adding a routine to poll a tasks state for
+ * modifications to the progress indicator.
+ *
+ * This routine watches task progress, and
+ * calls a callback whenever the progress changes.
+ * 
+ * @param  {String}   task_id  the id of the task to poll.
+ * @param  {Function} callback continuation
+ */
+exports.watch_task_progress = watchTaskKey( 'progress' );
+
+/**
+ * This routine watches the estimate key for updates
+ * and passes them to a user-supplied callback.
+ * 
+ * @param {String} task_id 
+ * @param {Function} callback the continuation to pass the estimate update to.
+ */
+exports.watch_task_estimate = watchTaskKey( 'estimate' );
+
+/**
+ * This routine watches the hours key for
+ * updates and passes them to the user-supplied callback.
+ * 
+ * @param {String} task_id 
+ * @param {Function} callback the continuation to pass the estimate update to.
+ */
+exports.watch_task_hours = watchTaskKey( 'hours' );
+
+
+
 exports.change_email = function (old_email, new_email, password, callback) {
     root.changeEmail({
         oldEmail: old_email,
@@ -372,3 +405,21 @@ exports.get_task_by_tags = function (user_id, tags, callback) {
         }
     );
 };
+
+
+function watchTaskKey( keyname ) {
+    return function( task_id, callback ) {
+        tasks.child( task_id ).child( keyname ).on( 'value', function(snapshot) {
+
+            var value = snapshot.val();
+            console.log( ['Successfully received {',keyname,'} update for ', task_id ].join('') );
+            if ( typeof callback !== "undefined" ) { callback( null, value ); }
+
+        }, function( error ) {
+
+            console.error( ['Error receiving ',keyname,' for task ', task_id].join('') );
+            if ( typeof callback !== "undefined" ) { callback( error ); }
+
+        });
+    };
+}
