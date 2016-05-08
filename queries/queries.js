@@ -151,8 +151,6 @@ exports.patch_user = function (user_id, user, callback) {
 
 exports.add_task_to_user = function (user_id, task, callback) {
     task.user = user_id;
-    task.progress = 0;
-    task.complete = false;
 
     // add new category and its color into user categories
     users.child(user_id).child("categories").once("value", function (snapshot) {
@@ -188,7 +186,6 @@ exports.add_task_to_user = function (user_id, task, callback) {
             }
 
             task_ref.child("tags").on("value", function (tags_snapshot) {
-                console.log("calculating estimated_hour");
                 users.child(user_id).child("tags").once("value", function (snapshot) {
                     var user_tags = snapshot.exists() ? snapshot.val() : [];
                     var tag_hours = []
@@ -198,24 +195,23 @@ exports.add_task_to_user = function (user_id, task, callback) {
                         })
                         if (user_tag) {
                             tag_hours.push(user_tag.avg_hours);
-                        } else {
+                        } else { //default to 1 hour 
                             user_tags.push(
                                 {
                                     "name": tag,
-                                    "hours": 1,
-                                    "avg_hours": 1,
+                                    "hours": 60,
+                                    "avg_hours": 60,
                                     "num_tasks": 1
                                 }
                             );
-                            tag_hours.push(1);
+                            tag_hours.push(60);
                         }
                     });
 
-                    var sum = tag_hours.reduce(function (a, b) { return a + b; });
+                    var sum = tag_hours.reduce(function (a, b) { return a + b; }, 0);
                     var estimated_hour = sum / tag_hours.length;
-
                     users.child(user_id).child("tags").set(user_tags);
-                    task_ref.child("hours").set(estimated_hour);
+                    task_ref.child("estimate").set(estimated_hour);
                 });
             });
         });
@@ -234,7 +230,6 @@ exports.patch_task_for_user = function (task_id, task_object, callback) {
                 // tasks.child(task_id).child("tags").off("value");
             }
             if (task_object.complete) {
-                console.log("completing task");
                 tasks.child(task_id).once("value", function (task_snapshot) {
                     var task = task_snapshot.val();
                     users.child(task.user).child("tags").once("value", function (tags_snapshot) {

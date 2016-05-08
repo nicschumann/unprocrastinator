@@ -326,6 +326,8 @@ function populateWeek() {
         appendTask(taskId, taskToAdd);
       });
 
+      renderEstimate(taskToAdd.estimate);
+
       $(this).prev().val('');
     });
 
@@ -370,6 +372,8 @@ function populateWeek() {
           db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
             appendTask(taskId, taskToAdd);
           });
+
+          renderEstimate(taskToAdd.estimate);
 
           element.val('');
         };
@@ -590,7 +594,8 @@ function renderSubtask( taskId, subtasks, subtaskName, isComplete ) {
 }
 
 function renderEstimate(estimatedTime) {
-  if (estimatedTime !== undefined) {
+  console.log("estimated time: " + estimatedTime);
+  if (estimatedTime) {
     var hours = Math.floor(estimatedTime / 3600);
     var minutes = Math.floor((estimatedTime - 3600 * hours) / 60);
     var seconds = estimatedTime - 3600 * hours - 60 * minutes;
