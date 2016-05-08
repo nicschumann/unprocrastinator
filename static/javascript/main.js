@@ -721,7 +721,6 @@ function addTagToDb(tagText) {
     var newTags = task.tags ? task.tags : [];
 
     if (newTags.indexOf(tagText) >= 0) {
-      console.log('that tag exists already');
       return;
     }
 
@@ -989,8 +988,6 @@ function loadTask(taskId, task) {
           $(this).next().next().removeClass('checked');
           task.complete = false;
         }
-
-        console.log(task);
 
         // patch task to mark complete or not. needs DB field
         db.patch_task_for_user(taskId, taskToPatch, function(error) {

@@ -39,7 +39,7 @@ module.exports = function( db ) {
 
 			} else {
 
-				console.log( categories );
+				//console.log( categories );
 
 				TAGS = searchableArrayFromTagSet( categories );
 
@@ -168,8 +168,8 @@ module.exports = function( db ) {
 
 		function setAutocompleteSource( event, categories ) {
 
-			console.log( event );
-			console.log( categories );
+			//console.log( event );
+			//console.log( categories );
 
 			element.autocomplete('setSource', TAGS );
 
