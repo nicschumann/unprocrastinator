@@ -1272,5 +1272,3 @@ function displayUserInfo() {
     });
 }
 displayUserInfo();
-
-a
