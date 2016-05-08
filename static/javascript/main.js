@@ -414,6 +414,8 @@ function appendTask(taskId, task) {
     }
   }
 
+// Took out estimated time part:
+// '<p class="targetTimeText" style="text-align: right"></p>' +
   var taskDetailsDOM = 
     '<div class="taskDetails">' +
           '<input type="text" class="form-control editName" placeholder="' + task.name + '" style="display: none;">' +
@@ -423,7 +425,7 @@ function appendTask(taskId, task) {
       '</button>' + 
     '<span class="targetTimeIcon glyphicon glyphicon-screenshot" data-toggle="tooltip" title="Target time"></span>' +
       '<div class="targetTimeWrapper"></div>' +
-      '<p class="targetTimeText" style="text-align: right"></p>' +
+      
       '<p class="remainderTimeText" style="text-align: right"></p>' +
       '<div class="progress">' +
         '<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: ' + task.progress + '%">' +
@@ -485,7 +487,7 @@ function appendTask(taskId, task) {
   }
 
   // Load estimated time
-  renderEstimate(task.estimate);
+  //renderEstimate(task.estimate);
 
   renderRemainder(task.estimate, task.hours);
 
@@ -607,7 +609,16 @@ function renderRemainder(estimatedTime, timeSpent) {
     var minutesLeft = Math.floor((difference - 3600 * hoursLeft) / 60);
     var secondsLeft = Math.floor(difference - 3600 * hoursLeft - 60 * minutesLeft);
 
-    $('.remainderTimeText').text("Time left " + hoursLeft + ": " + minutesLeft + ": " + secondsLeft);
+    if (hoursLeft > 0) {
+      if (minutesLeft > 0) {
+        $('.remainderTimeText').text(hoursLeft + " hr and " + minutesLeft + " min left!");
+      } else {
+        $('.remainderTimeText').text(hoursLeft + " hr left!");
+      }
+    } else {
+      $('.remainderTimeText').text(minutesLeft + " min left!");
+    }
+    //$('.remainderTimeText').text("Time left " + hoursLeft + ": " + minutesLeft + ": " + secondsLeft);
   }
 }
 /*
@@ -722,7 +733,7 @@ function loadTask(taskId, task) {
           var total = 3600 * hours + 60 * minutes + seconds; //total is in seconds
 
           $widget.find('.targetTimeText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
-          $widget.find('.targetTimeText').text("Estimated time " + hours + ": " + minutes + ": " + seconds);
+          //$widget.find('.targetTimeText').text("Estimated time " + hours + ": " + minutes + ": " + seconds);
 
           var taskToPatch = task;
           taskToPatch.estimate = total;
@@ -819,7 +830,7 @@ function loadTask(taskId, task) {
           var total = 3600 * hours + 60 * minutes + seconds; //total is in seconds
 
           $widget.find('.progressText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
-          $widget.find('.progressText').text(hours + " hour(s), " + minutes + " minute(s), and " + seconds + " second(s) of progress time have been added.");
+          $widget.find('.progressText').text(hours + " hr " + minutes + " min of progress time have been added.");
           $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});
 
           var taskToPatch = task;
@@ -867,7 +878,7 @@ function loadTask(taskId, task) {
           var total = 3600 * hours + 60 * minutes + seconds; //total is in seconds
 
           $widget.find('.progressText').css({ opacity: 1, "height": "auto", "padding-bottom": "10px"});
-          $widget.find('.progressText').text(progressTime[4] + " hour(s), " + progressTime[5] + " minute(s), and " + progressTime[6] + " second(s) of progress time have been added.");
+          $widget.find('.progressText').text(hours + " hr " + minutes + " min of progress time have been added.");
           $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});
 
           var taskToPatch = task;
