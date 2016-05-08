@@ -166,6 +166,11 @@ function loadTaskMap() {
       for (var task_id in tasks) {
           if (tasks.hasOwnProperty(task_id)) {
             var task = tasks[task_id];
+
+            if (task.completed && task.assigned_date < today) {
+              continue;
+            }
+
             var taskDateId = parseDate(task.assigned_date);
           } else {
             console.log('ERROR: tasks are invalid')
@@ -440,7 +445,7 @@ function appendTask(taskId, task) {
         '<span class="calIcon glyphicon glyphicon-calendar" data-toggle="tooltip" title="Reschedule"></span>' +
           '<div class="dateWrapper" style="width: 50%; display: inline-block; vertical-align: middle;"></div>' + 
         '<button class="trashButton" type="button">' +
-          '<span id="trashIcon" class="glyphicon glyphicon-trash"></span>' +
+          '<span id="trashIcon" class="glyphicon glyphicon-trash" data-toggle="tooltip" title="Delete task"></span>' +
         '</button>' +
 		  '</div><br>' +
       '<div class="tagsContainer">' +
@@ -481,7 +486,12 @@ function appendTask(taskId, task) {
   $('[data-toggle="tooltip"]').tooltip(); 
 
   // Display tags
-  $('#' + taskId + ' .tags').tagsInput({'width': '100%', 'height': 'auto'});
+  $('#' + taskId + ' .tags').tagsInput({
+    'width': '100%', 
+    'height': 'auto',
+    'onAddTag': addTagToDb,
+    'onRemoveTag': removeTagFromDb
+  });
 
   for (var tag in task.tags) {
      $('#' + taskId + ' .tags').addTag(task.tags[tag]);
@@ -501,9 +511,15 @@ function appendTask(taskId, task) {
     e.preventDefault();
     var taskId = $(this).parent().parent().parent().parent().attr('id');
     var subtaskName = $(this).prev().val();
-    appendSubtask(taskId, task.subtasks, subtaskName);
-    renderSubtask( taskId, task.subtasks, subtaskName, false );
-    $(this).prev().val('');
+    db.get_user_task(sessionStorage.user_id, taskId, function (error, task) {
+      if (error) {
+        console.log(error);
+        return;
+      }
+      appendSubtask(taskId, task.subtasks, subtaskName);
+      renderSubtask( taskId, task.subtasks, subtaskName, false );
+      $("#" + taskId + ' .subtaskButton').prev().val('');
+    })
   });
 
   $("#" + taskId + ' .subtaskInput').keypress(function (e) {
@@ -512,9 +528,15 @@ function appendTask(taskId, task) {
       e.preventDefault();
       var taskId = $(this).parent().parent().parent().parent().attr('id');
       var subtaskName = $(this).val();
-      appendSubtask(taskId, task.subtasks, subtaskName);
-      renderSubtask( taskId, task.subtasks, subtaskName, false );
-      $(this).val('');
+      db.get_user_task(sessionStorage.user_id, taskId, function (error, task) {
+        if (error) {
+          console.log(error);
+          return;
+        }
+        appendSubtask(taskId, task.subtasks, subtaskName);
+        renderSubtask( taskId, task.subtasks, subtaskName, false );
+        $("#" + taskId + ' .subtaskButton').prev().val('');
+      })
     }
   });
 
@@ -672,6 +694,72 @@ function renderSubtask( taskId, subtasks, subtaskName, isComplete ) {
       })
     });
 
+}
+
+/*
+  addTagToDb(): the callback that our tag library calls when someone
+  adds a tag to an input field.
+  @tagText: the tag string to be appended to the task object's tag list
+*/
+function addTagToDb(tagText) {
+  var taskId = $(this).parent().parent().parent()[0].id;
+  var task = db.get_user_task(sessionStorage.user_id, taskId, function(error, task) {
+    if (error) {
+      console.log(error);
+      return;
+    }
+    var newTags = task.tags ? task.tags : [];
+
+    if (newTags.indexOf(tagText) >= 0) {
+      console.log('that tag exists already');
+      return;
+    }
+
+    newTags.push(tagText);
+    var taskPatch = {
+      "tags": newTags
+    }
+
+    db.patch_task_for_user(taskId, taskPatch, function (error) {
+      if (error) {
+        console.log("ERROR: patch task " + error);
+      }
+    })
+
+  });
+}
+
+/*
+  removeTagFromDb(): the callback that our tag library calls when someone
+  deletes a tag from an input field.
+  @tagText: the tag string to be deleted
+*/
+function removeTagFromDb(tagText) {
+  var taskId = $(this).parent().parent().parent()[0].id;
+  var task = db.get_user_task(sessionStorage.user_id, taskId, function(error, task) {
+    if (error) {
+      console.log(error);
+      return;
+    }
+    var newTags = task.tags ? task.tags : [];
+
+    for (var i = 0; i < newTags.length; i++) {
+      if (newTags[i] == tagText) {
+        newTags.splice(i, 1);
+      }
+    }
+
+    var taskPatch = {
+      "tags": newTags
+    }
+
+    db.patch_task_for_user(taskId, taskPatch, function (error) {
+      if (error) {
+        console.log("ERROR: patch task " + error);
+      }
+    })
+
+  });
 }
 
 
