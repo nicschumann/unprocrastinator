@@ -167,7 +167,10 @@ function loadTaskMap() {
           if (tasks.hasOwnProperty(task_id)) {
             var task = tasks[task_id];
 
-            if (task.completed && task.assigned_date < today) {
+            console.log('complete? ' + task.complete);
+            console.log('assigned date: ' + task.due_date);
+            console.log('today: ' + today.getTime());
+            if (task.complete && task.due_date < today.getTime()) {
               continue;
             }
 

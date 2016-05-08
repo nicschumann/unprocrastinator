@@ -51,7 +51,7 @@ module.exports = function( db ) {
 
 	} else {
 
-		throw new Error('ERROR: Tried to attach an autocomplete instance with no logged-in user!');
+		//throw new Error('ERROR: Tried to attach an autocomplete instance with no logged-in user!');
 
 	}
 
