@@ -54,7 +54,7 @@ var categoryMap = {};
 // Actions to happen on page load
 $(document).ready(function(){
   loadTaskMap();
-  loadTodayOverview();
+  //loadTodayOverview();
   checkReassignTasks();
 
   $("#monthName").text(getMonthOfYear(today));
