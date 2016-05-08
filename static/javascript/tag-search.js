@@ -51,7 +51,7 @@ module.exports = function( db ) {
 
 	} else {
 
-		throw new Error('ERROR: Tried to attach an autocomplete instance with no logged-in user!');
+		return function() {};
 
 	}
 
@@ -83,7 +83,7 @@ module.exports = function( db ) {
 
 		//$(document).on( category_update, setAutocompleteSource );
 
-		initializeAutocomplete();
+		initializeAutocomplete( false )();
 
 		
 
@@ -94,28 +94,31 @@ module.exports = function( db ) {
 		 * This routine sets up the autocomplete instance, as well as the associated events.
 		 * It extends the default options witht he options that are passed to the module.
 		 */
-		function initializeAutocomplete() {
+		function initializeAutocomplete( shouldFocus ) {
+			return function() {
 
-			require('jquery-autocomplete');
+				require('jquery-autocomplete');
 
-			element.off( keyevent );
+				element.off( keyevent );
 
-			element.autocomplete($.extend({
+				element.autocomplete($.extend({
 
-				titleKey: 'name',
-				source: []
+					titleKey: 'name',
+					source: []
 
-			}, options ))
+				}, options ))
 
-			.on( 'selected.xdsoft', setCategory )
+				.on( 'selected.xdsoft', setCategory )
 
-			.on( keyevent, ifKeyIsComma( manuallySetCategory ))
+				.on( keyevent, ifKeyIsComma( manuallySetCategory ))
 
-			.on( keyevent, recordValue );
+				.on( keyevent, recordValue );
 
-			setAutocompleteSource( null, TAGS );
+				setAutocompleteSource( null, TAGS );
 
-			element.focus();
+				if ( shouldFocus ) { element.focus(); }
+
+			};
 
 		}
 
@@ -160,7 +163,7 @@ module.exports = function( db ) {
 
 			element.focus();
 
-			element.on( keyevent, ifNoCommas( initializeAutocomplete ) );
+			element.on( keyevent, ifNoCommas( initializeAutocomplete( true ) ) );
 
 			element.on( keyevent, ifEnterAndNonEmpty( options.post( element ) ) );
 
