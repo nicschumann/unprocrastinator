@@ -38,6 +38,9 @@ var tag_search = require('./tag-search')( db, $ );
 var today = new Date();
     today.setHours(0,0,0,0);
 
+    //TODO get rid of this later!!! it is for testing!!
+    //today.setDate(today.getDate() + 1)
+
 var todayId = generateDateId(today); 
 var dateCounter = 0;
 
@@ -167,9 +170,6 @@ function loadTaskMap() {
           if (tasks.hasOwnProperty(task_id)) {
             var task = tasks[task_id];
 
-            console.log('complete? ' + task.complete);
-            console.log('assigned date: ' + task.due_date);
-            console.log('today: ' + today.getTime());
             if (task.complete && task.due_date < today.getTime()) {
               continue;
             }
@@ -203,10 +203,7 @@ function checkReassignTasks() {
         reassignedTask.assigned_date = today.getTime();
 
         db.patch_task_for_user( taskPair.task_id, reassignedTask, function(err, task) {
-          
           appendTask(taskPair.task_id, reassignedTask);
-          $("#" + taskPair.task_id).find(".taskName").css("color", "red");
-
         })
 
       }
@@ -485,6 +482,10 @@ function appendTask(taskId, task) {
     '</li>';
 
   $("#" + parseDate(task.assigned_date) + " .tasks").append(taskDOM);
+
+  if (task.due_date < today.getTime()) {
+    $("#" + taskId).find(".taskName").css("color", "red");
+  }
 
   //hover text init
   $('[data-toggle="tooltip"]').tooltip(); 
