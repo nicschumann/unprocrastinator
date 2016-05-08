@@ -223,7 +223,7 @@ function generateDayTemplate(currDate) {
                 '<h2>' + currDate.getDate() + '<br>' + getDayOfWeek(currDate) + '</h2>' + 
               '</div>' + 
             '</div>' + 
-            '<div class="col-xs-11">' + 
+            '<div class="day-info-box col-xs-11">' + 
               '<p>' + 
                 '<div class="well" style="height: auto;overflow: auto;">' + 
                   '<ul class="tasks list-group checked-list-box">' +

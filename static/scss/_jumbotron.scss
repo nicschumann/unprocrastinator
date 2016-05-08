@@ -72,10 +72,15 @@ body {
       }
 
       .dates {
+        width: 10%;
         text-align: center;
         h2 {
           font-size: 3vw;
         }
+      }
+
+      .day-info-box {
+        width: 90%;
       }
 
       .well {
