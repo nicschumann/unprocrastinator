@@ -1,108 +1,142 @@
 <!DOCTYPE html>
 <html>
-	<head>
-	    <meta charset="utf-8">
-	    <title>FAQ</title>
-	    <!-- Link to CSS/Javascript -->
-	    <!-- Latest compiled and minified CSS -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+<head>
+ <meta charset="utf-8">
+ <title>FAQ</title>
+ <!-- Link to CSS/Javascript -->
+ <!-- Latest compiled and minified CSS -->
+ <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-    <script src="/static/javascript/bootstrap.min.js"></script>
-		<!-- Latest compiled and minified JavaScript -->
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+ <script src="/static/javascript/bootstrap.min.js"></script>
+ <!-- Latest compiled and minified JavaScript -->
+ <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
-	</head>
+</head>
+
+<body class="faq-body">
+
+  <nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a id="unprocrastinator" href="#" class="pull-left"><img style="max-width:200px; margin-right: 10px; margin-top: 4px" src="/static/img/logo.png"></a>
+      </div>
+      <div id="navbar" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="/user">Home</a></li>
+          <li class="active"><a href="/faq">FAQ</a></li>
+        </ul>
+        <form class="navbar-form navbar-right">
+          <label id="user_label"></label>
+          <button id="logout" type="submit" class="btn btn-success">Log out</button>
+        </form>
+      </div><!--/.nav-collapse -->
+    </div>
+  </nav>
 
 	<!-- what is: task, category, due date/assigned date, how do i edit tasks, how do i view old tasks?, what does the progress bar show?, how do I make a task? -->
-	<body class="faq-body">
-	<div class="container">
-		<div class="page-header ">
-  			<h2>FAQ</h2>
-		</div>
-      	<div class="panel-group" id="accordion">
-  			<div class="panel panel-default">
-			    <div class="panel-heading">
-			      	<h4 class="panel-title">
-				        <a data-toggle="collapse" data-parent="#accordion" href="#1">
-				        	How do I create a task?
-				        </a>
-			      </h4>
-			    </div>
-    			<div id="1" class="panel-collapse collapse ">
-    				<div class="panel-body">
-    					To create a new task, begin writing the task's category in a new field. Our system will auto-complete the category name, just press enter on the correct category! Once a category is selected, continue typing in the task name. Press enter to create your new task. If you wish to add more information to your task, like subtasks or tags, just click on the task name to view and edit task details.
-					    </div>
-  				</div>
-  			<div class="panel panel-default">
-    			<div class="panel-heading">
-      				<h4 class="panel-title">
-        				<a data-toggle="collapse" data-parent="#accordion" href="#2">
-							What is a category?     
-						</a>
-      				</h4>
-    			</div>
-    			<div id="2" class="panel-collapse collapse">
-      				<div class="panel-body">
-      					A category helps you define the type of tasks. As students, we use categories like "CS132" to designate assignments based on class. Every category comes with a color, so you can know which class an assignment is for at a glance. If you wish to create a new category, you can do so by typing the category name into a new task field and saving it as a new category. It will then be saved so you can use it again and utilize Unprocrastinator's time-managing aid!
-					</div>
-    			</div>
-  			</div>
-  			<div class="panel panel-default">
-    			<div class="panel-heading">
-      				<h4 class="panel-title">
-        				<a data-toggle="collapse" data-parent="#accordion" href="#3">
-							What does the progress bar mean?     
-						</a>
-      				</h4>
-    			</div>
-    			<div id="3" class="panel-collapse collapse">
-      				<div class="panel-body">
-      					Unprocrastinator is specifically designed for students like us - procrastinators who perpetually underestimate how long assignments take! That's why we added a time-management component to this application so that students could get a real idea of how long tasks take them. To use the progress bar, add tags to your task and update your hours logged either manually or with our built in timer. When you check off an assignment as complete, Unprocrastinator saves your time and uses it to approximate how long tasks with those same tags will take, and shows you how far along you are with the progress bar.
-					</div>
-    			</div>
-  			</div>
-  			<div class="panel panel-default">
-    			<div class="panel-heading">
-      				<h4 class="panel-title">
-        				<a data-toggle="collapse" data-parent="#accordion" href="#4">
-							What is the difference between a due date and an assigned date?    
-						</a>
-      				</h4>
-    			</div>
-    			<div id="4" class="panel-collapse collapse">
-      				<div class="panel-body">
-      					The due date is exactly what it sounds like - the day the task is due. The assigned date is what day you plan to work on a task. This lets you keep track of when you need to be finished but also keeps your to-do list from getting cluttered with tasks you don't plan to do.
-				      </div>
-    			</div>
-  			</div>
-        <div class="panel-group" id="accordion">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-              <h4 class="panel-title">
-                <a data-toggle="collapse" data-parent="#accordion" href="#5">
-                  How do I reschedule a task?
-                </a>
-            </h4>
-          </div>
-          <div id="5" class="panel-collapse collapse ">
-            <div class="panel-body">
-              To reschedule a task, you can change the assigned date by opening the task details and clicking on the calendar icon. From there, you can edit either the assigned date to change what day you plan to work on the task or the due date (which is automatically set to the assigned date when a task is first created).
-              </div>
-          </div>
-          <div class="panel-group" id="accordion">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-              <h4 class="panel-title">
-                <a data-toggle="collapse" data-parent="#accordion" href="#6">
-                  What happens to old tasks?
-                </a>
-            </h4>
-          </div>
-          <div id="6" class="panel-collapse collapse ">
-            <div class="panel-body">
-              Old tasks that have been completed will not show up in your calendar, but their time data will be stored to improve time-management for tasks with the same tags. If you have an incomplete task with a past assigned date, the task will display on today's to-do list with an option to reschedule when you want to work on it.
-              </div>
-          </div>
-  		</div>
-	</body>
+  <div class="container">
+    <div class="page-header " style="position:relative; margin-top:70px;">
+      <h2>FAQ</h2>
+    </div>
+  </div>
+
+  <div class="panel-group col-md-8" style="float: none;margin: 0 auto;">
+
+    <div class="panel panel-default ">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a data-toggle="collapse" data-parent="#accordion" href="#1">
+           How do I create a task?
+         </a>
+       </h4>
+     </div>
+     <div id="1" class="panel-collapse collapse ">
+      <div class="panel-body">
+       To create a new task, begin writing the task's category in a new field. Our system will auto-complete the category name, just press enter on the correct category! Once a category is selected, continue typing in the task name. Press enter to create your new task. If you wish to add more information to your task, like subtasks or tags, just click on the task name to view and edit task details.
+     </div>
+   </div>
+ </div>
+
+ <div class="panel panel-default">
+  <div class="panel-heading">
+    <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#2">
+       What is a category?     
+     </a>
+   </h4>
+ </div>
+ <div id="2" class="panel-collapse collapse">
+  <div class="panel-body">
+   A category helps you define the type of tasks. As students, we use categories like "CS132" to designate assignments based on class. Every category comes with a color, so you can know which class an assignment is for at a glance. If you wish to create a new category, you can do so by typing the category name into a new task field and saving it as a new category. It will then be saved so you can use it again and utilize Unprocrastinator's time-managing aid!
+ </div>
+</div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#3">
+       What does the progress bar mean?     
+     </a>
+   </h4>
+ </div>
+ <div id="3" class="panel-collapse collapse">
+  <div class="panel-body">
+   Unprocrastinator is specifically designed for students like us - procrastinators who perpetually underestimate how long assignments take! That's why we added a time-management component to this application so that students could get a real idea of how long tasks take them. To use the progress bar, add tags to your task and update your hours logged either manually or with our built in timer. When you check off an assignment as complete, Unprocrastinator saves your time and uses it to approximate how long tasks with those same tags will take, and shows you how far along you are with the progress bar.
+ </div>
+</div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#4">
+       What is the difference between a due date and an assigned date?    
+     </a>
+   </h4>
+ </div>
+ <div id="4" class="panel-collapse collapse">
+  <div class="panel-body">
+   The due date is exactly what it sounds like - the day the task is due. The assigned date is what day you plan to work on a task. This lets you keep track of when you need to be finished but also keeps your to-do list from getting cluttered with tasks you don't plan to do.
+ </div>
+</div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#5">
+        How do I reschedule a task?
+      </a>
+    </h4>
+  </div>
+  <div id="5" class="panel-collapse collapse ">
+    <div class="panel-body">
+      To reschedule a task, you can change the assigned date by opening the task details and clicking on the calendar icon. From there, you can edit either the assigned date to change what day you plan to work on the task or the due date (which is automatically set to the assigned date when a task is first created).
+    </div>
+  </div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#6">
+        What happens to old tasks?
+      </a>
+    </h4>
+  </div>
+  <div id="6" class="panel-collapse collapse ">
+    <div class="panel-body">
+      Old tasks that have been completed will not show up in your calendar, but their time data will be stored to improve time-management for tasks with the same tags. If you have an incomplete task with a past assigned date, the task will display on today's to-do list with an option to reschedule when you want to work on it.
+    </div>
+  </div>
+</div>
+</div>
+</body>
