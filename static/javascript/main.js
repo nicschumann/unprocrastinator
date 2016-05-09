@@ -1265,7 +1265,8 @@ $('#signin').on('click', function(event) {
         sessionStorage.user_id = user_id;
         window.location.href = "/user";
     } else {
-        alert(error);
+        $("#modalErrorText").text(error);
+        $("#errorModal").modal('show');
     }
   }); 
 });
