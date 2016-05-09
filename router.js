@@ -52,6 +52,10 @@ module.exports = function( options ) {
 		res.sendFile( path.join( __dirname, 'templates', 'index.html'));
 	});
 
+	app.get('/faq', function( req, res ) {
+		res.sendFile( path.join( __dirname, 'templates', 'faq.html'));
+	});
+
 	// =================== TESTING CODE ===============================
 
 	/** 

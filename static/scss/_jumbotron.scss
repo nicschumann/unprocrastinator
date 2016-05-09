@@ -1,27 +1,32 @@
-@font-face {
-  font-family: 'Glyphicons Halflings';
-  src: url('../fonts/glyphicons-halflings-regular.eot');
-  src: url('../fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('../fonts/glyphicons-halflings-regular.woff') format('woff'), url('../fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('../fonts/glyphicons-halflings-regular.svg#glyphicons-halflingsregular') format('svg');
-}
-
-/* CSS REQUIRED */
-.state-icon {
-  left: -5px;
-}
-.list-group-item-primary {
-  color: rgb(255, 255, 255);
-  background-color: rgb(66, 139, 202);
-}
-
-/* DEMO ONLY - REMOVES UNWANTED MARGIN */
-.well .list-group {
-  margin-bottom: 0px;
-}
+// @font-face {
+//   font-family: 'Glyphicons Halflings';
+//   src: url('../fonts/glyphicons-halflings-regular.eot');
+//   src: url('../fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('../fonts/glyphicons-halflings-regular.woff') format('woff'), url('../fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('../fonts/glyphicons-halflings-regular.svg#glyphicons-halflingsregular') format('svg');
+// }
 
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
+  font-family: 'Roboto', sans-serif;
+
+  h1 {
+    font-family: 'Roboto Slab', serif;
+  }
+
+  h2 {
+    font-family: 'Roboto Condensed', sans-serif;
+  }
+
+  #logo {
+    display:inline
+  }
   padding-top: 50px;
   padding-bottom: 20px; }
+
+  .jumbotron {
+    background-color: transparent;
+    background: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) ), url('/static/img/background.jpg');
+    color: white;
+  }
 
   #monthBar {
     position: fixed;
@@ -36,122 +41,170 @@ body {
 
     h2 {
       display: inline; }
+    }
 
-      calendarIcon {
-        float: right; }
+    #monthBarWrap {
+      z-index: 3;
+      position: fixed;
+      width: 100%;
+      height: 70px;
+      background-color: white;
+    }
+
+    #agendaList {
+      margin-top: 100px;
+      width: 70%;
+      word-break: break-all; 
+
+      #todayOverview {
+        h4 {
+          font-size: 1.8vw;
+        }
+      }
+      input[type="checkbox"] {
+        margin-right:5px;
       }
 
-      #monthBarWrap {
-        z-index: 3;
-        position: fixed;
-        width: 100%;
-        height: 80px;
-        background-color: white;
+      .editName {
+        width: calc(100% - 40px);
+        padding: 3px;
+        margin: 5px;
       }
 
-      #agendaList {
-        margin-top: 100px;
-        width: 70%;
-        word-break: break-all; 
+      .dates {
+        text-align: center;
+        h2 {
+          font-size: 3vw;
+        }
+      }
 
-        input[type="checkbox"] {
-          margin-right:5px;
+      .well {
+        padding: 8px;
+      }
+
+      .list-group {
+        margin: 0px;
+      }
+
+      .dueDate {
+        float: right;
+      }
+
+      .checked {
+        color: #999999;
+        text-decoration: line-through;
+      }
+
+      .taskDetails { 
+        margin-top: 10px;
+        padding: 15px;
+        background-color: #fcfcfc;
+        border-color: #dfdfdf;
+        border-style: solid;
+        border-width: 2px;
+        border-radius: 8px;
+
+        .taskDetailsHeading {
+          display: inline-block;
         }
 
-        .dates {
-          text-align: center;
+        .taskIcons {
+          .glyphicon {
+            font-size: 25px;
+            margin-left: 10px;
+            margin-right: 10px;
+
+            display: inline-block;
+            vertical-align: middle;
+            line-height: normal;   
+
+            cursor: pointer;
+          }
         }
 
-        .taskDetails { 
-          margin-top: 10px;
-          padding: 15px;
-          background-color: #fcfcfc;
-          border-color: #dfdfdf;
-          border-style: solid;
-          border-width: 2px;
-          border-radius: 8px;
+        /** Left this in from merging, if something is broken – kill .tags! */
 
-          .taskIcons {
-            .glyphicon {
-              font-size: 25px;
-              margin-left: 10px;
-              margin-right: 10px;
+        // .tags {
+        //   width: 100%;
+        // }
 
-              display: inline-block;
-              vertical-align: middle;
-              line-height: normal;   
+        .timerWrapper {
+          display: inline-block;
 
-              cursor: pointer;
-            }
-          }
-          .timerWrapper {
+          .timer {
             display: inline-block;
+            font-size: .8vw;
 
-            .timer {
-              display: inline-block;
-              font-size: .8vw;
-
-              display: inline-block;
-              vertical-align: middle;
-              line-height: normal;   
-            }
-
-            .glyphicon {
-              font-size: 14px;
-              line-height: normal;
-              cursor: pointer;
-            }
-          }
-
-          .plusWrapper {
             display: inline-block;
-            .plusProgress {
-              width: 105px;
-            }
-          }
-          
-          .noteInput {
-            outline: none;
-            -webkit-box-shadow: none !important;
-            -moz-box-shadow: none !important;
-            box-shadow: none !important;
-
-            background: transparent;
-            border: none;
-            border-bottom: 1px solid #000000;
-            border-radius: 0;
+            vertical-align: middle;
+            line-height: normal;   
           }
 
-          .calButton {
+          .glyphicon {
+            font-size: 14px;
+            line-height: normal;
+            cursor: pointer;
+          }
+        }
+
+        .plusWrapper {
+          display: inline-block;
+          .plusProgress {
+            width: 105px;
+          }
+        }
+
+        .subtask {
+          .glyphicon {
+            float: right;
+            cursor: pointer;
+            padding-left: 10px;
+          }
+        }
+
+        .noteInput {
+          outline: none;
+          -webkit-box-shadow: none !important;
+          -moz-box-shadow: none !important;
+          box-shadow: none !important;
+
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid #000000;
+          border-radius: 0;
+        }
+
+        .calButton, .trashButton, .editButton {
+          display: inline-block;
+          margin:0;
+          padding:0;
+          outline: none;
+          -webkit-box-shadow: none !important;
+          -moz-box-shadow: none !important;
+          box-shadow: none !important;
+          background: transparent;
+          border: none;
+
+          .glyphicon {
+            font-size: 25px;
             display: inline-block;
-            margin:0;
-            padding:0;
-            outline: none;
-            -webkit-box-shadow: none !important;
-            -moz-box-shadow: none !important;
-            box-shadow: none !important;
-            background: transparent;
-            border: none;
-            .glyphicon {
-              font-size: 25px;
-              display: inline-block;
-              vertical-align: middle;
-              line-height: normal;   
+            vertical-align: middle;
+            line-height: normal;   
 
-              cursor: pointer;
-            }
+            cursor: pointer;
           }
+        }
 
-          .progressText {
-            margin: 0;
+        .trashButton, .trashIcon, .editButton, .editIcon {
+          float: right;
+        }
+
+        .progressText {
+          margin: 0;
             // padding: 10px;
             text-align: center;
           }
 
+        /*# sourceMappingURL=jumbotron.css.map */
 
-/*# sourceMappingURL=jumbotron.css.map */
-#landingImg {
-  background-image: url('http://images.freecreatives.com/wp-content/uploads/2015/10/free-lined-paper-texture.jpg');
-  background-size: cover;
-}
-}}
+      }}

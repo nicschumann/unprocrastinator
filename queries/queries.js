@@ -1,8 +1,17 @@
 var firebase = require("firebase");
-
 var root = new Firebase("https://unprocrastinatordb.firebaseio.com");
 var users = root.child("users");
 var tasks = root.child("tasks");
+var colors = [
+    "#c04f9d",
+    "#f4889c",
+    "#ef4546",
+    "#f37331",
+    "#ffd83f",
+    "#8ec742",
+    "#90d6e8",
+    "#5e84c3"
+ ]
 
 // User
 
@@ -20,7 +29,7 @@ exports.add_user = function (user, callback) {
                 } else {
                     users.child(authData.uid).set({
                         email: authData.password.email,
-                        username: user.username
+                        username: user.username,
                     });
                     console.log("Successfully created user acoount with uid: ", user_id);
                     if (callback) { callback(null, user_id); }
@@ -94,6 +103,65 @@ exports.get_user = function (user_id, callback) {
     });
 };
 
+
+/**
+ *
+ * @modification nic
+ * I'm adding a routine to poll the user's state for 
+ * modifications to the category.
+ * 
+ * Given a user_id, This routine polls that user's 
+ * categories for changes, invoking the passed
+ * callback with the updated values whenever they change.
+ * 
+ * @param  {String}   user_id  the user to watch.
+ * @param  {Function} callback the continuation to invoke
+ */
+exports.watch_user_categories = function( user_id, callback ) {
+    users.child( user_id ).child('categories').on('value', function( snapshot ) {
+        var categories = snapshot.val();
+        console.log( 'Successfully received category update' );
+        if ( typeof callback !== "undefined" ) { callback( null, categories ); }
+    }, function ( error ) {
+        console.error('Error receiving categories for user');
+         if ( typeof callback !== "undefined" ) { callback( error ); }
+    });
+
+};
+
+/**
+ * @modification nic
+ * I'm adding a routine to poll a tasks state for
+ * modifications to the progress indicator.
+ *
+ * This routine watches task progress, and
+ * calls a callback whenever the progress changes.
+ * 
+ * @param  {String}   task_id  the id of the task to poll.
+ * @param  {Function} callback continuation
+ */
+exports.watch_task_progress = watchTaskKey( 'progress' );
+
+/**
+ * This routine watches the estimate key for updates
+ * and passes them to a user-supplied callback.
+ * 
+ * @param {String} task_id 
+ * @param {Function} callback the continuation to pass the estimate update to.
+ */
+exports.watch_task_estimate = watchTaskKey( 'estimate' );
+
+/**
+ * This routine watches the hours key for
+ * updates and passes them to the user-supplied callback.
+ * 
+ * @param {String} task_id 
+ * @param {Function} callback the continuation to pass the estimate update to.
+ */
+exports.watch_task_hours = watchTaskKey( 'hours' );
+
+
+
 exports.change_email = function (old_email, new_email, password, callback) {
     root.changeEmail({
         oldEmail: old_email,
@@ -142,22 +210,84 @@ exports.patch_user = function (user_id, user, callback) {
 
 exports.add_task_to_user = function (user_id, task, callback) {
     task.user = user_id;
-    var task_ref = tasks.push(task, function (error) {
-        if (error) {
-            console.log("Error adding task to user.");
-            if (callback) { callback(error); }
-        } else {
-            var task_id = task_ref.key();
-            users.child(user_id).child("tasks").push(task_id, function (error) {
-                if (error) {
-                    console.log("Error adding task.");
-                    if (callback) { callback(error); }
-                } else {
-                    console.log("Successfully added task.");
-                    if (callback) { callback(null, task_ref.key()); }
+
+    // add new category and its color into user categories
+    users.child(user_id).child("categories").once("value", function (snapshot) {
+        user_categories = snapshot.exists() ? snapshot.val() : [];
+        user_has_category = user_categories.some(function (cat) {
+            return cat.name === task.category;
+        });
+        if (!user_has_category) {
+            user_categories.push(
+                {
+                    "name": task.category,
+                    "color": colors[user_categories.length % colors.length]
                 }
-            });
+            )
+            users.child(user_id).child("categories").set(user_categories);
         }
+
+        var task_ref = tasks.push(task, function (error) {
+            if (error) {
+                console.log("Error adding task to user.");
+                if (callback) { callback(error); }
+            } else {
+                var task_id = task_ref.key();
+                users.child(user_id).child("tasks").push(task_id, function (error) {
+
+                    if (error) {
+
+                        console.log("Error adding task.");
+                        if (callback) { callback(error); }
+
+                    } else {
+
+                        task_ref.child("tags").on("value", function (tags_snapshot) {
+                            users.child(user_id).child("tags").once("value", function (snapshot) {
+                                var user_tags = snapshot.exists() ? snapshot.val() : [];
+                                var tag_hours = []
+                                tags_snapshot.val().forEach(function (tag) {
+                                    user_tag = user_tags.find(function (t, i) {
+                                        return t.name === tag
+                                    })
+                                    if (user_tag) {
+                                        tag_hours.push(user_tag.avg_hours);
+                                    } else { //default to 1 hour = 3600 seconds
+                                        user_tags.push(
+                                            {
+                                                "name": tag,
+                                                "hours": 3600,
+                                                "avg_hours": 3600,
+                                                "num_tasks": 1
+                                            }
+                                        );
+                                        tag_hours.push(3600);
+                                    }
+                                });
+
+                                var sum =  tag_hours.reduce(function (a, b) { return a + b; }, 0);
+                                var estimated_hour = Math.floor( sum / tag_hours.length );
+                                users.child(user_id).child("tags").set(user_tags);
+
+                                task_ref.child("estimate").set(estimated_hour);
+
+                                console.log("Successfully added task.");
+
+                                if (callback) { 
+
+                                    callback(null, task_ref.key() );
+                                    callback = null; 
+
+                                }
+
+                            });
+                        });
+                    }
+
+                });
+            }
+
+        });
     });
 };
 
@@ -167,6 +297,26 @@ exports.patch_task_for_user = function (task_id, task_object, callback) {
             console.log("Error patching task.");
             if (callback) { callback(error); }
         } else {
+            if (task_object.hours !== undefined) {
+                // Nic, this line causes problem.
+                // tasks.child(task_id).child("tags").off("value");
+            }
+            if (task_object.complete) {
+                tasks.child(task_id).once("value", function (task_snapshot) {
+                    var task = task_snapshot.val();
+                    users.child(task.user).child("tags").once("value", function (tags_snapshot) {
+                        var user_tags = tags_snapshot.val(); // tags_snapshot.exists() ? tags_snapshot.val() : [];
+                        for (var i = 0; i < user_tags.length; i++) {
+                            if (task.tags.indexOf(user_tags[i].name) >= 0) {
+                                user_tags[i].hours += task.hours;
+                                user_tags[i].num_tasks += 1;
+                                user_tags[i].avg_hours = user_tags[i].hours / user_tags[i].num_tasks;
+                            }
+                        }
+                        users.child(task.user).child("tags").set(user_tags);
+                    });
+                });
+            }
             console.log("Successfully patched task.");
             if (callback) { callback(null); }
         }
@@ -191,7 +341,6 @@ exports.remove_task_from_user = function (user_id, task_id, callback) {
                 });
         }
     });
-
 };
 
 exports.get_user_tags = function (user_id, callback) {
@@ -209,6 +358,15 @@ exports.get_user_tags = function (user_id, callback) {
         if (callback) { callback(error); }
     });
 };
+
+exports.get_user_task = function (user_id, task_id, callback) {
+    tasks.child(task_id).once("value", function (snapshot) {
+        if (callback) { callback(null, snapshot.val()); }
+    }, function (error) {
+        console.log("Error getting user task: ", error);
+        if (callback) { callback(error); }
+    });
+}
 
 exports.get_user_tasks = function (user_id, callback) {
     tasks.orderByChild("user").equalTo(user_id).once("value", function (snapshot) {
@@ -260,3 +418,21 @@ exports.get_task_by_tags = function (user_id, tags, callback) {
         }
     );
 };
+
+
+function watchTaskKey( keyname ) {
+    return function( task_id, callback ) {
+        tasks.child( task_id ).child( keyname ).on( 'value', function(snapshot) {
+
+            var value = snapshot.val();
+            console.log( ['Successfully received {',keyname,'} update for ', task_id ].join('') );
+            if ( typeof callback !== "undefined" ) { callback( null, value ); }
+
+        }, function( error ) {
+
+            console.error( ['Error receiving ',keyname,' for task ', task_id].join('') );
+            if ( typeof callback !== "undefined" ) { callback( error ); }
+
+        });
+    };
+}
