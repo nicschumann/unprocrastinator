@@ -299,8 +299,17 @@ function populateWeek() {
       var dateId = $(this).parent().parent().parent().parent().attr('id');
       
       var input = $(this).prev().val();
+
+      if (!input) {
+        return;
+      }
+
       var category = input.split(",")[0];
       var name = input.split(",")[1]
+
+      if (/^\s*$/.test(name)) {
+        return;
+      }
 
       var tags = [category];
       var words = name.split(" ");
@@ -344,8 +353,17 @@ function populateWeek() {
           var dateId = element.parent().parent().parent().parent().attr('id');
 
           var input = element.val();
+
+          if (!input) {
+            return;
+          }
+
           var category = input.split(", ")[0];
           var name = input.split(", ")[1];
+
+          if (/^\s*$/.test(name)) {
+            return;
+          }
 
           var tags = [category];
           var words = name.split(" ");
