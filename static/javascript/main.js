@@ -886,8 +886,16 @@ function loadTask(taskId, task) {
         $widget.find('.input-daterange .due-date').each(function() {
           $(this).on('changeDate', function (e) {
             var taskToPatch = task;
-            taskToPatch.due_date = $(this).datepicker('getDate').getTime();
+            var dueDate = $(this).datepicker('getDate');
+            taskToPatch.due_date = dueDate.getTime();
             db.patch_task_for_user(taskId, taskToPatch);
+
+            var taskTitleBar = $widget.find('.taskName')[0].innerHTML;
+            var dateString = dueDate.getMonth() + 1 + '/' + dueDate.getDate();
+            var regex = /\d{1,2}\/\d{2}/;
+            taskTitleBar = taskTitleBar.replace(regex, dateString);
+
+            $widget.find('.taskName')[0].innerHTML = taskTitleBar;
           });
         });
 
