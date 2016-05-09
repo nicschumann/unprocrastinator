@@ -1,23 +1,20 @@
-@font-face {
-  font-family: 'Glyphicons Halflings';
-  src: url("../fonts/glyphicons-halflings-regular.eot");
-  src: url("../fonts/glyphicons-halflings-regular.eot?#iefix") format("embedded-opentype"), url("../fonts/glyphicons-halflings-regular.woff") format("woff"), url("../fonts/glyphicons-halflings-regular.ttf") format("truetype"), url("../fonts/glyphicons-halflings-regular.svg#glyphicons-halflingsregular") format("svg"); }
-/* CSS REQUIRED */
-.state-icon {
-  left: -5px; }
-
-.list-group-item-primary {
-  color: white;
-  background-color: #428bca; }
-
-/* DEMO ONLY - REMOVES UNWANTED MARGIN */
-.well .list-group {
-  margin-bottom: 0px; }
-
+@charset "UTF-8";
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
+  font-family: 'Roboto', sans-serif;
   padding-top: 50px;
   padding-bottom: 20px; }
+  body h1 {
+    font-family: 'Roboto Slab', serif; }
+  body h2 {
+    font-family: 'Roboto Condensed', sans-serif; }
+  body #logo {
+    display: inline; }
+
+.jumbotron {
+  background-color: transparent;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("/static/img/background.jpg");
+  color: white; }
 
 #monthBar {
   position: fixed;
@@ -31,24 +28,39 @@ body {
   margin: 20px auto 20px auto; }
   #monthBar h2 {
     display: inline; }
-  #monthBar calendarIcon {
-    float: right; }
 
 #monthBarWrap {
   z-index: 3;
   position: fixed;
   width: 100%;
-  height: 80px;
+  height: 70px;
   background-color: white; }
 
 #agendaList {
   margin-top: 100px;
   width: 70%;
   word-break: break-all; }
+  #agendaList #todayOverview h4 {
+    font-size: 1.8vw; }
   #agendaList input[type="checkbox"] {
     margin-right: 5px; }
+  #agendaList .editName {
+    width: calc(100% - 40px);
+    padding: 3px;
+    margin: 5px; }
   #agendaList .dates {
     text-align: center; }
+    #agendaList .dates h2 {
+      font-size: 3vw; }
+  #agendaList .well {
+    padding: 8px; }
+  #agendaList .list-group {
+    margin: 0px; }
+  #agendaList .dueDate {
+    float: right; }
+  #agendaList .checked {
+    color: #999999;
+    text-decoration: line-through; }
   #agendaList .taskDetails {
     margin-top: 10px;
     padding: 15px;
@@ -57,7 +69,10 @@ body {
     border-style: solid;
     border-width: 2px;
     border-radius: 8px;
+    /** Left this in from merging, if something is broken – kill .tags! */
     /*# sourceMappingURL=jumbotron.css.map */ }
+    #agendaList .taskDetails .taskDetailsHeading {
+      display: inline-block; }
     #agendaList .taskDetails .taskIcons .glyphicon {
       font-size: 25px;
       margin-left: 10px;
@@ -82,6 +97,10 @@ body {
       display: inline-block; }
       #agendaList .taskDetails .plusWrapper .plusProgress {
         width: 105px; }
+    #agendaList .taskDetails .subtask .glyphicon {
+      float: right;
+      cursor: pointer;
+      padding-left: 10px; }
     #agendaList .taskDetails .noteInput {
       outline: none;
       -webkit-box-shadow: none !important;
@@ -91,7 +110,7 @@ body {
       border: none;
       border-bottom: 1px solid #000000;
       border-radius: 0; }
-    #agendaList .taskDetails .calButton {
+    #agendaList .taskDetails .calButton, #agendaList .taskDetails .trashButton, #agendaList .taskDetails .editButton {
       display: inline-block;
       margin: 0;
       padding: 0;
@@ -101,17 +120,16 @@ body {
       box-shadow: none !important;
       background: transparent;
       border: none; }
-      #agendaList .taskDetails .calButton .glyphicon {
+      #agendaList .taskDetails .calButton .glyphicon, #agendaList .taskDetails .trashButton .glyphicon, #agendaList .taskDetails .editButton .glyphicon {
         font-size: 25px;
         display: inline-block;
         vertical-align: middle;
         line-height: normal;
         cursor: pointer; }
+    #agendaList .taskDetails .trashButton, #agendaList .taskDetails .trashIcon, #agendaList .taskDetails .editButton, #agendaList .taskDetails .editIcon {
+      float: right; }
     #agendaList .taskDetails .progressText {
       margin: 0;
       text-align: center; }
-    #agendaList .taskDetails #landingImg {
-      background-image: url("http://images.freecreatives.com/wp-content/uploads/2015/10/free-lined-paper-texture.jpg");
-      background-size: cover; }
 
 /*# sourceMappingURL=bundle.css.map */
