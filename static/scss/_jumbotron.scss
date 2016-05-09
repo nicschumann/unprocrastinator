@@ -36,7 +36,7 @@ body {
     position: fixed;
     left: 0;
     right: 0;
-    z-index: 4;
+    z-index: 1000;
     background-color: black;
     color: white;
     padding: 10px;
@@ -55,6 +55,10 @@ body {
       background-color: white;
     }
 
+    .input-group {
+      z-index: 1;
+    }
+
     #agendaList {
       margin-top: 100px;
       width: 70%;
@@ -70,7 +74,7 @@ body {
       }
 
       .editName {
-        width: calc(100% - 40px);
+        width: calc(100% - 80px);
         padding: 3px;
         margin: 5px;
       }
@@ -183,7 +187,7 @@ body {
           border-radius: 0;
         }
 
-        .calButton, .trashButton, .editButton {
+        .calButton, .trashButton, .editButton, .targetTimeButton {
           display: inline-block;
           margin:0;
           padding:0;
@@ -204,7 +208,7 @@ body {
           }
         }
 
-        .trashButton, .trashIcon, .editButton, .editIcon {
+        .trashButton, .trashIcon, .editButton, .editIcon, .targetTimeIcon, .targetTimeButton {
           float: right;
         }
 

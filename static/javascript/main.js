@@ -66,28 +66,28 @@ $(document).ready(function(){
   $("#jumpDate").val(todayId);
   $('.date').datepicker()
     .on('changeDate', function(e) {
-        scrollJump($('#jumpDate').datepicker('getDate'));
-    });
+      //scrollJump($('#jumpDate').datepicker('getDate'));
+  });
 
-    // As user scrolls, loads 7 more days infinitely. 
-    // #TODO - Currently has bugs according to screen/zoom size 
-    // where screen has to be 100%
-    $(window).scroll(function(){
-      if ($(window).scrollTop() == $(document).height()-$(window).height()){ // doesnt work if zoom is not at 100%
-        populateWeek();
-      }
-      if ($(window).scrollTop() == 0){
-        $("#monthName").text(getMonthOfYear(today));
-      } else {
-        // #monthBar changes from APRIL to MAY to JUNE, etc, as it scrolls through the days.
-        var days = $(".day.row");
+  // As user scrolls, loads 7 more days infinitely. 
+  // #TODO - Currently has bugs according to screen/zoom size 
+  // where screen has to be 100%
+  $(window).scroll(function(){
+    if ($(window).scrollTop() == $(document).height()-$(window).height()){ // doesnt work if zoom is not at 100%
+      populateWeek();
+    }
+    if ($(window).scrollTop() == 0){
+      $("#monthName").text(getMonthOfYear(today));
+    } else {
+      // #monthBar changes from APRIL to MAY to JUNE, etc, as it scrolls through the days.
+      var days = $(".day.row");
 
-        for (var i = 0; i < days.length; i++) {
-          if (collide( $("#monthBarWrap"), $("#" + days[i].id) )) {
-            $("#monthName").text(getMonthByNum(days[i].id[0]));
-          }
+      for (var i = 0; i < days.length; i++) {
+        if (collide( $("#monthBarWrap"), $("#" + days[i].id) )) {
+          $("#monthName").text(getMonthByNum(days[i].id[0]));
         }
       }
+    }
   });
 
   $('#datepicker1').on("changeDate", function() {
@@ -95,6 +95,7 @@ $(document).ready(function(){
           $('#datepicker1').datepicker('getFormattedDate')
       );
   });
+  $(window).scrollTop(0);
 });
 
 /*
@@ -445,10 +446,15 @@ function appendTask(taskId, task) {
     '<div class="taskDetails">' +
           '<input type="text" class="form-control editName" placeholder="' + task.name + '" style="display: none;">' +
       '<h4 class="taskDetailsHeading">' + '<span style="color: '+ taskColor+'" >' + task.category.toUpperCase() + '</span> ' + task.name +'</h4>' +
+
+
     '<button class="editButton" type="button">' +
-        '<span id="editIcon" class="glyphicon glyphicon-edit"></span>' +
+        '<span id="editIcon" class="glyphicon glyphicon-edit" data-toggle="tooltip" title="Edit task name"></span>' +
       '</button>' + 
-    '<span class="targetTimeIcon glyphicon glyphicon-screenshot" data-toggle="tooltip" title="Target time"></span>' +
+
+    '<button class="targetTimeButton" type="button">' +
+        '<span class="targetTimeIcon glyphicon glyphicon-hourglass" data-toggle="tooltip" title="Expected time to complete"></span>' +
+      '</button>' + 
       '<div class="targetTimeWrapper"></div>' +
       
       '<p class="remainderTimeText" style="text-align: right"></p>' +
@@ -894,7 +900,7 @@ function loadTask(taskId, task) {
 
             $(this).on('hide', function (e) {
               $widget.remove();
-              scrollJump(newAssignedDate);
+              //scrollJump(newAssignedDate);
               appendTask(taskId, taskToPatch);
             });
 
@@ -927,7 +933,7 @@ function loadTask(taskId, task) {
     $targetTimeButton.click(function(e) {
 
       if ($targetTimeWrapper.find('.targetTime').length == 0) { // check that this doesnt already exist
-        $targetTimeWrapper.append("<input type='text' placeholder='hr min' class='targetTime'></input>");
+        $targetTimeWrapper.append("<input type='text' placeholder='hr min' class='targetTime form-control'></input>");
         $targetTimeWrapper.find('.targetTime').focus();  
 
         var hours;
