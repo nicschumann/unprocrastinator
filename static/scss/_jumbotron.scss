@@ -215,7 +215,7 @@ body {
     cursor: pointer;
 
     &.active {
-      color: $active-color;
+      background-color: #efefef;
     }
   }
 }
