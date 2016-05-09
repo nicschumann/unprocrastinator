@@ -1,34 +1,3 @@
-/********************************************
-QUICK README:
-
-The general flow of the index.html is as follows:
-
-1. On page load, a full week of dates is populated by populateWeek, which...
-    i) calls generateDayHTML 7 times.
-    ii) loads "taskButton" so new tasks can be added by user 
-
-2. generateTodayOverview is called to load the rainbow progress bar at the top.
-   currently, it uses fake numbers (hard coded %s that i made up) - needs to use DB data 
-   and ML algorithm stuff later 
-
-3. For now, "today" is loaded with a dummy task of "Eat lunch" for testing purposes by...
-    i) simply calling appendTask.
-        a. appendTask calls loadTask, which loads the interactive aspects (timer, progress, calendar, subtasks, notes) 
-           of a task
-
-GENERAL NOTES
-I don't recommend auto-indenting all, since the HTML templates are indented in a particular way
-for readability, but its nbd if you don't read the HTML templates - you shouldn't need to anyway!
-
-#TODO
-I have tagged all things that need to be done soon with a #TODO tag. Please look for these and 
-pick out any you'd like to tackle!
-
-ANY QUESTIONS? 
-Ask Jina about the front end code anytime!!! :)
-
-********************************************/
-
 var db = require('../../queries/queries.js');
 var autosize = require('autosize');
 
@@ -44,54 +13,114 @@ var dateCounter = 0;
 //Global task map for loading existing tasks
 var taskMap = {};
 
-var colorArray = ["#ef4546", "#f37331", "#ffd83f", "#8ec742", "#90d6e8", "#5e843c", "#c04f9d", "#f4889c"];
-
-var colorCounter = 0; 
-
-var categoryMap = {};
-
-
 // Actions to happen on page load
 $(document).ready(function(){
-  loadTaskMap();
-  //loadTodayOverview();
-  checkReassignTasks();
+  if ($('.index-body')[0]) {
+    loadTaskMap();
+    //loadTodayOverview();
+    checkReassignTasks();
 
-  $("#monthName").text(getMonthOfYear(today));
+    $("#monthName").text(getMonthOfYear(today));
 
-  // Load calendar jump datepicker
-  $("#jumpDate").val(todayId);
-  $('.date').datepicker()
-    .on('changeDate', function(e) {
-        scrollJump($('#jumpDate').datepicker('getDate'));
-    });
+    $('#jumpDate').val(todayId);
 
-    // As user scrolls, loads 7 more days infinitely. 
-    // #TODO - Currently has bugs according to screen/zoom size 
-    // where screen has to be 100%
-    $(window).scroll(function(){
-      if ($(window).scrollTop() == $(document).height()-$(window).height()){ // doesnt work if zoom is not at 100%
-        populateWeek();
-      }
-      if ($(window).scrollTop() == 0){
-        $("#monthName").text(getMonthOfYear(today));
-      } else {
-        // #monthBar changes from APRIL to MAY to JUNE, etc, as it scrolls through the days.
-        var days = $(".day.row");
+    console.log(today);
 
-        for (var i = 0; i < days.length; i++) {
-          if (collide( $("#monthBarWrap"), $("#" + days[i].id) )) {
-            $("#monthName").text(getMonthByNum(days[i].id[0]));
+    // Load calendar jump datepicker
+    $('.date').datepicker()
+      .on('changeDate', function(e) {
+        console.log($('.date').datepicker('getDate'));
+        scrollJump($('.date').datepicker('getDate'));
+      });
+
+      // As user scrolls, loads 7 more days infinitely. 
+      // #TODO - Currently has bugs according to screen/zoom size 
+      // where screen has to be 100%
+      $(window).scroll(function(){
+        if ($(window).scrollTop() == $(document).height()-$(window).height()){ // doesnt work if zoom is not at 100%
+          populateWeek();
+        }
+        if ($(window).scrollTop() == 0){
+          $("#monthName").text(getMonthOfYear(today));
+        } else {
+          // #monthBar changes from APRIL to MAY to JUNE, etc, as it scrolls through the days.
+          var days = $(".day.row");
+
+          for (var i = 0; i < days.length; i++) {
+            if (collide( $("#monthBarWrap"), $("#" + days[i].id) )) {
+              $("#monthName").text(getMonthByNum(days[i].id[0]));
+            }
           }
         }
-      }
-  });
+    });
+    } else if ($('.landing-body')[0]) {
 
-  $('#datepicker1').on("changeDate", function() {
-      $('#pickedDate').val(
-          $('#datepicker1').datepicker('getFormattedDate')
-      );
-  });
+      // -----------------------------------------------------------
+
+      /************************
+          LANDING.HTML JS
+      *************************/
+
+      // Button and request handlers for landing.html
+      $('#myModal').on('shown.bs.modal', function () {
+        $('#myInput').focus()
+      })
+
+      $('#createaccount').on('click', function(event) {
+        event.preventDefault();
+          var user = {
+            "username": $("#newusername").val(),
+              "email": $("#newemail").val(),
+              "password": $("#newpassword").val(),
+              "categories": []
+          };
+          db.add_user(user, function (error, user_id) {
+              if (!error) {
+                sessionStorage.user_id = user_id;
+                  window.location.href = "/user";
+              } 
+          });
+      }); 
+
+      $('#signin').on('click', function(event) {
+        event.preventDefault();
+        var user = {
+          "email": $("#email").val(),
+          "password": $("#password").val()
+        };
+        db.log_in(user, function (error, user_id) {
+          if (!error) {
+              sessionStorage.user_id = user_id;
+              window.location.href = "/user";
+          } else {
+              alert(error);
+          }
+        }); 
+      });
+
+      $("#logout").click(function (event) {
+          event.preventDefault();
+          db.log_out(function (error) {
+              if (!error) {
+                  window.location.href = "/login";
+              }
+          });
+      });
+
+      $("#unprocrastinator").click(function (event) { //automatically log user out
+          event.preventDefault();
+          db.log_out(function (error) {
+              if (!error) {
+                  window.location.href = "/login";
+              }
+          });
+      });
+
+
+    } else if ($('.faq-body')[0]) {
+
+    }
+
 });
 
 /*
@@ -397,16 +426,6 @@ function populateWeek() {
 }
 
 /*
-    displayCalendarComponent: Loads the calendar component. Is used in two cases -
-        1) in the month bar where the user can click a day to jump to it without scrolling
-        2) in the task details where the user can reschedule a task
-
-*/
-function displayCalendarComponent() {
-    // #TODO - implement this... There are some libraries that provide it but I can't get them to work!
-}
-
-/*
     appendTask: Appends a task to a date.
     @dateId - the date ID for the date to append this task to
     @taskName - the name of the task.
@@ -415,168 +434,166 @@ function displayCalendarComponent() {
 function appendTask(taskId, task) {
 
   // Assign task category color
-  var taskColor;
-  if (task.category in categoryMap) {
-    taskColor = categoryMap[task.category];
-  } else {
-    //#TODO add more colors and not throw this alert
-    if (colorCounter > 7) {
-      alert("You have too many categories! Please delete one before adding this task.")
-    } else {
-      categoryMap[task.category] = colorArray[colorCounter];
-      taskColor = categoryMap[task.category];
-      colorCounter++;
-    }
-  }
+  db.get_user(sessionStorage.user_id, function (error, user) {
+    var categoryColor;
 
-// Took out estimated time part:
-
-  var taskDetailsDOM = 
-    '<div class="taskDetails">' +
-          '<input type="text" class="form-control editName" placeholder="' + task.name + '" style="display: none;">' +
-      '<h4 class="taskDetailsHeading">' + '<span style="color: '+ taskColor+'" >' + task.category.toUpperCase() + '</span> ' + task.name +'</h4>' +
-    '<button class="editButton" type="button">' +
-        '<span id="editIcon" class="glyphicon glyphicon-edit"></span>' +
-      '</button>' + 
-    '<span class="targetTimeIcon glyphicon glyphicon-screenshot" data-toggle="tooltip" title="Target time"></span>' +
-      '<div class="targetTimeWrapper"></div>' +
-      
-      '<p class="remainderTimeText" style="text-align: right"></p>' +
-      '<p class="targetTimeText" style="text-align: right"></p>' +
-      '<div class="progress">' +
-        '<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: ' + task.progress + '%">' +
-        '</div>' +
-      '</div>' +
-      '<p class="progressText"></p>' +
-      '<div class="taskIcons">' +
-        '<span class="plusIcon glyphicon glyphicon-plus-sign" data-toggle="tooltip" title="Add progress"></span>' +
-          '<div class="plusWrapper"></div>' +
-        '<span class="timeIcon glyphicon glyphicon-time" data-toggle="tooltip" title="Progress timer"></span>' +
-          '<div class="timerWrapper"></div>' +
-        '<span class="calIcon glyphicon glyphicon-calendar" data-toggle="tooltip" title="Reschedule"></span>' +
-          '<div class="dateWrapper" style="width: 50%; display: inline-block; vertical-align: middle;"></div>' + 
-        '<button class="trashButton" type="button">' +
-          '<span id="trashIcon" class="glyphicon glyphicon-trash" data-toggle="tooltip" title="Delete task"></span>' +
-        '</button>' +
-      '</div><br>' +
-      '<div class="tagsContainer">' +
-        '<h5>Tags</h5>' +
-        '<input name="tags" class="tags" value=""/>' +
-        '</ul>' +
-      '</div>' +
-     '<h5>Subtasks</h5>' +
-     '<div class="subtasks" style="height: auto;overflow: auto;">  ' +
-          '<ul class="list-group checked-list-box"> ' +
-          '</ul> ' +
-            '<div class="input-group"> ' +
-              '<input type="text" class="form-control subtaskInput" placeholder="Add a subtask..." aria-describedby="basic-addon2">' +
-                '<span class="input-group-addon subtaskButton">+</span> ' +
-            '</div>' +
-        '</div> ' +
-
-      '<div class="notes">' +
-        '<h5>Notes</h5>' +
-        '<textarea class="noteInput form-control" rows="1" aria-describedby="sizing-addon1">'+ task.notes +'</textarea>' +
-      '</div>' +
-    '</div>'
-
-  var due = new Date(task.due_date);
-  var d = due.getDate();
-  var m = due.getMonth() + 1;  
-
-  var taskDOM = 
-    '<li id="'+ taskId +'" class="task list-group-item" data-checked="false">' +
-      '<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + taskColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + " [Due " + m + "/" + d + "] " + "<b>" + "<i><span class='progress-indicator'>" + task.progress + "%" + "</span></i>" + "</b>" + '</span>' + 
-      taskDetailsDOM + 
-    '</li>';
-
-  $("#" + parseDate(task.assigned_date) + " .tasks").append(taskDOM);
-
-  //hover text init
-  $('[data-toggle="tooltip"]').tooltip(); 
-
-  // Display tags
-  $('#' + taskId + ' .tags').tagsInput({
-    'width': '100%', 
-    'height': 'auto',
-    'onAddTag': addTagToDb,
-    'onRemoveTag': removeTagFromDb
-  });
-
-  for (var tag in task.tags) {
-     $('#' + taskId + ' .tags').addTag(task.tags[tag]);
-  }
-
-  // Load estimated time
-  renderEstimate(task.estimate);
-
-  renderRemainder(task.estimate, task.hours);
-
-  // Load subtasks
-  for (var subtask in task.subtasks) {
-    renderSubtask( taskId, task.subtasks, task.subtasks[subtask].name, task.subtasks[subtask].complete );
-  }
-  $('#' + taskId + ' .taskDetails').hide(); // Hide taskDetails until clicked.
-
-  // CSS cursor for add subtask button
-  $("#" + taskId + ' .subtaskButton').css("cursor", "pointer"); 
-
-  // Event handlers for adding subtasks (click and enter key)
-  $("#" + taskId + ' .subtaskButton').click(function (e) { 
-    e.preventDefault();
-    var taskId = $(this).parent().parent().parent().parent().attr('id');
-    var subtaskName = $(this).prev().val();
-    db.get_user_task(sessionStorage.user_id, taskId, function (error, task) {
-      if (error) {
-        console.log(error);
-        return;
+    for (category in user.categories) {
+      if (user.categories[category].name == task.category) {
+        categoryColor = user.categories[category].color;
       }
-      appendSubtask(taskId, task.subtasks, subtaskName);
-      renderSubtask( taskId, task.subtasks, subtaskName, false );
-      $("#" + taskId + ' .subtaskButton').prev().val('');
-    })
-  });
-
-  $("#" + taskId + ' .subtaskInput').keypress(function (e) {
-     var key = e.which;
-     if (key == 13) { // the enter key code
-      e.preventDefault();
-      var taskId = $(this).parent().parent().parent().parent().attr('id');
-      var subtaskName = $(this).val();
-      db.get_user_task(sessionStorage.user_id, taskId, function (error, task) {
-        if (error) {
-          console.log(error);
-          return;
-        }
-        appendSubtask(taskId, task.subtasks, subtaskName);
-        renderSubtask( taskId, task.subtasks, subtaskName, false );
-        $("#" + taskId + ' .subtaskButton').prev().val('');
-      })
     }
-  });
 
-  $("#" + taskId + ' .editName').keypress(function (e) {
-    var key = e.which;
-    if (key == 13) { // the enter key code
-      e.preventDefault();
-      var taskId = $(this).parent().parent().attr('id');
-      var name = $(this).val();
+    // Took out estimated time part:
 
-      var taskPatch =  {
-        "name": name,
-      };
+      var taskDetailsDOM = 
+        '<div class="taskDetails">' +
+              '<input type="text" class="form-control editName" placeholder="' + task.name + '" style="display: none;">' +
+          '<h4 class="taskDetailsHeading">' + '<span style="color: '+ categoryColor+'" >' + task.category.toUpperCase() + '</span> ' + task.name +'</h4>' +
+        '<button class="editButton" type="button">' +
+            '<span id="editIcon" class="glyphicon glyphicon-edit"></span>' +
+          '</button>' + 
+        '<span class="targetTimeIcon glyphicon glyphicon-screenshot" data-toggle="tooltip" title="Target time"></span>' +
+          '<div class="targetTimeWrapper"></div>' +
+          
+          '<p class="remainderTimeText" style="text-align: right"></p>' +
+          '<p class="targetTimeText" style="text-align: right"></p>' +
+          '<div class="progress">' +
+            '<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: ' + task.progress + '%">' +
+            '</div>' +
+          '</div>' +
+          '<p class="progressText"></p>' +
+          '<div class="taskIcons">' +
+            '<span class="plusIcon glyphicon glyphicon-plus-sign" data-toggle="tooltip" title="Add progress"></span>' +
+              '<div class="plusWrapper"></div>' +
+            '<span class="timeIcon glyphicon glyphicon-time" data-toggle="tooltip" title="Progress timer"></span>' +
+              '<div class="timerWrapper"></div>' +
+            '<span class="calIcon glyphicon glyphicon-calendar" data-toggle="tooltip" title="Reschedule"></span>' +
+              '<div class="dateWrapper" style="width: 50%; display: inline-block; vertical-align: middle;"></div>' + 
+            '<button class="trashButton" type="button">' +
+              '<span id="trashIcon" class="glyphicon glyphicon-trash" data-toggle="tooltip" title="Delete task"></span>' +
+            '</button>' +
+          '</div><br>' +
+          '<div class="tagsContainer">' +
+            '<h5>Tags</h5>' +
+            '<input name="tags" class="tags" value=""/>' +
+            '</ul>' +
+          '</div>' +
+         '<h5>Subtasks</h5>' +
+         '<div class="subtasks" style="height: auto;overflow: auto;">  ' +
+              '<ul class="list-group checked-list-box"> ' +
+              '</ul> ' +
+                '<div class="input-group"> ' +
+                  '<input type="text" class="form-control subtaskInput" placeholder="Add a subtask..." aria-describedby="basic-addon2">' +
+                    '<span class="input-group-addon subtaskButton">+</span> ' +
+                '</div>' +
+            '</div> ' +
 
-      db.patch_task_for_user(taskId, taskPatch, function(error) {
-        $('#' + taskId).remove();
-        db.get_user_task(sessionStorage.user_id, taskId, function (error, task) {
-          appendTask(taskId, task);
-        });
+          '<div class="notes">' +
+            '<h5>Notes</h5>' +
+            '<textarea class="noteInput form-control" rows="1" aria-describedby="sizing-addon1">'+ task.notes +'</textarea>' +
+          '</div>' +
+        '</div>'
+
+      var due = new Date(task.due_date);
+      var d = due.getDate();
+      var m = due.getMonth() + 1;  
+
+      var taskDOM = 
+        '<li id="'+ taskId +'" class="task list-group-item" data-checked="false">' +
+          '<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + categoryColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + " [Due " + m + "/" + d + "] " + "<b>" + "<i><span class='progress-indicator'>" + task.progress + "%" + "</span></i>" + "</b>" + '</span>' + 
+          taskDetailsDOM + 
+        '</li>';
+
+      $("#" + parseDate(task.assigned_date) + " .tasks").append(taskDOM);
+
+      //hover text init
+      $('[data-toggle="tooltip"]').tooltip(); 
+
+      // Display tags
+      $('#' + taskId + ' .tags').tagsInput({
+        'width': '100%', 
+        'height': 'auto',
+        'onAddTag': addTagToDb,
+        'onRemoveTag': removeTagFromDb
       });
-    }
-  });   
 
-  // Call loadTask to load the interactive features of a task (toggle, details, etc.)
-  loadTask(taskId, task);
+      for (var tag in task.tags) {
+         $('#' + taskId + ' .tags').addTag(task.tags[tag]);
+      }
+
+      // Load estimated time
+      renderEstimate(task.estimate);
+
+      renderRemainder(task.estimate, task.hours);
+
+      // Load subtasks
+      for (var subtask in task.subtasks) {
+        renderSubtask( taskId, task.subtasks, task.subtasks[subtask].name, task.subtasks[subtask].complete );
+      }
+      $('#' + taskId + ' .taskDetails').hide(); // Hide taskDetails until clicked.
+
+      // CSS cursor for add subtask button
+      $("#" + taskId + ' .subtaskButton').css("cursor", "pointer"); 
+
+      // Event handlers for adding subtasks (click and enter key)
+      $("#" + taskId + ' .subtaskButton').click(function (e) { 
+        e.preventDefault();
+        var taskId = $(this).parent().parent().parent().parent().attr('id');
+        var subtaskName = $(this).prev().val();
+        db.get_user_task(sessionStorage.user_id, taskId, function (error, task) {
+          if (error) {
+            console.log(error);
+            return;
+          }
+          appendSubtask(taskId, task.subtasks, subtaskName);
+          renderSubtask( taskId, task.subtasks, subtaskName, false );
+          $("#" + taskId + ' .subtaskButton').prev().val('');
+        })
+      });
+
+      $("#" + taskId + ' .subtaskInput').keypress(function (e) {
+         var key = e.which;
+         if (key == 13) { // the enter key code
+          e.preventDefault();
+          var taskId = $(this).parent().parent().parent().parent().attr('id');
+          var subtaskName = $(this).val();
+          db.get_user_task(sessionStorage.user_id, taskId, function (error, task) {
+            if (error) {
+              console.log(error);
+              return;
+            }
+            appendSubtask(taskId, task.subtasks, subtaskName);
+            renderSubtask( taskId, task.subtasks, subtaskName, false );
+            $("#" + taskId + ' .subtaskButton').prev().val('');
+          })
+        }
+      });
+
+      $("#" + taskId + ' .editName').keypress(function (e) {
+        var key = e.which;
+        if (key == 13) { // the enter key code
+          e.preventDefault();
+          var taskId = $(this).parent().parent().attr('id');
+          var name = $(this).val();
+
+          var taskPatch =  {
+            "name": name,
+          };
+
+          db.patch_task_for_user(taskId, taskPatch, function(error) {
+            $('#' + taskId).remove();
+            db.get_user_task(sessionStorage.user_id, taskId, function (error, task) {
+              appendTask(taskId, task);
+            });
+          });
+        }
+      });   
+
+      // Call loadTask to load the interactive features of a task (toggle, details, etc.)
+      loadTask(taskId, task);
+  });
+
+
 }
 
 /*
@@ -858,16 +875,13 @@ function loadTask(taskId, task) {
         $widget.find('.dateWrapper').append(
           '<div class="input-group input-daterange">' +
               '<span class="input-group-addon">Assigned:</span>' +
-              '<input type="text" class="form-control assign-date" value="' + parseDate(task.assigned_date) + '">' +
+              '<input type="text" class="form-control assign-date" data-date-start-date="yesterday" value="' + parseDate(task.assigned_date) + '">' +
               '<span class="input-group-addon">Due:</span>' +
-              '<input type="text" class="form-control due-date" value="' + parseDate(task.due_date) + '">' +
+              '<input type="text" class="form-control due-date" data-date-start-date="yesterday" value="' + parseDate(task.due_date) + '">' +
           '</div>')
 
         $widget.find('.input-daterange input').each(function() {
           $(this).datepicker();
-          // $(this).on('changeDate', function (e) {
-          //   console.log($(this).datepicker('getDate'));
-          // });
         });
 
         $widget.find('.input-daterange .assign-date').each(function() {
@@ -1231,67 +1245,6 @@ function loadTask(taskId, task) {
   //  $('#display-json').html(JSON.stringify(checkedItems, null, '\t'));
   // });
 }
-
-// -----------------------------------------------------------
-
-/************************
-    LANDING.HTML JS
-*************************/
-
-// Button and request handlers for landing.html
-$('#myModal').on('shown.bs.modal', function () {
-  $('#myInput').focus()
-})
-
-$('#createaccount').on('click', function(event) {
-  event.preventDefault();
-    var user = {
-      "username": $("#newusername").val(),
-        "email": $("#newemail").val(),
-        "password": $("#newpassword").val(),
-        "categories": []
-    };
-    db.add_user(user, function (error, user_id) {
-        if (!error) {
-          sessionStorage.user_id = user_id;
-            window.location.href = "/user";
-        } 
-    });
-}); 
-
-$('#signin').on('click', function(event) {
-  event.preventDefault();
-  var user = {
-    "email": $("#email").val(),
-    "password": $("#password").val()
-  };
-  db.log_in(user, function (error, user_id) {
-    if (!error) {
-        sessionStorage.user_id = user_id;
-        window.location.href = "/user";
-    } else {
-        alert(error);
-    }
-  }); 
-});
-
-$("#logout").click(function (event) {
-    event.preventDefault();
-    db.log_out(function (error) {
-        if (!error) {
-            window.location.href = "/login";
-        }
-    });
-});
-
-$("#unprocrastinator").click(function (event) { //automatically log user out
-    event.preventDefault();
-    db.log_out(function (error) {
-        if (!error) {
-            window.location.href = "/login";
-        }
-    });
-});
 
 /*
 displayUserInfo: displays user info to
