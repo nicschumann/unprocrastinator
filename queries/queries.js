@@ -253,15 +253,16 @@ exports.add_task_to_user = function (user_id, task, callback) {
                                     if (user_tag) {
                                         tag_hours.push(user_tag.avg_time);
                                     } else { //default to 1 hour = 3600 seconds
+                                        var default_time = 3600
                                         user_tags.push(
                                             {
                                                 "name": tag,
-                                                "total_time": 0,
-                                                "avg_time": 0,
+                                                "total_time": default_time,
+                                                "avg_time": default_time,
                                                 "num_tasks": 0
                                             }
                                         );
-                                        tag_hours.push(3600);
+                                        tag_hours.push(default_time);
                                     }
                                 });
 
