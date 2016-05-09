@@ -38,9 +38,6 @@ var tag_search = require('./tag-search')( db, $ );
 var today = new Date();
     today.setHours(0,0,0,0);
 
-    //TODO get rid of this later!!! it is for testing!!
-    today.setDate(today.getDate() + 1)
-
 var todayId = generateDateId(today); 
 var dateCounter = 0;
 
