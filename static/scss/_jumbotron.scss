@@ -208,3 +208,14 @@ body {
         /*# sourceMappingURL=jumbotron.css.map */
 
       }}
+
+/** This is a modal active style for the autocomplete dropdown */ 
+.xdsoft_autocomplete_dropdown {
+  div {
+    cursor: pointer;
+
+    &.active {
+      color: $active-color;
+    }
+  }
+}

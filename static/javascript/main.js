@@ -1333,6 +1333,8 @@ function loadTask(taskId, task) {
     });
 
 
+
+
     // Actions
     function updateDisplay() {
       var isChecked = $checkbox.is(':checked');
