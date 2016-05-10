@@ -242,15 +242,20 @@ function checkReassignTasks(reassignTaskMap) {
       for (var taskIndex in reassignTaskMap[dateId]) {
         var taskPair = reassignTaskMap[dateId][taskIndex];
         var reassignedTask = taskPair.task;
-        reassignedTask.assigned_date = today.getTime();
 
         // Removed this while merging JINA's Branch
         // db.patch_task_for_user( taskPair.task_id, reassignedTask, function(err, task) {
         //   appendTask(taskPair.task_id, reassignedTask);
         // })
 
-        db.patch_task_for_user( taskPair.task_id, reassignedTask);
-        appendTask(taskPair.task_id, reassignedTask, true);
+        var taskPatch = {
+          "assigned_date": today.getTime()
+        }
+
+
+        db.patch_task_for_user( taskPair.task_id, taskPatch, function(error) {
+           appendTask(taskPair.task_id, reassignedTask, true);
+        });
 
       }
     }
@@ -966,9 +971,13 @@ function loadTask(taskId, task) {
           $(this).on('changeDate', function (e) {
             var taskToPatch = task;
             var newAssignedDate = $(this).datepicker('getDate');
-            taskToPatch.assigned_date = $(this).datepicker('getDate').getTime();
+            taskToPatch.assigned_date = newAssignedDate.getTime();
+            
+            var taskPatch = {
+              "assigned_date": newAssignedDate.getTime()
+            }
 
-            db.patch_task_for_user(taskId, taskToPatch);
+            db.patch_task_for_user(taskId, taskPatch);
 
             $(this).on('hide', function (e) {
               $widget.remove();
@@ -981,10 +990,12 @@ function loadTask(taskId, task) {
 
         $widget.find('.input-daterange .due-date').each(function() {
           $(this).on('changeDate', function (e) {
-            var taskToPatch = task;
+
             var dueDate = $(this).datepicker('getDate');
-            taskToPatch.due_date = dueDate.getTime();
-            db.patch_task_for_user(taskId, taskToPatch);
+            var taskPatch = {
+              "due_date": dueDate.getTime()
+            }
+            db.patch_task_for_user(taskId, taskPatch);
 
             var taskTitleBar = $widget.find('.taskName')[0].innerHTML;
             var dateString = dueDate.getMonth() + 1 + '/' + dueDate.getDate();
@@ -1091,12 +1102,12 @@ function loadTask(taskId, task) {
 
             db.get_user_task(sessionStorage.user_id, taskId, function (err, newTask) {
                 var new_estimate = total
-                task_update = {
+                var taskPatch = {
                     "estimate": new_estimate,
                     "estimate_set": true,
                     "progress": Math.round((newTask.hours / new_estimate) * 100)
                 };
-                db.patch_task_for_user(taskId, task_update);
+                db.patch_task_for_user(taskId, taskPatch);
             });
 
 
@@ -1152,11 +1163,14 @@ function loadTask(taskId, task) {
         $checkbox.attr("disabled", true);
 
         // patch task to mark complete or not. needs DB field
-        db.patch_task_for_user(taskId, {complete: task.complete}, function(error) {
+        var taskPatch = {
+          "complete": task.complete
+        }
+        db.patch_task_for_user(taskId, taskPatch, function(error) {
           if (error) {
             console.log(error);
           }
-        })
+        });
 
         $widget.data('state', (isChecked) ? "complete" : "incomplete");
       });
@@ -1279,11 +1293,11 @@ function loadTask(taskId, task) {
 
             db.get_user_task(sessionStorage.user_id, taskId, function (err, newTask) {
               var new_hours = newTask.hours + total
-              task_update = {
+              var taskPatch= {
                   "hours": new_hours,
                   "progress": Math.round((new_hours / newTask.estimate) * 100)
               };
-              db.patch_task_for_user(taskId, task_update);
+              db.patch_task_for_user(taskId, taskPatch);
             });
 
             $plusWrapper.empty();
@@ -1328,13 +1342,13 @@ function loadTask(taskId, task) {
           $widget.find('.progressText').text(hours + " hr " + minutes + " min of progress time have been added.");
           $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});
 
-          var taskToPatch = task;
+          var progress = Math.round((task.hours + total / task.estimate) * 100);
 
-          taskToPatch.hours = task.hours + total;
-          var progress = Math.round((taskToPatch.hours / task.estimate) * 100);
-          taskToPatch.progress = progress;
-
-          db.patch_task_for_user(taskId, taskToPatch);
+          var taskPatch = {
+            "hours": task.hours + total,
+            "progress": progress
+          }
+          db.patch_task_for_user(taskId, taskPatch);
 
         });
       } else if ($timerWrapper.find('.timer').length == 1) {
