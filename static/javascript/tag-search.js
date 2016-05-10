@@ -39,9 +39,7 @@ module.exports = function( db ) {
 
 			} else {
 
-				console.log( categories );
-
-				TAGS = searchableArrayFromTagSet( categories );
+				TAGS = searchableArrayFromTagSet( categories || [] );
 
 				$(document).trigger(category_update, TAGS);
 
@@ -104,7 +102,16 @@ module.exports = function( db ) {
 				element.autocomplete($.extend({
 
 					titleKey: 'name',
-					source: []
+					source: [],
+					dropdownStyle: {
+						"background-color": "white",
+						"border": "1px solid #bbb",
+						"border-right": "1px solid #555",
+					},
+					hintStyle: {
+						"color": "red",
+						"cursor": "pointer"
+					}
 
 				}, options ))
 
@@ -171,8 +178,8 @@ module.exports = function( db ) {
 
 		function setAutocompleteSource( event, categories ) {
 
-			console.log( event );
-			console.log( categories );
+			//console.log( event );
+			//console.log( categories );
 
 			element.autocomplete('setSource', TAGS );
 

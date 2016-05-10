@@ -28,11 +28,15 @@ body {
     color: white;
   }
 
+  #newusername, #newemail {
+    margin-bottom: 20px
+  }
+
   #monthBar {
     position: fixed;
     left: 0;
     right: 0;
-    z-index: 4;
+    z-index: 1000;
     background-color: black;
     color: white;
     padding: 10px;
@@ -51,6 +55,10 @@ body {
       background-color: white;
     }
 
+    .input-group {
+      z-index: 1;
+    }
+
     #agendaList {
       margin-top: 100px;
       width: 70%;
@@ -66,16 +74,21 @@ body {
       }
 
       .editName {
-        width: calc(100% - 40px);
+        width: calc(100% - 80px);
         padding: 3px;
         margin: 5px;
       }
 
       .dates {
+        width: 10%;
         text-align: center;
         h2 {
           font-size: 3vw;
         }
+      }
+
+      .day-info-box {
+        width: 90%;
       }
 
       .well {
@@ -174,7 +187,7 @@ body {
           border-radius: 0;
         }
 
-        .calButton, .trashButton, .editButton {
+        .calButton, .trashButton, .editButton, .targetTimeButton {
           display: inline-block;
           margin:0;
           padding:0;
@@ -195,7 +208,7 @@ body {
           }
         }
 
-        .trashButton, .trashIcon, .editButton, .editIcon {
+        .trashButton, .trashIcon, .editButton, .editIcon, .targetTimeIcon, .targetTimeButton {
           float: right;
         }
 
@@ -208,3 +221,41 @@ body {
         /*# sourceMappingURL=jumbotron.css.map */
 
       }}
+
+/** This is a modal active style for the autocomplete dropdown */ 
+.xdsoft_autocomplete_dropdown {
+  div {
+    cursor: pointer;
+
+    &.active {
+      background-color: #efefef;
+    }
+  }
+}
+
+/*CSS for mobile*/
+
+ 
+ @media only screen and (max-device-width: 480px) {
+   
+   #monthBar {
+     width: 100%;
+     margin: 5px 0 20px 0;
+   }
+   #agendaList {
+     width: 90%;
+     margin-top:70px;
+   }
+   .col-xs-11 {
+     width: 85%;
+   }
+   .dates{
+     padding-left: 25px;
+   }
+   .day {
+     margin: 0 -25px 0 -25px;
+   }
+   .dateWrapper{
+     display: none;
+   }
+ }
