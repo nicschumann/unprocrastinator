@@ -39,9 +39,7 @@ module.exports = function( db ) {
 
 			} else {
 
-				console.log( categories );
-
-				TAGS = searchableArrayFromTagSet( categories );
+				TAGS = searchableArrayFromTagSet( categories || [] );
 
 				$(document).trigger(category_update, TAGS);
 
