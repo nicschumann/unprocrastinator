@@ -1169,17 +1169,15 @@ function loadTask(taskId, task) {
     db.watch_task_hours( taskId, function( err, hours ) {
         console.log( 'update_hours' );
         console.log( hours );
-        //task.hours = hours;
+        task.hours = hours;
         renderRemainder( task.estimate, hours );
-        renderEstimate( task.estimate );
     })
 
     db.watch_task_estimate( taskId, function( err, estimate ) {
         console.log( 'update_estimate' );
         console.log( estimate );
-        //task.estimate = estimate;
+        task.estimate = estimate;
         renderRemainder( estimate, task.hours );
-        renderEstimate( task.estimate );
     });
 
 
