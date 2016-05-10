@@ -941,32 +941,78 @@ function loadTask(taskId, task) {
         $targetTimeWrapper.append("<input type='text' placeholder='hr min' class='targetTime'></input>");
         $targetTimeWrapper.find('.targetTime').focus();
 
-        var hours;
-        var minutes;
-        var seconds;
-
         $targetTimeWrapper.find('.targetTime').keypress(function (e) {
          var key = e.which;
          if (key == 13) { // the enter key code
           e.preventDefault();
-          //var targetTime = $(this).val().split(/[ ,]+/);
-          var targetTime = $(this).val().split(" ");
+          
+          var targetTime = $(this).val().split(/[ ,]+/);
           var hours = 0;
           var minutes = 0;
 
-          for (chunk in targetTime) {
-            if (targetTime[chunk] == "hr") {
-              hours = Math.floor(targetTime[chunk - 1]);
-            } else { //no space before "hr"
-              var nums = $(this).val().split("hr");
-              if (nums == $(this).val()) { //no hour
-                var num = $(this).val().split("min");
-                minutes = Math.floor(num[0]);
+          if (targetTime.length == 2) { //"hr" and "min" without space OR "h" and "min" without space OR two numbers
+            var first = $(this).val().split("hr");
+            if (first == $(this).val()) { //no "hr" OR "h" and "m" OR two numbers
+              var second = $(this).val().split("min");
+              if (second == $(this).val()) { //"h" and "m" OR two numbers  
+                var third = $(this).val().split("h");
+                if (third == $(this).val()) { //no "h" OR two numbers
+                  var fourth = $(this).val().split("m");
+                  if (fourth == $(this).val()) { //two numbers
+                    hours = Math.floor(targetTime[0]);
+                    minutes = Math.floor(targetTime[1]);
+                  } else {
+                    minutes = Math.floor(fourth[0]);
+                  }
+                } else {
+                  hours = Math.floor(third[0]);
+                  minutes = Math.floor(targetTime[1].split("m")[0]);
+                }
               } else {
-                hours = Math.floor(nums[0]);
-                var num = nums[1].split("min");
-                minutes = Math.floor(num[0]);
+                minutes = Math.floor(second[0]);
               }
+            } else {
+              hours = Math.floor(first[0]);
+              minutes = Math.floor(targetTime[1].split("min")[0]);
+            }
+          } else if (targetTime.length == 4) { //type in two numbers and hr and min with space
+            for (chunk in targetTime) {
+              if (targetTime[chunk] == "hr") {
+                hours = Math.floor(targetTime[chunk - 1]);
+              } 
+              if (targetTime[chunk] == "min") {
+                minutes = Math.floor(targetTime[chunk - 1]);
+              }
+              if (targetTime[chunk] == "h") {
+                hours = Math.floor(targetTime[chunk - 1]);
+              } 
+              if (targetTime[chunk] == "m") {
+                minutes = Math.floor(targetTime[chunk - 1]);
+              }
+            }
+          } else if (targetTime.length == 1) {//only entered one number OR "min" only OR "m" only OR no space
+            var fifth = $(this).val().split("hr");
+            if (fifth == $(this).val()) { //"h" and "m"
+              var sixth = $(this).val().split("h");
+              if (sixth == $(this).val()) { //no hours input
+                var seventh = $(this).val().split("min");
+                if (seventh == $(this).val()) { //"m" or just number
+                  var eighth = $(this).val().split("m");
+                  if (eighth == $(this).val()) { //just number
+                    minutes = Math.floor($(this).val()); 
+                  } else {
+                    minutes = Math.floor(eighth[0]);
+                  }
+                } else {
+                  minutes = Math.floor(seventh[0]);
+                }
+              } else {
+                hours = Math.floor(sixth[0]);
+                minutes = Math.floor(sixth[1].split("m")[0]);
+              }
+            } else {
+              hours = Math.floor(fifth[0]);
+              minutes = Math.floor(fifth[1].split("min")[0]);
             }
           }
 
@@ -1085,25 +1131,74 @@ function loadTask(taskId, task) {
          var key = e.which;
          if (key == 13) { // the enter key code
           e.preventDefault();
-          //var progressTime = $(this).val().split(/[ ,]+/);
-          var progressTime = $(this).val().split(" ");
+          
+          var prgressTime = $(this).val().split(/[ ,]+/);
           var hours = 0;
           var minutes = 0;
 
-          for (chunk in progressTime) {
-            if (progressTime[chunk] == "hr") {
-              hours = Math.floor(progressTime[chunk - 1]);
-            } else { //no space before "hr"
-              var nums = $(this).val().split("hr");
-
-              if (nums == $(this).val()) { //no hour
-                var num = $(this).val().split("min");
-                minutes = Math.floor(num[0]);
+          if (prgressTime.length == 2) { //"hr" and "min" without space OR "h" and "min" without space OR two numbers
+            var first = $(this).val().split("hr");
+            if (first == $(this).val()) { //no "hr" OR "h" and "m" OR two numbers
+              var second = $(this).val().split("min");
+              if (second == $(this).val()) { //"h" and "m" OR two numbers  
+                var third = $(this).val().split("h");
+                if (third == $(this).val()) { //no "h" OR two numbers
+                  var fourth = $(this).val().split("m");
+                  if (fourth == $(this).val()) { //two numbers
+                    hours = Math.floor(prgressTime[0]);
+                    minutes = Math.floor(prgressTime[1]);
+                  } else {
+                    minutes = Math.floor(fourth[0]);
+                  }
+                } else {
+                  hours = Math.floor(third[0]);
+                  minutes = Math.floor(prgressTime[1].split("m")[0]);
+                }
               } else {
-                hours = Math.floor(nums[0]);
-                var num = nums[1].split("min");
-                minutes = Math.floor(num[0]);
+                minutes = Math.floor(second[0]);
               }
+            } else {
+              hours = Math.floor(first[0]);
+              minutes = Math.floor(prgressTime[1].split("min")[0]);
+            }
+          } else if (prgressTime.length == 4) { //type in two numbers and hr and min with space
+            for (chunk in prgressTime) {
+              if (targetTime[chunk] == "hr") {
+                hours = Math.floor(prgressTime[chunk - 1]);
+              } 
+              if (prgressTime[chunk] == "min") {
+                minutes = Math.floor(prgressTime[chunk - 1]);
+              }
+              if (prgressTime[chunk] == "h") {
+                hours = Math.floor(prgressTime[chunk - 1]);
+              } 
+              if (prgressTime[chunk] == "m") {
+                minutes = Math.floor(prgressTime[chunk - 1]);
+              }
+            }
+          } else if (prgressTime.length == 1) {//only entered one number OR "min" only OR "m" only OR no space
+            var fifth = $(this).val().split("hr");
+            if (fifth == $(this).val()) { //"h" and "m"
+              var sixth = $(this).val().split("h");
+              if (sixth == $(this).val()) { //no hours input
+                var seventh = $(this).val().split("min");
+                if (seventh == $(this).val()) { //"m" or just number
+                  var eighth = $(this).val().split("m");
+                  if (eighth == $(this).val()) { //just number
+                    minutes = Math.floor($(this).val()); 
+                  } else {
+                    minutes = Math.floor(eighth[0]);
+                  }
+                } else {
+                  minutes = Math.floor(seventh[0]);
+                }
+              } else {
+                hours = Math.floor(sixth[0]);
+                minutes = Math.floor(sixth[1].split("m")[0]);
+              }
+            } else {
+              hours = Math.floor(fifth[0]);
+              minutes = Math.floor(fifth[1].split("min")[0]);
             }
           }
 
