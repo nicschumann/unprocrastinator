@@ -7,7 +7,6 @@ var tag_search = require('./tag-search')( db, $ );
 // Global date variables
 var today = new Date();
     today.setHours(0,0,0,0);
-    today.setDate(today.getDate()+3);
 
 var todayId = generateDateId(today); 
 var dateCounter = 0;
