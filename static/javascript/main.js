@@ -29,6 +29,8 @@ Ask Jina about the front end code anytime!!! :)
 
 ********************************************/
 
+var fadeOutTiming = 750;
+
 var db = require('../../queries/queries.js');
 var autosize = require('autosize');
 
@@ -44,11 +46,14 @@ var dateCounter = 0;
 //Global task map for loading existing tasks
 var taskMap = {};
 
+function fadeOverlayOut() {
+     $('#overlay').fadeOut( fadeOutTiming ); 
+}
+
 // Actions to happen on page load
 $(document).ready(function(){
   if ($('.index-body')[0]) {
     loadTaskMap();
-
 
     /** We removed this during the merge of JINA's code */
     //var colorCounter = 0;
@@ -100,6 +105,8 @@ $(document).ready(function(){
           LANDING.HTML JS
       *************************/
 
+      fadeOverlayOut();
+
       // Button and request handlers for landing.html
       $('#myModal').on('shown.bs.modal', function () {
         $('#myInput').focus()
@@ -132,12 +139,15 @@ $(document).ready(function(){
               sessionStorage.user_id = user_id;
               window.location.href = "/user";
           } else {
-              alert(error);
+              $('#errorModal').modal('show');
+              $('#modalErrorText').text( error.message );
           }
         }); 
       });
 
     } else if ($('.faq-body')[0]) {
+
+      fadeOverlayOut();
 
     }
 });
@@ -245,6 +255,7 @@ function loadTaskMap() {
 
       checkReassignTasks(reassignTaskMap);
       populateWeek(taskMap);
+      fadeOverlayOut();
     }
   });
 }
@@ -966,9 +977,9 @@ function loadTask(taskId, task) {
         $widget.find('.dateWrapper').append(
           '<div class="input-group input-daterange">' +
               '<span class="input-group-addon">Assigned:</span>' +
-              '<input type="text" class="form-control assign-date" data-date-start-date="yesterday" value="' + parseDate(task.assigned_date) + '">' +
+              '<input type="text" class="form-control assign-date" data-date-start-date="today" value="' + parseDate(task.assigned_date) + '">' +
               '<span class="input-group-addon">Due:</span>' +
-              '<input type="text" class="form-control due-date" data-date-start-date="yesterday" value="' + parseDate(task.due_date) + '">' +
+              '<input type="text" class="form-control due-date" data-date-start-date="today" value="' + parseDate(task.due_date) + '">' +
           '</div>')
 
         $widget.find('.input-daterange input').each(function() {
@@ -1099,7 +1110,11 @@ function loadTask(taskId, task) {
 
           var total = 3600 * hours + 60 * minutes; //total is in seconds
 
-          $widget.find('.targetTimeText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
+          if (!isNaN(hours) && !isNaN(minutes)) {
+
+            $widget.find('.targetTimeText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
+
+          
           //$widget.find('.targetTimeText').text("Estimated time " + hours + ": " + minutes + ": " + seconds);
 
         //   var taskToPatch = task;
@@ -1118,6 +1133,8 @@ function loadTask(taskId, task) {
               };
               db.patch_task_for_user(taskId, task_update);
           });
+          
+        }
 
 
           $targetTimeWrapper.empty();
@@ -1290,10 +1307,8 @@ function loadTask(taskId, task) {
 
           var total = 3600 * hours + 60 * minutes; //total is in seconds
 
-          if (isNaN(hours) || isNaN(minutes)) {
+          if (!isNaN(hours) && !isNaN(minutes)) {
             
-            console.log("error");
-          } else {
             $widget.find('.progressText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
             $widget.find('.progressText').text(hours + " hr " + minutes + " min of progress time have been added.");
             $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});
@@ -1309,6 +1324,7 @@ function loadTask(taskId, task) {
 
             $plusWrapper.empty();
           }
+
         }
       });
       } else if ($plusWrapper.find('.plusProgress').length == 1) {
