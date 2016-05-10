@@ -519,9 +519,9 @@ function appendTask(taskId, task) {
   }
 
   // Load estimated time
-  renderEstimate(task.estimate);
+  renderEstimate(task.estimate, taskId);
 
-  renderRemainder(task.estimate, task.hours);
+  renderRemainder(task.estimate, task.hours, taskId);
 
   // Load subtasks
   for (var subtask in task.subtasks) {
@@ -786,7 +786,7 @@ function removeTagFromDb(tagText) {
   });
 }
 
-function renderEstimate(estimatedTime) {
+function renderEstimate(estimatedTime, taskId) {
   if (estimatedTime) {
     var hours = Math.floor(estimatedTime / 3600);
     var minutes = Math.floor((estimatedTime - 3600 * hours) / 60);
@@ -794,17 +794,17 @@ function renderEstimate(estimatedTime) {
 
     if (hours > 0) {
       if (minutes > 0) {
-        $('.targetTimeText').text("Estimated time: " + hours + " hr and " + minutes + " min");
+        $( '#'+taskId ).find('.targetTimeText').text("Estimated time: " + hours + " hr and " + minutes + " min");
       } else {
-        $('.targetTimeText').text("Estimated time: " + hours + " hr ");
+        $( '#'+taskId ).find('.targetTimeText').text("Estimated time: " + hours + " hr ");
       }
     } else {
-      $('.targetTimeText').text("Estimated time: " + minutes + " min");
+      $( '#'+taskId ).find('.targetTimeText').text("Estimated time: " + minutes + " min");
     }
   }
 }
 
-function renderRemainder(estimatedTime, timeSpent) {
+function renderRemainder(estimatedTime, timeSpent, taskId) {
   if (estimatedTime) {
     var difference = estimatedTime - timeSpent;
     console.log("difference " + difference);
@@ -815,25 +815,25 @@ function renderRemainder(estimatedTime, timeSpent) {
     if (difference < 0) {
       if (hoursLeft < 0) {
         if (minutesLeft < 0) {
-          $('.remainderTimeText').text("Over " + (-1) * hoursLeft + " hr and " + (-1) * minutesLeft + " min. Please update your estimated time!");
+          $( '#'+taskId ).find('.remainderTimeText').text("Over " + (-1) * hoursLeft + " hr and " + (-1) * minutesLeft + " min. Please update your estimated time!");
         } else {
-          $('.remainderTimeText').text("Over " + (-1) * hoursLeft + " hr. Please update your estimated time!");
+          $( '#'+taskId ).find('.remainderTimeText').text("Over " + (-1) * hoursLeft + " hr. Please update your estimated time!");
         }
       } else {
-        $('.remainderTimeText').text("Over " + (-1) * minutesLeft + " min. Please update your estimated time!");
+        $( '#'+taskId ).find('.remainderTimeText').text("Over " + (-1) * minutesLeft + " min. Please update your estimated time!");
       }
-      $('.remainderTimeText').css("color", "red");
+      $( '#'+taskId ).find('.remainderTimeText').css("color", "red");
     } else {
       if (hoursLeft > 0) {
         if (minutesLeft > 0) {
-          $('.remainderTimeText').text(hoursLeft + " hr and " + minutesLeft + " min left!");
+          $( '#'+taskId ).find('.remainderTimeText').text(hoursLeft + " hr and " + minutesLeft + " min left!");
         } else {
-          $('.remainderTimeText').text(hoursLeft + " hr left!");
+          $( '#'+taskId ).find('.remainderTimeText').text(hoursLeft + " hr left!");
         }
       } else {
-        $('.remainderTimeText').text(minutesLeft + " min left!");
+        $( '#'+taskId ).find('.remainderTimeText').text(minutesLeft + " min left!");
       }
-      $('.remainderTimeText').css("color", "black");
+      $( '#'+taskId ).find('.remainderTimeText').css("color", "black");
     }
   }
 }
@@ -1312,8 +1312,8 @@ function loadTask(taskId, task) {
         db.get_user_task(sessionStorage.user_id, taskId, function (error, newTask) {
             if (newTask) {
               console.log("new task hours: " + newTask.hours);
-              renderRemainder( newTask.estimate, newTask.hours );
-              renderEstimate( newTask.estimate );
+              renderRemainder( newTask.estimate, newTask.hours, taskId);
+              renderEstimate( newTask.estimate, taskId );
             }
         });
     })
@@ -1322,8 +1322,8 @@ function loadTask(taskId, task) {
         db.get_user_task(sessionStorage.user_id, taskId, function (error, newTask) {
             if (newTask) {
                 console.log("new task hours: " + newTask.hours);
-                renderRemainder( newTask.estimate, newTask.hours );
-                renderEstimate( newTask.estimate );
+                renderRemainder( newTask.estimate, newTask.hours, taskId );
+                renderEstimate( newTask.estimate, taskId );
                 newTask.progress = Math.round((newTask.hours / newTask.estimate) * 100);
                 $( '#'+taskId ).find('.progress-bar').css({ width: newTask.progress + '%' });
 
