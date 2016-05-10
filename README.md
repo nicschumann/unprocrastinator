@@ -9,7 +9,7 @@ Hi Everyone,
 The file you are looking at is the README for our project. The project uses a lot of dependencies, including globally installed javascript compilation scripts and  CSS preprocessor scripts. You can read about how these tools were used below. Installing the tools can be a bit of a headache, so instead of handing in the project, having you install all the dependencies (and their dependencies), and then building the project yourself and running locally, we thought we'd just provide you with 3 links.
 
 
-1.[live heroku app](http://unprocrastinator.herokuapp.com) – This is the live application, which you can play with.
+1. [live heroku app](http://unprocrastinator.herokuapp.com) – This is the live application, which you can play with.
 
 2. [github repository](http://github.com/nicschumann/unprocrastinator) – This is the project's github repository. You can browse the source code here. Most of the interesting work happens in ```static/javascript``` and ```queries```. The server itself, which is insanely minimal, lives in ```router.js```.
 
