@@ -253,9 +253,8 @@ function checkReassignTasks(reassignTaskMap) {
         }
 
 
-        db.patch_task_for_user( taskPair.task_id, taskPatch, function(error) {
-           appendTask(taskPair.task_id, reassignedTask, true);
-        });
+        db.patch_task_for_user( taskPair.task_id, taskPatch );
+        appendTask(taskPair.task_id, reassignedTask, true);
 
       }
     }
@@ -1302,7 +1301,7 @@ function loadTask(taskId, task) {
           var total = 3600 * hours + 60 * minutes; //total is in seconds
 
           if (!isNaN(hours) && !isNaN(minutes)) {
-            
+
             $widget.find('.progressText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
             $widget.find('.progressText').text(hours + " hr " + minutes + " min of progress time have been added.");
             $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});
