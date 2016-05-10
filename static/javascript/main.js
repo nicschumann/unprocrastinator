@@ -322,7 +322,7 @@ function populateWeek() {
           "complete": false,
           "assigned_date": generateDateFromId(dateId).getTime(),
           "due_date": generateDateFromId(dateId).getTime(),
-          "tags": tags,
+          "tags": [category],
           "category": category,
           "subtasks": [],
           "notes": "Write a note..."
@@ -368,7 +368,7 @@ function populateWeek() {
                 "complete": false,
                 "assigned_date": generateDateFromId(dateId).getTime(),
                 "due_date": generateDateFromId(dateId).getTime(),
-                "tags": tags,
+                "tags": [category],
                 "category": category,
                 "subtasks": [],
                 "notes": "Write a note..."
@@ -781,9 +781,16 @@ function renderEstimate(estimatedTime) {
     var minutes = Math.floor((estimatedTime - 3600 * hours) / 60);
     var seconds = Math.floor(estimatedTime - 3600 * hours - 60 * minutes);
 
-    // $('.targetTimeText').text("Estimated time " + hours + ": " + minutes + ": " + seconds);
-    $('.targetTimeText').text("Estimated time " + Math.round(estimatedTime / 60) + " min");
-  }
+    if (hours > 0) {
+      if (minutes > 0) {
+        $('.targetTimeText').text("Estimated time: " + hours + " hr and " + minutes + " min");
+      } else {
+        $('.targetTimeText').text("Estimated time: " + hours + " hr ");
+      }
+    } else {
+      $('.targetTimeText').text("Estimated time: " + minutes + " min");
+    }
+
 }
 
 function renderRemainder(estimatedTime, timeSpent) {
@@ -793,18 +800,29 @@ function renderRemainder(estimatedTime, timeSpent) {
     var minutesLeft = Math.round((difference - 3600 * hoursLeft) / 60);
     var secondsLeft = Math.round(difference - 3600 * hoursLeft - 60 * minutesLeft);
 
-    $('.remainderTimeText').text(Math.round(difference / 60) + " min left!");
+    //$('.remainderTimeText').text(Math.round(difference / 60) + " min left!");
 
-    // if (hoursLeft > 0) {
-    //   if (minutesLeft > 0) {
-    //     $('.remainderTimeText').text(hoursLeft + " hr and " + minutesLeft + " min left!");
-    //   } else {
-    //     $('.remainderTimeText').text(hoursLeft + " hr left!");
-    //   }
-    // } else {
-    //   $('.remainderTimeText').text(minutesLeft + " min left!");
-    // }
-    //$('.remainderTimeText').text("Time left " + hoursLeft + ": " + minutesLeft + ": " + secondsLeft);
+    if (difference < 0) {
+      if (hoursLeft < 0) {
+        if (minutesLeft < 0) {
+          $('.remainderTimeText').text("Over " + (-1) * hoursLeft + " hr and " + (-1) * minutesLeft + " min");
+        } else {
+          $('.remainderTimeText').text("Over " + (-1) * hoursLeft + " hr");
+        }
+      } else {
+        $('.remainderTimeText').text("Over " + (-1) * minutesLeft + " min");
+      }
+    } else {
+      if (hoursLeft > 0) {
+        if (minutesLeft > 0) {
+          $('.remainderTimeText').text(hoursLeft + " hr and " + minutesLeft + " min left!");
+        } else {
+          $('.remainderTimeText').text(hoursLeft + " hr left!");
+        }
+      } else {
+        $('.remainderTimeText').text(minutesLeft + " min left!");
+      }
+    }
   }
 }
 

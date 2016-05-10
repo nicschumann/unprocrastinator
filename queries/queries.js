@@ -236,7 +236,6 @@ exports.add_task_to_user = function (user_id, task, callback) {
                 users.child(user_id).child("tasks").push(task_id, function (error) {
 
                     if (error) {
-
                         console.log("Error adding task.");
                         if (callback) { callback(error); }
 
