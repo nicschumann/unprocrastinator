@@ -53,6 +53,11 @@ function fadeOverlayOut() {
 // Actions to happen on page load
 $(document).ready(function(){
   if ($('.index-body')[0]) {
+
+    if ( typeof sessionStorage.user_id === "undefined" || sessionStorage.user_id === null ) {
+      window.location.href = '/login';
+    }
+
     loadTaskMap();
 
     $("#monthName").text(getMonthOfYear(today));
@@ -112,7 +117,10 @@ $(document).ready(function(){
               if (!error) {
                 sessionStorage.user_id = user_id;
                   window.location.href = "/user";
-              } 
+              } else {
+                  $('#errorModal').modal('show');
+                  $('#modalErrorText').text( error.message );
+              }
           });
       }); 
 
@@ -1500,6 +1508,7 @@ $("#logout").click(function (event) {
     event.preventDefault();
     db.log_out(function (error) {
         if (!error) {
+            sessionStorage.user_id = null;
             window.location.href = "/login";
         }
     });
@@ -1509,6 +1518,7 @@ $("#unprocrastinator").click(function (event) { //automatically log user out
     event.preventDefault();
     db.log_out(function (error) {
         if (!error) {
+            sessionStorage.user_id = null;
             window.location.href = "/login";
         }
     });
