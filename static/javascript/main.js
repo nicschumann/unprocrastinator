@@ -63,8 +63,9 @@ $(document).ready(function(){
   $("#jumpDate").val(todayId);
   $('.date').datepicker()
     .on('changeDate', function(e) {
-        scrollJump($('#jumpDate').datepicker('getDate'));
-    });
+      //scrollJump($('#jumpDate').datepicker('getDate'));
+  });
+
 
     // As user scrolls, loads 7 more days infinitely.
     // #TODO - Currently has bugs according to screen/zoom size
@@ -79,12 +80,12 @@ $(document).ready(function(){
         // #monthBar changes from APRIL to MAY to JUNE, etc, as it scrolls through the days.
         var days = $(".day.row");
 
-        for (var i = 0; i < days.length; i++) {
-          if (collide( $("#monthBarWrap"), $("#" + days[i].id) )) {
-            $("#monthName").text(getMonthByNum(days[i].id[0]));
-          }
+      for (var i = 0; i < days.length; i++) {
+        if (collide( $("#monthBarWrap"), $("#" + days[i].id) )) {
+          $("#monthName").text(getMonthByNum(days[i].id[0]));
         }
       }
+    }
   });
 
   $('#datepicker1').on("changeDate", function() {
@@ -92,6 +93,7 @@ $(document).ready(function(){
           $('#datepicker1').datepicker('getFormattedDate')
       );
   });
+  $(window).scrollTop(0);
 });
 
 /*
@@ -167,7 +169,7 @@ function loadTaskMap() {
           if (tasks.hasOwnProperty(task_id)) {
             var task = tasks[task_id];
 
-            if (task.completed && task.assigned_date < today) {
+            if (task.complete && task.due_date < today.getTime()) {
               continue;
             }
 
@@ -200,10 +202,7 @@ function checkReassignTasks() {
         reassignedTask.assigned_date = today.getTime();
 
         db.patch_task_for_user( taskPair.task_id, reassignedTask, function(err, task) {
-
           appendTask(taskPair.task_id, reassignedTask);
-          $("#" + taskPair.task_id).find(".taskName").css("color", "red");
-
         })
 
       }
@@ -217,15 +216,15 @@ function checkReassignTasks() {
 */
 function generateDayTemplate(currDate) {
   var currDateId = generateDateId(currDate);
-  return '<div class="day row" id="' + currDateId + '">' +
-            '<div class="dates col-xs-1">' +
-              '<div class="row">' +
-                '<h2>' + currDate.getDate() + '<br>' + getDayOfWeek(currDate) + '</h2>' +
-              '</div>' +
-            '</div>' +
-            '<div class="col-xs-11">' +
-              '<p>' +
-                '<div class="well" style="height: auto;overflow: auto;">' +
+  return '<div class="day row" id="' + currDateId + '">' + 
+            '<div class="dates col-xs-1">' + 
+              '<div class="row">' + 
+                '<h2>' + currDate.getDate() + '<br>' + getDayOfWeek(currDate) + '</h2>' + 
+              '</div>' + 
+            '</div>' + 
+            '<div class="day-info-box col-xs-11">' + 
+              '<p>' + 
+                '<div class="well" style="height: auto;overflow: auto;">' + 
                   '<ul class="tasks list-group checked-list-box">' +
                   '</ul>'+
                     '<div class="input-group">' +
@@ -299,8 +298,17 @@ function populateWeek() {
       var dateId = $(this).parent().parent().parent().parent().attr('id');
 
       var input = $(this).prev().val();
+
+      if (!input) {
+        return;
+      }
+
       var category = input.split(",")[0];
       var name = input.split(",")[1]
+
+      if (/^\s*$/.test(name)) {
+        return;
+      }
 
       var tags = [category];
       var words = name.split(" ");
@@ -325,7 +333,7 @@ function populateWeek() {
           "tags": [category],
           "category": category,
           "subtasks": [],
-          "notes": "Write a note..."
+          "notes": ""
       };
 
       db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
@@ -344,8 +352,17 @@ function populateWeek() {
           var dateId = element.parent().parent().parent().parent().attr('id');
 
           var input = element.val();
+
+          if (!input) {
+            return;
+          }
+
           var category = input.split(", ")[0];
           var name = input.split(", ")[1];
+
+          if (/^\s*$/.test(name)) {
+            return;
+          }
 
           var tags = [category];
           var words = name.split(" ");
@@ -371,7 +388,7 @@ function populateWeek() {
                 "tags": [category],
                 "category": category,
                 "subtasks": [],
-                "notes": "Write a note..."
+                "notes": ""
             };
 
           db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId, task) {
@@ -433,10 +450,14 @@ function appendTask(taskId, task) {
     '<div class="taskDetails">' +
           '<input type="text" class="form-control editName" placeholder="' + task.name + '" style="display: none;">' +
       '<h4 class="taskDetailsHeading">' + '<span style="color: '+ taskColor+'" >' + task.category.toUpperCase() + '</span> ' + task.name +'</h4>' +
+
+
     '<button class="editButton" type="button">' +
-        '<span id="editIcon" class="glyphicon glyphicon-edit"></span>' +
-      '</button>' +
-    '<span class="targetTimeIcon glyphicon glyphicon-screenshot" data-toggle="tooltip" title="Target time"></span>' +
+        '<span id="editIcon" class="glyphicon glyphicon-edit" data-toggle="tooltip" title="Edit task name"></span>' +
+      '</button>' + 
+    '<button class="targetTimeButton" type="button">' +
+        '<span class="targetTimeIcon glyphicon glyphicon-hourglass" data-toggle="tooltip" title="Estimated time to completion"></span>' +
+      '</button>' + 
       '<div class="targetTimeWrapper"></div>' +
 
       '<p class="remainderTimeText" style="text-align: right"></p>' +
@@ -474,22 +495,24 @@ function appendTask(taskId, task) {
 
       '<div class="notes">' +
         '<h5>Notes</h5>' +
-        '<textarea class="noteInput form-control" rows="1" aria-describedby="sizing-addon1">'+ task.notes +'</textarea>' +
+        '<textarea class="noteInput form-control" rows="1" placeholder="Write a note..." aria-describedby="sizing-addon1">'+ ((typeof task.notes !== "undefined") ? task.notes : "")  +'</textarea>' +
       '</div>' +
-    '</div>'
+    '</div>';
 
   var due = new Date(task.due_date);
   var d = due.getDate();
   var m = due.getMonth() + 1;
 
+  var taskDom;
+
   if (task.progress <= 100) {
-      var taskDOM =
+      taskDOM =
     '<li id="'+ taskId +'" class="task list-group-item" data-checked="false">' +
       '<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + taskColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + " [Due " + m + "/" + d + "] " + "<b>" + "<i><span class='progress-indicator'>" + task.progress + "%" + "</span></i>" + "</b>" + '</span>' +
       taskDetailsDOM +
     '</li>';
   } else {
-    var taskDOM =
+    taskDOM =
     '<li id="'+ taskId +'" class="task list-group-item" data-checked="false">' +
       '<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + taskColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + " [Due " + m + "/" + d + "] " + "<b>" + "<i><span class='progress-indicator'>" + "</span></i>" + "</b>" + '</span>' +
       taskDetailsDOM +
@@ -500,6 +523,12 @@ function appendTask(taskId, task) {
 
 
   $("#" + parseDate(task.assigned_date) + " .tasks").append(taskDOM);
+
+  if (task.due_date < today.getTime()) {
+    $("#" + taskId).find(".taskName").css("color", "red");
+  }
+
+  $("#" + taskId).find(".noteInput").val(task.notes);
 
   //hover text init
   $('[data-toggle="tooltip"]').tooltip();
@@ -909,7 +938,7 @@ function loadTask(taskId, task) {
 
             $(this).on('hide', function (e) {
               $widget.remove();
-              scrollJump(newAssignedDate);
+              //scrollJump(newAssignedDate);
               appendTask(taskId, taskToPatch);
             });
 
@@ -919,8 +948,16 @@ function loadTask(taskId, task) {
         $widget.find('.input-daterange .due-date').each(function() {
           $(this).on('changeDate', function (e) {
             var taskToPatch = task;
-            taskToPatch.due_date = $(this).datepicker('getDate').getTime();
+            var dueDate = $(this).datepicker('getDate');
+            taskToPatch.due_date = dueDate.getTime();
             db.patch_task_for_user(taskId, taskToPatch);
+
+            var taskTitleBar = $widget.find('.taskName')[0].innerHTML;
+            var dateString = dueDate.getMonth() + 1 + '/' + dueDate.getDate();
+            var regex = /\d{1,2}\/\d{2}/;
+            taskTitleBar = taskTitleBar.replace(regex, dateString);
+
+            $widget.find('.taskName')[0].innerHTML = taskTitleBar;
           });
         });
 
@@ -934,6 +971,7 @@ function loadTask(taskId, task) {
     $targetTimeButton.click(function(e) {
 
       if ($targetTimeWrapper.find('.targetTime').length == 0) { // check that this doesnt already exist
+
         $targetTimeWrapper.append("<input type='text' placeholder='hr min' class='targetTime'></input>");
         $targetTimeWrapper.find('.targetTime').focus();
 
@@ -1422,7 +1460,8 @@ $('#signin').on('click', function(event) {
         sessionStorage.user_id = user_id;
         window.location.href = "/user";
     } else {
-        alert(error);
+        $("#modalErrorText").text(error);
+        $("#errorModal").modal('show');
     }
   });
 });
