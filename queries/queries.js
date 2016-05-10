@@ -243,40 +243,42 @@ exports.add_task_to_user = function (user_id, task, callback) {
                     } else {
                         console.log("Successfully added task.");
                         task_ref.child("tags").on("value", function (tags_snapshot) {
-                            users.child(user_id).child("tags").once("value", function (snapshot) {
-                                var user_tags = snapshot.exists() ? snapshot.val() : [];
-                                var tag_hours = []
-                                tags_snapshot.val().forEach(function (tag) {
-                                    user_tag = user_tags.find(function (t, i) {
-                                        return t.name === tag
-                                    })
-                                    if (user_tag) {
-                                        tag_hours.push(user_tag.avg_time);
-                                    } else { //default to 1 hour = 3600 seconds
-                                        var default_time = 3600
-                                        user_tags.push(
-                                            {
-                                                "name": tag,
-                                                "total_time": default_time,
-                                                "avg_time": default_time,
-                                                "num_tasks": 0
-                                            }
-                                        );
-                                        tag_hours.push(default_time);
+                            if (tags_snapshot.exists()) {
+                                users.child(user_id).child("tags").once("value", function (snapshot) {
+                                    var user_tags = snapshot.exists() ? snapshot.val() : [];
+                                    var tag_hours = []
+                                    tags_snapshot.val().forEach(function (tag) {
+                                        user_tag = user_tags.find(function (t, i) {
+                                            return t.name === tag
+                                        })
+                                        if (user_tag) {
+                                            tag_hours.push(user_tag.avg_time);
+                                        } else { //default to 1 hour = 3600 seconds
+                                            var default_time = 3600
+                                            user_tags.push(
+                                                {
+                                                    "name": tag,
+                                                    "total_time": default_time,
+                                                    "avg_time": default_time,
+                                                    "num_tasks": 0
+                                                }
+                                            );
+                                            tag_hours.push(default_time);
+                                        }
+                                    });
+
+                                    var sum = tag_hours.reduce(function (a, b) { return a + b; }, 0);
+                                    var estimated_hour = Math.floor( sum / tag_hours.length );
+
+                                    users.child(user_id).child("tags").set(user_tags);
+                                    task_ref.child("estimate").set(estimated_hour);
+
+                                    if (callback) {
+                                        callback(null, task_ref.key() );
+                                        callback = null;
                                     }
                                 });
-
-                                var sum = tag_hours.reduce(function (a, b) { return a + b; }, 0);
-                                var estimated_hour = Math.floor( sum / tag_hours.length );
-
-                                users.child(user_id).child("tags").set(user_tags);
-                                task_ref.child("estimate").set(estimated_hour);
-
-                                if (callback) {
-                                    callback(null, task_ref.key() );
-                                    callback = null;
-                                }
-                            });
+                            }
                         });
                     }
                 });

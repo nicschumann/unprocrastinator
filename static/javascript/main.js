@@ -5,15 +5,15 @@ The general flow of the index.html is as follows:
 
 1. On page load, a full week of dates is populated by populateWeek, which...
     i) calls generateDayHTML 7 times.
-    ii) loads "taskButton" so new tasks can be added by user 
+    ii) loads "taskButton" so new tasks can be added by user
 
 2. generateTodayOverview is called to load the rainbow progress bar at the top.
-   currently, it uses fake numbers (hard coded %s that i made up) - needs to use DB data 
-   and ML algorithm stuff later 
+   currently, it uses fake numbers (hard coded %s that i made up) - needs to use DB data
+   and ML algorithm stuff later
 
 3. For now, "today" is loaded with a dummy task of "Eat lunch" for testing purposes by...
     i) simply calling appendTask.
-        a. appendTask calls loadTask, which loads the interactive aspects (timer, progress, calendar, subtasks, notes) 
+        a. appendTask calls loadTask, which loads the interactive aspects (timer, progress, calendar, subtasks, notes)
            of a task
 
 GENERAL NOTES
@@ -21,10 +21,10 @@ I don't recommend auto-indenting all, since the HTML templates are indented in a
 for readability, but its nbd if you don't read the HTML templates - you shouldn't need to anyway!
 
 #TODO
-I have tagged all things that need to be done soon with a #TODO tag. Please look for these and 
+I have tagged all things that need to be done soon with a #TODO tag. Please look for these and
 pick out any you'd like to tackle!
 
-ANY QUESTIONS? 
+ANY QUESTIONS?
 Ask Jina about the front end code anytime!!! :)
 
 ********************************************/
@@ -38,7 +38,7 @@ var tag_search = require('./tag-search')( db, $ );
 var today = new Date();
     today.setHours(0,0,0,0);
 
-var todayId = generateDateId(today); 
+var todayId = generateDateId(today);
 var dateCounter = 0;
 
 //Global task map for loading existing tasks
@@ -46,7 +46,7 @@ var taskMap = {};
 
 var colorArray = ["#ef4546", "#f37331", "#ffd83f", "#8ec742", "#90d6e8", "#5e843c", "#c04f9d", "#f4889c"];
 
-var colorCounter = 0; 
+var colorCounter = 0;
 
 var categoryMap = {};
 
@@ -66,8 +66,8 @@ $(document).ready(function(){
         scrollJump($('#jumpDate').datepicker('getDate'));
     });
 
-    // As user scrolls, loads 7 more days infinitely. 
-    // #TODO - Currently has bugs according to screen/zoom size 
+    // As user scrolls, loads 7 more days infinitely.
+    // #TODO - Currently has bugs according to screen/zoom size
     // where screen has to be 100%
     $(window).scroll(function(){
       if ($(window).scrollTop() == $(document).height()-$(window).height()){ // doesnt work if zoom is not at 100%
@@ -98,7 +98,7 @@ $(document).ready(function(){
     getDayOfWeek: A simple function that returns corresponding day-of-week abbreviations.
     @date - the Date object to retrieve the abbreviated day of week for.
 */
-function getDayOfWeek(date) { 
+function getDayOfWeek(date) {
    return ["SUN","MON","TUE","WED","THU","FRI","SAT"][(date.getDay())];
 }
 
@@ -175,7 +175,7 @@ function loadTaskMap() {
           } else {
             console.log('ERROR: tasks are invalid')
           }
-   
+
           if (taskMap[taskDateId]) {
             var existingTasks = taskMap[taskDateId];
             var updatedTasks = existingTasks.concat({task_id: task_id, task: task});
@@ -188,7 +188,7 @@ function loadTaskMap() {
       populateWeek();
       checkReassignTasks();
     }
-  }); 
+  });
 }
 
 function checkReassignTasks() {
@@ -200,7 +200,7 @@ function checkReassignTasks() {
         reassignedTask.assigned_date = today.getTime();
 
         db.patch_task_for_user( taskPair.task_id, reassignedTask, function(err, task) {
-          
+
           appendTask(taskPair.task_id, reassignedTask);
           $("#" + taskPair.task_id).find(".taskName").css("color", "red");
 
@@ -217,23 +217,23 @@ function checkReassignTasks() {
 */
 function generateDayTemplate(currDate) {
   var currDateId = generateDateId(currDate);
-  return '<div class="day row" id="' + currDateId + '">' + 
-            '<div class="dates col-xs-1">' + 
-              '<div class="row">' + 
-                '<h2>' + currDate.getDate() + '<br>' + getDayOfWeek(currDate) + '</h2>' + 
-              '</div>' + 
-            '</div>' + 
-            '<div class="col-xs-11">' + 
-              '<p>' + 
-                '<div class="well" style="height: auto;overflow: auto;">' + 
+  return '<div class="day row" id="' + currDateId + '">' +
+            '<div class="dates col-xs-1">' +
+              '<div class="row">' +
+                '<h2>' + currDate.getDate() + '<br>' + getDayOfWeek(currDate) + '</h2>' +
+              '</div>' +
+            '</div>' +
+            '<div class="col-xs-11">' +
+              '<p>' +
+                '<div class="well" style="height: auto;overflow: auto;">' +
                   '<ul class="tasks list-group checked-list-box">' +
-                  '</ul>'+ 
+                  '</ul>'+
                     '<div class="input-group">' +
                       '<input type="text" class="form-control taskInput" placeholder="Category, Task name..." aria-describedby="basic-addon2">' +
                         '<span class="input-group-addon taskButton"> + </span>' +
                     '</div>'+
                 '</div>' +
-              '</p>' + 
+              '</p>' +
             '</div>'
             '</div>';
 }
@@ -242,8 +242,8 @@ function generateDayTemplate(currDate) {
     Generates the Today Overview Bar.
 */
 function generateTodayOverview() {
-  return '<div id="todayOverview">' + 
-            '<div class="row">' + 
+  return '<div id="todayOverview">' +
+            '<div class="row">' +
               '<div class="col-xs-3">' +
                 '<h4>Today\'s Overview:</h4>' +
               '</div>' +
@@ -283,7 +283,7 @@ function populateWeek() {
 
     var currDateId = generateDateId(currDate);
 
-    if (taskMap[currDateId]) { 
+    if (taskMap[currDateId]) {
       for (var taskIndex in taskMap[currDateId]) {
         var taskPair = taskMap[currDateId][taskIndex];
         appendTask(taskPair.task_id, taskPair.task);
@@ -291,13 +291,13 @@ function populateWeek() {
     }
 
     // Cursor for add button
-    $('#' + currDateId + ' .taskButton').css("cursor", "pointer"); 
+    $('#' + currDateId + ' .taskButton').css("cursor", "pointer");
 
     // Event handlers for adding task (click and enter)
     $('#' + currDateId + ' .taskButton').click(function (e) {
       e.preventDefault();
       var dateId = $(this).parent().parent().parent().parent().attr('id');
-      
+
       var input = $(this).prev().val();
       var category = input.split(",")[0];
       var name = input.split(",")[1]
@@ -349,7 +349,7 @@ function populateWeek() {
 
           var tags = [category];
           var words = name.split(" ");
- 
+
           for (word in words) {
             tags.push(words[word]);
           }
@@ -358,7 +358,7 @@ function populateWeek() {
            * Push categories as a string,
            * even though they are {name: category-name, color: "#xxxxxx"}
            * in the database
-           * 
+           *
            * @type {TaskObject}
            */
           var taskToAdd =  {
@@ -390,8 +390,8 @@ function populateWeek() {
         };
 
     }
-   }); 
-  
+   });
+
     dateCounter++;
   }
 }
@@ -431,16 +431,16 @@ function appendTask(taskId, task) {
 
 // Took out estimated time part:
 
-  var taskDetailsDOM = 
+  var taskDetailsDOM =
     '<div class="taskDetails">' +
           '<input type="text" class="form-control editName" placeholder="' + task.name + '" style="display: none;">' +
       '<h4 class="taskDetailsHeading">' + '<span style="color: '+ taskColor+'" >' + task.category.toUpperCase() + '</span> ' + task.name +'</h4>' +
     '<button class="editButton" type="button">' +
         '<span id="editIcon" class="glyphicon glyphicon-edit"></span>' +
-      '</button>' + 
+      '</button>' +
     '<span class="targetTimeIcon glyphicon glyphicon-screenshot" data-toggle="tooltip" title="Target time"></span>' +
       '<div class="targetTimeWrapper"></div>' +
-      
+
       '<p class="remainderTimeText" style="text-align: right"></p>' +
       '<p class="targetTimeText" style="text-align: right"></p>' +
       '<div class="progress">' +
@@ -454,7 +454,7 @@ function appendTask(taskId, task) {
         '<span class="timeIcon glyphicon glyphicon-time" data-toggle="tooltip" title="Progress timer"></span>' +
           '<div class="timerWrapper"></div>' +
         '<span class="calIcon glyphicon glyphicon-calendar" data-toggle="tooltip" title="Reschedule"></span>' +
-          '<div class="dateWrapper" style="width: 50%; display: inline-block; vertical-align: middle;"></div>' + 
+          '<div class="dateWrapper" style="width: 50%; display: inline-block; vertical-align: middle;"></div>' +
         '<button class="trashButton" type="button">' +
           '<span id="trashIcon" class="glyphicon glyphicon-trash" data-toggle="tooltip" title="Delete task"></span>' +
         '</button>' +
@@ -482,22 +482,22 @@ function appendTask(taskId, task) {
 
   var due = new Date(task.due_date);
   var d = due.getDate();
-  var m = due.getMonth() + 1;  
+  var m = due.getMonth() + 1;
 
-  var taskDOM = 
+  var taskDOM =
     '<li id="'+ taskId +'" class="task list-group-item" data-checked="false">' +
-      '<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + taskColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + " [Due " + m + "/" + d + "] " + "<b>" + "<i><span class='progress-indicator'>" + task.progress + "%" + "</span></i>" + "</b>" + '</span>' + 
-      taskDetailsDOM + 
+      '<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + taskColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + " [Due " + m + "/" + d + "] " + "<b>" + "<i><span class='progress-indicator'>" + task.progress + "%" + "</span></i>" + "</b>" + '</span>' +
+      taskDetailsDOM +
     '</li>';
 
   $("#" + parseDate(task.assigned_date) + " .tasks").append(taskDOM);
 
   //hover text init
-  $('[data-toggle="tooltip"]').tooltip(); 
+  $('[data-toggle="tooltip"]').tooltip();
 
   // Display tags
   $('#' + taskId + ' .tags').tagsInput({
-    'width': '100%', 
+    'width': '100%',
     'height': 'auto',
     'onAddTag': addTagToDb,
     'onRemoveTag': removeTagFromDb
@@ -519,10 +519,10 @@ function appendTask(taskId, task) {
   $('#' + taskId + ' .taskDetails').hide(); // Hide taskDetails until clicked.
 
   // CSS cursor for add subtask button
-  $("#" + taskId + ' .subtaskButton').css("cursor", "pointer"); 
+  $("#" + taskId + ' .subtaskButton').css("cursor", "pointer");
 
   // Event handlers for adding subtasks (click and enter key)
-  $("#" + taskId + ' .subtaskButton').click(function (e) { 
+  $("#" + taskId + ' .subtaskButton').click(function (e) {
     e.preventDefault();
     var taskId = $(this).parent().parent().parent().parent().attr('id');
     var subtaskName = $(this).prev().val();
@@ -573,7 +573,7 @@ function appendTask(taskId, task) {
         });
       });
     }
-  });   
+  });
 
   // Call loadTask to load the interactive features of a task (toggle, details, etc.)
   loadTask(taskId, task);
@@ -599,7 +599,7 @@ function appendSubtask(taskId, subtasks, subtaskName) {
 }
 
 /*
-    removeSubtask: Removes the given subtask from a task - fired when a user 
+    removeSubtask: Removes the given subtask from a task - fired when a user
     clicks delete on a subtask.
     @taskId - the ID of the task to delete this subtask from
     @subtaskName - the name of the subtask to delete
@@ -625,7 +625,7 @@ function deleteSubtask(taskId, subtasks, subtaskName) {
 }
 
 /*
-    checkSubtask: Checks or unchecks the given subtask from a task - fired when a user 
+    checkSubtask: Checks or unchecks the given subtask from a task - fired when a user
     clicks the check box next to a subtask.
     @taskId - the ID of the task this subtask falls under
     @subtaskName - the name of the subtask
@@ -654,7 +654,7 @@ function checkSubtask(taskId, subtasks, subtaskName, isChecked) {
 
 /**
  * this routine renders a subtask given by the parameters to the dom.
- * 
+ *
  * @param  {String}  taskId      the id of the task to render the subtask for.
  * @param  {SubtaskObjects}  subtasks    the existing set of subtasks to render
  * @param  {String}  subtaskName the name of the subtask to render
@@ -664,9 +664,9 @@ function renderSubtask( taskId, subtasks, subtaskName, isComplete ) {
     var isCompleteDom = isComplete ? 'checked' : '';
     var isCompleteDomClass = isComplete ? 'class="checked"' : '';
 
-    var subtask = 
+    var subtask =
     '<li class="list-group-item subtask" data-checked="false">' +
-      '<input class="subtaskCheckbox" type="checkbox"' + isCompleteDom + '/>' + 
+      '<input class="subtaskCheckbox" type="checkbox"' + isCompleteDom + '/>' +
       '<span ' + isCompleteDomClass + '>' + subtaskName + '</span>' +
       '<span id="trashIcon" class="glyphicon glyphicon-trash">' +
     '</li>';
@@ -695,7 +695,7 @@ function renderSubtask( taskId, subtasks, subtaskName, isComplete ) {
       } else {
         $(this).next().removeClass('checked');
       }
-      
+
       $(this).data('state', (isChecked) ? "complete" : "incomplete");
       var subtaskName = $(this).parent()[0].childNodes[1];
       db.get_user_task(sessionStorage.user_id, taskId, function (error, task) {
@@ -781,7 +781,8 @@ function renderEstimate(estimatedTime) {
     var minutes = Math.floor((estimatedTime - 3600 * hours) / 60);
     var seconds = Math.floor(estimatedTime - 3600 * hours - 60 * minutes);
 
-    $('.targetTimeText').text("Estimated time " + hours + ": " + minutes + ": " + seconds);
+    // $('.targetTimeText').text("Estimated time " + hours + ": " + minutes + ": " + seconds);
+    $('.targetTimeText').text("Estimated time " + Math.round(estimatedTime / 60) + " min");
   }
 }
 
@@ -792,15 +793,17 @@ function renderRemainder(estimatedTime, timeSpent) {
     var minutesLeft = Math.round((difference - 3600 * hoursLeft) / 60);
     var secondsLeft = Math.round(difference - 3600 * hoursLeft - 60 * minutesLeft);
 
-    if (hoursLeft > 0) {
-      if (minutesLeft > 0) {
-        $('.remainderTimeText').text(hoursLeft + " hr and " + minutesLeft + " min left!");
-      } else {
-        $('.remainderTimeText').text(hoursLeft + " hr left!");
-      }
-    } else {
-      $('.remainderTimeText').text(minutesLeft + " min left!");
-    }
+    $('.remainderTimeText').text(Math.round(difference / 60) + " min left!");
+
+    // if (hoursLeft > 0) {
+    //   if (minutesLeft > 0) {
+    //     $('.remainderTimeText').text(hoursLeft + " hr and " + minutesLeft + " min left!");
+    //   } else {
+    //     $('.remainderTimeText').text(hoursLeft + " hr left!");
+    //   }
+    // } else {
+    //   $('.remainderTimeText').text(minutesLeft + " min left!");
+    // }
     //$('.remainderTimeText').text("Time left " + hoursLeft + ": " + minutesLeft + ": " + secondsLeft);
   }
 }
@@ -808,12 +811,12 @@ function renderRemainder(estimatedTime, timeSpent) {
 
 /*
     loadTask: Loads the interactive features of a task, such as click to toggle, and
-    task details. 
+    task details.
     @taskId - the ID of the task to load
 
     #TODO* - can possibly be refactored into smaller chunks for readability. not a priority yet
     #TODO* - we can use the built in settings to change color/icon, but also not priority.
-    
+
     #TODO - Jina is working on this, but: Interactivity for notes, and icon interactions!
 */
 function loadTask(taskId, task) {
@@ -906,7 +909,7 @@ function loadTask(taskId, task) {
 
       if ($targetTimeWrapper.find('.targetTime').length == 0) { // check that this doesnt already exist
         $targetTimeWrapper.append("<input type='text' placeholder='hr min' class='targetTime'></input>");
-        $targetTimeWrapper.find('.targetTime').focus();  
+        $targetTimeWrapper.find('.targetTime').focus();
 
         var hours;
         var minutes;
@@ -933,7 +936,7 @@ function loadTask(taskId, task) {
                 hours = Math.floor(nums[0]);
                 var num = nums[1].split("min");
                 minutes = Math.floor(num[0]);
-              }  
+              }
             }
           }
 
@@ -942,16 +945,26 @@ function loadTask(taskId, task) {
           $widget.find('.targetTimeText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
           //$widget.find('.targetTimeText').text("Estimated time " + hours + ": " + minutes + ": " + seconds);
 
-          var taskToPatch = task;
-          taskToPatch.estimate = total;
-          var progress = Math.round((taskToPatch.hours / taskToPatch.estimate) * 100);
-          taskToPatch.progress = progress;
+        //   var taskToPatch = task;
+        //   taskToPatch.estimate = total;
+        //   var progress = Math.round((taskToPatch.hours / taskToPatch.estimate) * 100);
+        //   taskToPatch.progress = progress;
+          //
+        //   db.patch_task_for_user(taskId, taskToPatch);
 
-          db.patch_task_for_user(taskId, taskToPatch);
+          db.get_user_task(sessionStorage.user_id, taskId, function (err, newTask) {
+              var new_estimate = total
+              task_update = {
+                  "estimate": new_estimate,
+                  "progress": Math.round((newTask.hours / new_estimate) * 100)
+              };
+              db.patch_task_for_user(taskId, task_update);
+          });
+
 
           $targetTimeWrapper.empty();
         }
-      });   
+      });
       } else if ($targetTimeWrapper.find('.targetTime').length == 1) {
         $targetTimeWrapper.empty();
       }
@@ -996,7 +1009,7 @@ function loadTask(taskId, task) {
         console.log(task);
 
         // patch task to mark complete or not. needs DB field
-        db.patch_task_for_user(taskId, taskToPatch, function(error) {
+        db.patch_task_for_user(taskId, {complete: task.complete}, function(error) {
           if (error) {
             console.log(error);
           }
@@ -1031,12 +1044,12 @@ function loadTask(taskId, task) {
         }
         return false;
         }
-    });   
+    });
 
     $plusButton.click(function(e) {
       if ($plusWrapper.find('.plusProgress').length == 0) { // check that this doesnt already exist
         $plusWrapper.append("<input type='text' placeholder='hr min' class='plusProgress'></input>");
-        $plusWrapper.find('.plusProgress').focus();  
+        $plusWrapper.find('.plusProgress').focus();
 
         $plusWrapper.find('.plusProgress').keypress(function (e) {
          var key = e.which;
@@ -1060,7 +1073,7 @@ function loadTask(taskId, task) {
                 hours = Math.floor(nums[0]);
                 var num = nums[1].split("min");
                 minutes = Math.floor(num[0]);
-              }  
+              }
             }
           }
 
@@ -1070,24 +1083,24 @@ function loadTask(taskId, task) {
           $widget.find('.progressText').text(hours + " hr " + minutes + " min of progress time have been added.");
           $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});
 
-          var taskToPatch = task;
+          db.get_user_task(sessionStorage.user_id, taskId, function (err, newTask) {
+              var new_hours = newTask.hours + total
+              task_update = {
+                  "hours": new_hours,
+                  "progress": Math.round((new_hours / newTask.estimate) * 100)
+              };
+              db.patch_task_for_user(taskId, task_update);
+          });
 
-          taskToPatch.hours = task.hours + total;
-          var progress = Math.round((taskToPatch.hours / task.estimate) * 100);
-          taskToPatch.progress = progress;
-
-          console.log( taskToPatch );
-
-          db.patch_task_for_user(taskId, taskToPatch);
           $plusWrapper.empty();
         }
-      });   
+      });
       } else if ($plusWrapper.find('.plusProgress').length == 1) {
         $plusWrapper.empty();
       }
     })
 
-    // Loads and handles timer actions 
+    // Loads and handles timer actions
     $timerButton.click(function(e) {
       if ($timerWrapper.find('.timer').length == 0) { // check that tmer doesnt already exist
         $timerWrapper.append("<div class='timer'></div>");
@@ -1154,32 +1167,47 @@ function loadTask(taskId, task) {
       $('#' + taskId).remove();
       db.remove_task_from_user(sessionStorage.user_id, taskId, function(error) {
         if (error) {
-          console.log("ERROR: remove task " + error); 
+          console.log("ERROR: remove task " + error);
         }
       })
     });
 
     db.watch_task_progress( taskId, function( err, progress ) {
-        console.log( 'update_progress' );
-        console.log( progress );
-        $( '#'+taskId ).find('.progress-bar').css({ width: progress + '%' });
-        $( '#'+taskId ).find('.progress-indicator').text( progress + '%' );
+        db.get_user_task(sessionStorage.user_id, taskId, function (error, newTask) {
+            if (newTask) {
+                console.log( 'update_progress' );
+                console.log( newTask.progress );
+                $( '#'+taskId ).find('.progress-bar').css({ width: newTask.progress + '%' });
+                $( '#'+taskId ).find('.progress-indicator').text( newTask.progress + '%' );
+            }
+        });
     });
 
     db.watch_task_hours( taskId, function( err, hours ) {
-        console.log( 'update_hours' );
-        console.log( hours );
-        //task.hours = hours;
-        renderRemainder( task.estimate, hours );
-        renderEstimate( task.estimate );
+        db.get_user_task(sessionStorage.user_id, taskId, function (error, newTask) {
+            if (newTask) {
+                console.log( 'update_hours' );
+                console.log( newTask.hours );
+                //task.hours = hours;
+                renderRemainder( newTask.estimate, newTask.hours );
+                renderEstimate( newTask.estimate );
+            }
+        });
     })
 
     db.watch_task_estimate( taskId, function( err, estimate ) {
-        console.log( 'update_estimate' );
-        console.log( estimate );
-        //task.estimate = estimate;
-        renderRemainder( estimate, task.hours );
-        renderEstimate( task.estimate );
+        db.get_user_task(sessionStorage.user_id, taskId, function (error, newTask) {
+            if (newTask) {
+                console.log( 'update_estimate' );
+                console.log( newTask.estimate );
+                //task.estimate = estimate;
+                renderRemainder( newTask.estimate, newTask.hours );
+                renderEstimate( newTask.estimate );
+                newTask.progress = Math.round((newTask.hours / newTask.estimate) * 100)
+                $( '#'+taskId ).find('.progress-bar').css({ width: newTask.progress + '%' });
+                $( '#'+taskId ).find('.progress-indicator').text( newTask.progress + '%' );
+            }
+        });
     });
 
 
@@ -1212,7 +1240,7 @@ function loadTask(taskId, task) {
       }
 
       updateDisplay();
-   
+
         // Inject the icon if applicable
         // if ($widget.find('.state-icon').length == 0) {
         //     $widget.prepend('<span class="state-icon ' + settings[$widget.data('state')].icon + '"></span>');
@@ -1222,7 +1250,7 @@ function loadTask(taskId, task) {
   });
 
   // $('#get-checked-data').on('click', function(event) {
-  //  event.preventDefault(); 
+  //  event.preventDefault();
   //  var checkedItems = {}, counter = 0;
   //  $("#check-list-box li.active").each(function(idx, li) {
   //    checkedItems[counter] = $(li).text();
@@ -1255,9 +1283,9 @@ $('#createaccount').on('click', function(event) {
         if (!error) {
           sessionStorage.user_id = user_id;
             window.location.href = "/user";
-        } 
+        }
     });
-}); 
+});
 
 $('#signin').on('click', function(event) {
   event.preventDefault();
@@ -1272,7 +1300,7 @@ $('#signin').on('click', function(event) {
     } else {
         alert(error);
     }
-  }); 
+  });
 });
 
 $("#logout").click(function (event) {
