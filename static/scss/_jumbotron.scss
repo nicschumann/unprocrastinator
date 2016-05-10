@@ -208,3 +208,30 @@ body {
         /*# sourceMappingURL=jumbotron.css.map */
 
       }}
+
+      /*CSS for mobile*/
+
+       
+       @media only screen and (max-device-width: 480px) {
+         
+         #monthBar {
+           width: 100%;
+           margin: 5px 0 20px 0;
+         }
+         #agendaList {
+           width: 90%;
+           margin-top:70px;
+         }
+         .col-xs-11 {
+           width: 85%;
+         }
+         .dates{
+           padding-left: 25px;
+         }
+         .day {
+           margin: 0 -25px 0 -25px;
+         }
+         .dateWrapper{
+           display: none;
+         }
+       }

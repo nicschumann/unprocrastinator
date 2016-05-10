@@ -7,7 +7,7 @@ var tag_search = require('./tag-search')( db, $ );
 // Global date variables
 var today = new Date();
     today.setHours(0,0,0,0);
-    today.setDate(today.getDate());
+    today.setDate(today.getDate()+3);
 
 var todayId = generateDateId(today); 
 var dateCounter = 0;
@@ -1009,6 +1009,8 @@ function loadTask(taskId, task) {
           $(this).next().next().removeClass('checked');
           task.complete = false;
         }
+
+        $checkbox.attr("disabled", true);
 
         // patch task to mark complete or not. needs DB field
         db.patch_task_for_user(taskId, taskToPatch, function(error) {
