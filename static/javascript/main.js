@@ -1,3 +1,4 @@
+
 var db = require('../../queries/queries.js');
 var autosize = require('autosize');
 
@@ -6,6 +7,7 @@ var tag_search = require('./tag-search')( db, $ );
 // Global date variables
 var today = new Date();
     today.setHours(0,0,0,0);
+    today.setDate(today.getDate());
 
 var todayId = generateDateId(today); 
 var dateCounter = 0;
@@ -17,14 +19,9 @@ var taskMap = {};
 $(document).ready(function(){
   if ($('.index-body')[0]) {
     loadTaskMap();
-    //loadTodayOverview();
-    checkReassignTasks();
 
     $("#monthName").text(getMonthOfYear(today));
-
     $('#jumpDate').val(todayId);
-
-    console.log(today);
 
     // Load calendar jump datepicker
     $('.date').datepicker()
@@ -38,7 +35,7 @@ $(document).ready(function(){
       // where screen has to be 100%
       $(window).scroll(function(){
         if ($(window).scrollTop() == $(document).height()-$(window).height()){ // doesnt work if zoom is not at 100%
-          populateWeek();
+          populateWeek(taskMap);
         }
         if ($(window).scrollTop() == 0){
           $("#monthName").text(getMonthOfYear(today));
@@ -147,7 +144,7 @@ function getMonthByNum(i) {
 
 function scrollJump(date) {
   while ($("#" + generateDateId(date)).length == 0) {
-    populateWeek();
+    populateWeek(taskMap);
   }
   $.scrollTo($("#" + generateDateId(date)));
 }
@@ -214,26 +211,32 @@ function loadTaskMap() {
             taskMap[taskDateId] = [{task_id: task_id, task: task}];
           }
       }
-      populateWeek();
-      checkReassignTasks();
+
+      var reassignTaskMap = {};
+      for (var dateId in taskMap) {
+        if (generateDateFromId(dateId).getTime() < today.getTime()) {
+          reassignTaskMap[dateId] = taskMap[dateId];
+          delete taskMap[dateId]
+          console.log('moved to reassigntaskmap')
+         };
+      };
+
+      checkReassignTasks(reassignTaskMap);
+      populateWeek(taskMap);
     }
   }); 
 }
 
-function checkReassignTasks() {
-  for (var dateId in taskMap) {
+function checkReassignTasks(reassignTaskMap) {
+  for (var dateId in reassignTaskMap) {
     if (generateDateFromId(dateId).getTime() < today.getTime()) {
-      for (var taskIndex in taskMap[dateId]) {
-        var taskPair = taskMap[dateId][taskIndex];
+      for (var taskIndex in reassignTaskMap[dateId]) {
+        var taskPair = reassignTaskMap[dateId][taskIndex];
         var reassignedTask = taskPair.task;
         reassignedTask.assigned_date = today.getTime();
 
-        db.patch_task_for_user( taskPair.task_id, reassignedTask, function(err, task) {
-          
-          appendTask(taskPair.task_id, reassignedTask);
-          $("#" + taskPair.task_id).find(".taskName").css("color", "red");
-
-        })
+        db.patch_task_for_user( taskPair.task_id, reassignedTask);
+        appendTask(taskPair.task_id, reassignedTask, true);
 
       }
     }
@@ -257,7 +260,7 @@ function generateDayTemplate(currDate) {
                 '<div class="well" style="height: auto;overflow: auto;">' + 
                   '<ul class="tasks list-group checked-list-box">' +
                   '</ul>'+ 
-                    '<div class="input-group">' +
+                    '<div class="input-group" style="width:99%">' +
                       '<input type="text" class="form-control taskInput" placeholder="Category, Task name..." aria-describedby="basic-addon2">' +
                         '<span class="input-group-addon taskButton"> + </span>' +
                     '</div>'+
@@ -303,7 +306,7 @@ function loadTodayOverview() {
 /*
     populateWeek: Populates the next 7 days. Is called for use in the infinite scroll.
 */
-function populateWeek() {
+function populateWeek(loadedTaskMap) {
   for (i = 0; i < 7; i++) {
     var currDate = new Date();
     currDate.setDate(today.getDate() + dateCounter);
@@ -312,10 +315,10 @@ function populateWeek() {
 
     var currDateId = generateDateId(currDate);
 
-    if (taskMap[currDateId]) { 
-      for (var taskIndex in taskMap[currDateId]) {
-        var taskPair = taskMap[currDateId][taskIndex];
-        appendTask(taskPair.task_id, taskPair.task);
+    if (loadedTaskMap[currDateId]) { 
+      for (var taskIndex in loadedTaskMap[currDateId]) {
+        var taskPair = loadedTaskMap[currDateId][taskIndex];
+        appendTask(taskPair.task_id, taskPair.task, false);
       }
     }
 
@@ -358,7 +361,7 @@ function populateWeek() {
       };
 
       db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
-        appendTask(taskId, taskToAdd);
+        appendTask(taskId, taskToAdd, false);
       });
 
       $(this).prev().val('');
@@ -406,11 +409,7 @@ function populateWeek() {
           db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId, task) {
 
             db.get_user_task( sessionStorage.user_id, taskId, function( err, task ) {
-
-              console.log( task );
-
-              appendTask(taskId, task);
-
+              appendTask(taskId, task, false);
             });
 
           });
@@ -431,7 +430,7 @@ function populateWeek() {
     @taskName - the name of the task.
     #TODO Currently uses a "dummy" random int as a task ID. Connect DB to use the real task ID.
 */
-function appendTask(taskId, task) {
+function appendTask(taskId, task, isReassigned) {
 
   // Assign task category color
   db.get_user(sessionStorage.user_id, function (error, user) {
@@ -591,6 +590,10 @@ function appendTask(taskId, task) {
 
       // Call loadTask to load the interactive features of a task (toggle, details, etc.)
       loadTask(taskId, task);
+      if (isReassigned) {
+        $("#" + taskId).find(".taskName").css("color", "red");
+        isReassigned = false;
+      }
   });
 
 
@@ -895,7 +898,7 @@ function loadTask(taskId, task) {
             $(this).on('hide', function (e) {
               $widget.remove();
               scrollJump(newAssignedDate);
-              appendTask(taskId, taskToPatch);
+              appendTask(taskId, taskToPatch, false);
             });
 
           });
@@ -1007,8 +1010,6 @@ function loadTask(taskId, task) {
           task.complete = false;
         }
 
-        console.log(task);
-
         // patch task to mark complete or not. needs DB field
         db.patch_task_for_user(taskId, taskToPatch, function(error) {
           if (error) {
@@ -1089,8 +1090,6 @@ function loadTask(taskId, task) {
           taskToPatch.hours = task.hours + total;
           var progress = Math.round((taskToPatch.hours / task.estimate) * 100);
           taskToPatch.progress = progress;
-
-          console.log( taskToPatch );
 
           db.patch_task_for_user(taskId, taskToPatch);
           $plusWrapper.empty();
