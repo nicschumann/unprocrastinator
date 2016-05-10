@@ -117,7 +117,10 @@ $(document).ready(function(){
               if (!error) {
                 sessionStorage.user_id = user_id;
                   window.location.href = "/user";
-              } 
+              } else {
+                  $('#errorModal').modal('show');
+                  $('#modalErrorText').text( error.message );
+              }
           });
       }); 
 
