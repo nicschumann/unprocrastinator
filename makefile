@@ -17,6 +17,10 @@ build-client:
 	sass $(SCSS_SOURCE):$(SCSS_TARGET)
 	browserify $(JS_SOURCE) -o $(JS_TARGET)
 
+build-client-min:
+	sass $(SCSS_SOURCE):$(SCSS_TARGET) --style compressed
+	browserify $(JS_SOURCE) | uglifyjs > $(JS_TARGET)
+
 serve:
 	sass --watch $(SCSS_SOURCE):$(SCSS_TARGET) &
 	watchify $(JS_SOURCE) -o $(JS_TARGET) &
