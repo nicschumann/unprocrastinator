@@ -807,7 +807,8 @@ function renderEstimate(estimatedTime) {
 function renderRemainder(estimatedTime, timeSpent) {
   if (estimatedTime) {
     var difference = estimatedTime - timeSpent;
-    var hoursLeft = Math.round(difference / 3600);
+    console.log("difference " + difference);
+    var hoursLeft = Math.floor(difference / 3600);
     var minutesLeft = Math.round((difference - 3600 * hoursLeft) / 60);
     var secondsLeft = Math.round(difference - 3600 * hoursLeft - 60 * minutesLeft);
 
@@ -1215,8 +1216,9 @@ function loadTask(taskId, task) {
     db.watch_task_hours( taskId, function( err, hours ) {
         db.get_user_task(sessionStorage.user_id, taskId, function (error, newTask) {
             if (newTask) {
-                renderRemainder( newTask.estimate, newTask.hours );
-                renderEstimate( newTask.estimate );
+              console.log("new task hours: " + newTask.hours);
+              renderRemainder( newTask.estimate, newTask.hours );
+              renderEstimate( newTask.estimate );
             }
         });
     })
@@ -1224,6 +1226,7 @@ function loadTask(taskId, task) {
     db.watch_task_estimate( taskId, function( err, estimate ) {
         db.get_user_task(sessionStorage.user_id, taskId, function (error, newTask) {
             if (newTask) {
+                console.log("new task hours: " + newTask.hours);
                 renderRemainder( newTask.estimate, newTask.hours );
                 renderEstimate( newTask.estimate );
                 newTask.progress = Math.round((newTask.hours / newTask.estimate) * 100);
