@@ -378,8 +378,6 @@ function populateWeek() {
 
             db.get_user_task( sessionStorage.user_id, taskId, function( err, task ) {
 
-              console.log( task );
-
               appendTask(taskId, task);
 
             });
@@ -735,7 +733,6 @@ function addTagToDb(tagText) {
     var newTags = task.tags ? task.tags : [];
 
     if (newTags.indexOf(tagText) >= 0) {
-      console.log('that tag exists already');
       return;
     }
 
@@ -807,7 +804,6 @@ function renderEstimate(estimatedTime, taskId) {
 function renderRemainder(estimatedTime, timeSpent, taskId) {
   if (estimatedTime) {
     var difference = estimatedTime - timeSpent;
-    console.log("difference " + difference);
     var hoursLeft = Math.floor(difference / 3600);
     var minutesLeft = Math.round((difference - 3600 * hoursLeft) / 60);
     var secondsLeft = Math.round(difference - 3600 * hoursLeft - 60 * minutesLeft);
@@ -1032,6 +1028,7 @@ function loadTask(taskId, task) {
               var new_estimate = total
               task_update = {
                   "estimate": new_estimate,
+                  "estimate_set": true,
                   "progress": Math.round((newTask.hours / new_estimate) * 100)
               };
               db.patch_task_for_user(taskId, task_update);
@@ -1081,8 +1078,6 @@ function loadTask(taskId, task) {
           $(this).next().next().removeClass('checked');
           task.complete = false;
         }
-
-        console.log(task);
 
         // patch task to mark complete or not. needs DB field
         db.patch_task_for_user(taskId, {complete: task.complete}, function(error) {
@@ -1311,7 +1306,6 @@ function loadTask(taskId, task) {
     db.watch_task_hours( taskId, function( err, hours ) {
         db.get_user_task(sessionStorage.user_id, taskId, function (error, newTask) {
             if (newTask) {
-              console.log("new task hours: " + newTask.hours);
               renderRemainder( newTask.estimate, newTask.hours, taskId);
               renderEstimate( newTask.estimate, taskId );
             }
@@ -1321,7 +1315,6 @@ function loadTask(taskId, task) {
     db.watch_task_estimate( taskId, function( err, estimate ) {
         db.get_user_task(sessionStorage.user_id, taskId, function (error, newTask) {
             if (newTask) {
-                console.log("new task hours: " + newTask.hours);
                 renderRemainder( newTask.estimate, newTask.hours, taskId );
                 renderEstimate( newTask.estimate, taskId );
                 newTask.progress = Math.round((newTask.hours / newTask.estimate) * 100);
