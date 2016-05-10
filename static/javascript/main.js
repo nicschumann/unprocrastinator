@@ -874,12 +874,27 @@ function renderEstimate(estimatedTime, taskId) {
 
 function renderRemainder(estimatedTime, timeSpent, taskId) {
   if (estimatedTime) {
-    var difference = estimatedTime - timeSpent;
-    var hoursLeft = Math.floor(difference / 3600);
-    var minutesLeft = Math.round((difference - 3600 * hoursLeft) / 60);
-    var secondsLeft = Math.round(difference - 3600 * hoursLeft - 60 * minutesLeft);
 
-    if (difference < 0) {
+    var difference = 0;
+    var hoursLeft = 0;
+    var minutesLeft = 0;
+    var seoncdleft = 0;
+    if (estimatedTime < 3600) {//less than 1 hour
+      difference = estimatedTime - timeSpent;
+      minutesLeft = Math.round((difference) / 60);
+      secondsLeft = Math.round(difference - 60 * minutesLeft);
+    } else {
+      difference = estimatedTime - timeSpent;
+      hoursLeft = Math.floor(difference / 3600);
+      minutesLeft = Math.round((difference - 3600 * hoursLeft) / 60);
+      secondsLeft = Math.round(difference - 3600 * hoursLeft - 60 * minutesLeft);
+    }
+    
+    console.log(difference);
+    if (difference < 0) { //over
+      if (hoursLeft == 0) {
+        $( '#'+taskId ).find('.remainderTimeText').text("Over " + (-1) * minutesLeft + " min. Please update your estimated time!");
+      }
       if (hoursLeft < 0) {
         if (minutesLeft < 0) {
           $( '#'+taskId ).find('.remainderTimeText').text("Over " + (-1) * hoursLeft + " hr and " + (-1) * minutesLeft + " min. Please update your estimated time!");
