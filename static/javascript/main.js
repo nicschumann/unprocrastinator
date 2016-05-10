@@ -139,7 +139,8 @@ $(document).ready(function(){
               sessionStorage.user_id = user_id;
               window.location.href = "/user";
           } else {
-              alert(error);
+              $('#errorModal').modal('show');
+              $('#modalErrorText').text( error.message );
           }
         }); 
       });
