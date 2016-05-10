@@ -450,7 +450,7 @@ function appendTask(taskId, task) {
       '</button>' + 
 
     '<button class="targetTimeButton" type="button">' +
-        '<span class="targetTimeIcon glyphicon glyphicon-hourglass" data-toggle="tooltip" title="Expected time to complete"></span>' +
+        '<span class="targetTimeIcon glyphicon glyphicon-hourglass" data-toggle="tooltip" title="Estimated time to completion"></span>' +
       '</button>' + 
       '<div class="targetTimeWrapper"></div>' +
       
