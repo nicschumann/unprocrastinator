@@ -15,7 +15,7 @@ The file you are looking at is the README for our project. The project uses a lo
 
 3. [final report](https://docs.google.com/a/brown.edu/document/d/19uGloGuMyR024V_m6vM_PHlFRA4iEAfp7oWiy0q-DiE/edit?usp=sharing). This is our final report, as a google drive document. Anyone who's authenticated to google with a brown email should be able to view the document. If you have any problems viewing this document, please email  **nicolas_schumann** ```at``` **brown** ```dot``` **edu**.
 
-That should be all you need! If you feel like you need more information, or want to get the project running locally, or generally have other questions, please email the group at **<cs-logins>** ```at``` **cs** ```dot``` **brown** ```dot``` **edu**.
+That should be all you need! If you feel like you need more information, or want to get the project running locally, or generally have other questions, please email the group at **our-cs-logins-listed-above** ```at``` **cs** ```dot``` **brown** ```dot``` **edu**.
 
 Thanks!
 
