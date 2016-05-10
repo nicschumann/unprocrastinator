@@ -484,11 +484,22 @@ function appendTask(taskId, task) {
   var d = due.getDate();
   var m = due.getMonth() + 1;
 
-  var taskDOM =
+  if (task.progress <= 100) {
+      var taskDOM =
     '<li id="'+ taskId +'" class="task list-group-item" data-checked="false">' +
       '<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + taskColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + " [Due " + m + "/" + d + "] " + "<b>" + "<i><span class='progress-indicator'>" + task.progress + "%" + "</span></i>" + "</b>" + '</span>' +
       taskDetailsDOM +
     '</li>';
+  } else {
+    var taskDOM =
+    '<li id="'+ taskId +'" class="task list-group-item" data-checked="false">' +
+      '<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + taskColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + " [Due " + m + "/" + d + "] " + "<b>" + "<i><span class='progress-indicator'>" + "</span></i>" + "</b>" + '</span>' +
+      taskDetailsDOM +
+    '</li>';
+  }
+
+
+
 
   $("#" + parseDate(task.assigned_date) + " .tasks").append(taskDOM);
 
@@ -790,7 +801,7 @@ function renderEstimate(estimatedTime) {
     } else {
       $('.targetTimeText').text("Estimated time: " + minutes + " min");
     }
-
+  }
 }
 
 function renderRemainder(estimatedTime, timeSpent) {
@@ -800,18 +811,17 @@ function renderRemainder(estimatedTime, timeSpent) {
     var minutesLeft = Math.round((difference - 3600 * hoursLeft) / 60);
     var secondsLeft = Math.round(difference - 3600 * hoursLeft - 60 * minutesLeft);
 
-    //$('.remainderTimeText').text(Math.round(difference / 60) + " min left!");
-
     if (difference < 0) {
       if (hoursLeft < 0) {
         if (minutesLeft < 0) {
-          $('.remainderTimeText').text("Over " + (-1) * hoursLeft + " hr and " + (-1) * minutesLeft + " min");
+          $('.remainderTimeText').text("Over " + (-1) * hoursLeft + " hr and " + (-1) * minutesLeft + " min. Please update your estimated time!");
         } else {
-          $('.remainderTimeText').text("Over " + (-1) * hoursLeft + " hr");
+          $('.remainderTimeText').text("Over " + (-1) * hoursLeft + " hr. Please update your estimated time!");
         }
       } else {
-        $('.remainderTimeText').text("Over " + (-1) * minutesLeft + " min");
+        $('.remainderTimeText').text("Over " + (-1) * minutesLeft + " min. Please update your estimated time!");
       }
+      $('.remainderTimeText').css("color", "red");
     } else {
       if (hoursLeft > 0) {
         if (minutesLeft > 0) {
@@ -822,6 +832,7 @@ function renderRemainder(estimatedTime, timeSpent) {
       } else {
         $('.remainderTimeText').text(minutesLeft + " min left!");
       }
+      $('.remainderTimeText').css("color", "black");
     }
   }
 }
@@ -1193,10 +1204,10 @@ function loadTask(taskId, task) {
     db.watch_task_progress( taskId, function( err, progress ) {
         db.get_user_task(sessionStorage.user_id, taskId, function (error, newTask) {
             if (newTask) {
-                console.log( 'update_progress' );
-                console.log( newTask.progress );
-                $( '#'+taskId ).find('.progress-bar').css({ width: newTask.progress + '%' });
+              $( '#'+taskId ).find('.progress-bar').css({ width: newTask.progress + '%' });
+              if (newTask.progress <= 100) {
                 $( '#'+taskId ).find('.progress-indicator').text( newTask.progress + '%' );
+              } 
             }
         });
     });
@@ -1204,9 +1215,6 @@ function loadTask(taskId, task) {
     db.watch_task_hours( taskId, function( err, hours ) {
         db.get_user_task(sessionStorage.user_id, taskId, function (error, newTask) {
             if (newTask) {
-                console.log( 'update_hours' );
-                console.log( newTask.hours );
-                //task.hours = hours;
                 renderRemainder( newTask.estimate, newTask.hours );
                 renderEstimate( newTask.estimate );
             }
@@ -1216,14 +1224,14 @@ function loadTask(taskId, task) {
     db.watch_task_estimate( taskId, function( err, estimate ) {
         db.get_user_task(sessionStorage.user_id, taskId, function (error, newTask) {
             if (newTask) {
-                console.log( 'update_estimate' );
-                console.log( newTask.estimate );
-                //task.estimate = estimate;
                 renderRemainder( newTask.estimate, newTask.hours );
                 renderEstimate( newTask.estimate );
-                newTask.progress = Math.round((newTask.hours / newTask.estimate) * 100)
+                newTask.progress = Math.round((newTask.hours / newTask.estimate) * 100);
                 $( '#'+taskId ).find('.progress-bar').css({ width: newTask.progress + '%' });
-                $( '#'+taskId ).find('.progress-indicator').text( newTask.progress + '%' );
+
+                if (newTask.progress <= 100) {
+                  $( '#'+taskId ).find('.progress-indicator').text( newTask.progress + '%' );
+                }
             }
         });
     });
