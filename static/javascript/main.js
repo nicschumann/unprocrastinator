@@ -44,56 +44,102 @@ var dateCounter = 0;
 //Global task map for loading existing tasks
 var taskMap = {};
 
-var colorArray = ["#ef4546", "#f37331", "#ffd83f", "#8ec742", "#90d6e8", "#5e843c", "#c04f9d", "#f4889c"];
-
-var colorCounter = 0;
-
-var categoryMap = {};
-
-
 // Actions to happen on page load
 $(document).ready(function(){
-  loadTaskMap();
-  //loadTodayOverview();
-  checkReassignTasks();
-
-  $("#monthName").text(getMonthOfYear(today));
-
-  // Load calendar jump datepicker
-  $("#jumpDate").val(todayId);
-  $('.date').datepicker()
-    .on('changeDate', function(e) {
-      //scrollJump($('#jumpDate').datepicker('getDate'));
-  });
+  if ($('.index-body')[0]) {
+    loadTaskMap();
 
 
-    // As user scrolls, loads 7 more days infinitely.
-    // #TODO - Currently has bugs according to screen/zoom size
-    // where screen has to be 100%
-    $(window).scroll(function(){
-      if ($(window).scrollTop() == $(document).height()-$(window).height()){ // doesnt work if zoom is not at 100%
-        populateWeek();
-      }
-      if ($(window).scrollTop() == 0){
-        $("#monthName").text(getMonthOfYear(today));
-      } else {
-        // #monthBar changes from APRIL to MAY to JUNE, etc, as it scrolls through the days.
-        var days = $(".day.row");
+    /** We removed this during the merge of JINA's code */
+    //var colorCounter = 0;
 
-      for (var i = 0; i < days.length; i++) {
-        if (collide( $("#monthBarWrap"), $("#" + days[i].id) )) {
-          $("#monthName").text(getMonthByNum(days[i].id[0]));
+    $("#monthName").text(getMonthOfYear(today));
+    $('#jumpDate').val(todayId);
+
+
+    // Load calendar jump datepicker
+    $('.date').datepicker()
+      .on('changeDate', function(e) {
+        console.log($('.date').datepicker('getDate'));
+        scrollJump($('.date').datepicker('getDate'));
+      });
+
+      // As user scrolls, loads 7 more days infinitely. 
+      // #TODO - Currently has bugs according to screen/zoom size 
+      // where screen has to be 100%
+      $(window).scroll(function(){
+        if ($(window).scrollTop() == $(document).height()-$(window).height()){ // doesnt work if zoom is not at 100%
+          populateWeek(taskMap);
         }
-      }
-    }
-  });
+        if ($(window).scrollTop() == 0){
+          $("#monthName").text(getMonthOfYear(today));
+        } else {
+          // #monthBar changes from APRIL to MAY to JUNE, etc, as it scrolls through the days.
+          var days = $(".day.row");
 
-  $('#datepicker1').on("changeDate", function() {
-      $('#pickedDate').val(
-          $('#datepicker1').datepicker('getFormattedDate')
-      );
-  });
-  $(window).scrollTop(0);
+          for (var i = 0; i < days.length; i++) {
+            if (collide( $("#monthBarWrap"), $("#" + days[i].id) )) {
+              $("#monthName").text(getMonthByNum(days[i].id[0]));
+            }
+          }
+        }
+    });
+
+    /** Removed this while merging JINA's code */
+    // $('#datepicker1').on("changeDate", function() {
+    //     $('#pickedDate').val(
+    //         $('#datepicker1').datepicker('getFormattedDate')
+    //     );
+    // });
+    // $(window).scrollTop(0);
+    } else if ($('.landing-body')[0]) {
+
+      // -----------------------------------------------------------
+
+      /************************
+          LANDING.HTML JS
+      *************************/
+
+      // Button and request handlers for landing.html
+      $('#myModal').on('shown.bs.modal', function () {
+        $('#myInput').focus()
+      })
+
+      $('#createaccount').on('click', function(event) {
+        event.preventDefault();
+          var user = {
+            "username": $("#newusername").val(),
+              "email": $("#newemail").val(),
+              "password": $("#newpassword").val(),
+              "categories": []
+          };
+          db.add_user(user, function (error, user_id) {
+              if (!error) {
+                sessionStorage.user_id = user_id;
+                  window.location.href = "/user";
+              } 
+          });
+      }); 
+
+      $('#signin').on('click', function(event) {
+        event.preventDefault();
+        var user = {
+          "email": $("#email").val(),
+          "password": $("#password").val()
+        };
+        db.log_in(user, function (error, user_id) {
+          if (!error) {
+              sessionStorage.user_id = user_id;
+              window.location.href = "/user";
+          } else {
+              alert(error);
+          }
+        }); 
+      });
+
+    } else if ($('.faq-body')[0]) {
+
+    }
 });
 
 /*
@@ -120,7 +166,7 @@ function getMonthByNum(i) {
 
 function scrollJump(date) {
   while ($("#" + generateDateId(date)).length == 0) {
-    populateWeek();
+    populateWeek(taskMap);
   }
   $.scrollTo($("#" + generateDateId(date)));
 }
@@ -187,23 +233,37 @@ function loadTaskMap() {
             taskMap[taskDateId] = [{task_id: task_id, task: task}];
           }
       }
-      populateWeek();
-      checkReassignTasks();
+
+      var reassignTaskMap = {};
+      for (var dateId in taskMap) {
+        if (generateDateFromId(dateId).getTime() < today.getTime()) {
+          reassignTaskMap[dateId] = taskMap[dateId];
+          delete taskMap[dateId]
+          console.log('moved to reassigntaskmap')
+         };
+      };
+
+      checkReassignTasks(reassignTaskMap);
+      populateWeek(taskMap);
     }
   });
 }
 
-function checkReassignTasks() {
-  for (var dateId in taskMap) {
+function checkReassignTasks(reassignTaskMap) {
+  for (var dateId in reassignTaskMap) {
     if (generateDateFromId(dateId).getTime() < today.getTime()) {
-      for (var taskIndex in taskMap[dateId]) {
-        var taskPair = taskMap[dateId][taskIndex];
+      for (var taskIndex in reassignTaskMap[dateId]) {
+        var taskPair = reassignTaskMap[dateId][taskIndex];
         var reassignedTask = taskPair.task;
         reassignedTask.assigned_date = today.getTime();
 
-        db.patch_task_for_user( taskPair.task_id, reassignedTask, function(err, task) {
-          appendTask(taskPair.task_id, reassignedTask);
-        })
+        // Removed this while merging JINA's Branch
+        // db.patch_task_for_user( taskPair.task_id, reassignedTask, function(err, task) {
+        //   appendTask(taskPair.task_id, reassignedTask);
+        // })
+
+        db.patch_task_for_user( taskPair.task_id, reassignedTask);
+        appendTask(taskPair.task_id, reassignedTask, true);
 
       }
     }
@@ -226,14 +286,13 @@ function generateDayTemplate(currDate) {
               '<p>' + 
                 '<div class="well" style="height: auto;overflow: auto;">' + 
                   '<ul class="tasks list-group checked-list-box">' +
-                  '</ul>'+
-                    '<div class="input-group">' +
+                  '</ul>'+ 
+                    '<div class="input-group" style="width:99%">' +
                       '<input type="text" class="form-control taskInput" placeholder="Category, Task name..." aria-describedby="basic-addon2">' +
                         '<span class="input-group-addon taskButton"> + </span>' +
                     '</div>'+
                 '</div>' +
               '</p>' +
-            '</div>'
             '</div>';
 }
 
@@ -273,7 +332,7 @@ function loadTodayOverview() {
 /*
     populateWeek: Populates the next 7 days. Is called for use in the infinite scroll.
 */
-function populateWeek() {
+function populateWeek(loadedTaskMap) {
   for (i = 0; i < 7; i++) {
     var currDate = new Date();
     currDate.setDate(today.getDate() + dateCounter);
@@ -282,10 +341,10 @@ function populateWeek() {
 
     var currDateId = generateDateId(currDate);
 
-    if (taskMap[currDateId]) {
-      for (var taskIndex in taskMap[currDateId]) {
-        var taskPair = taskMap[currDateId][taskIndex];
-        appendTask(taskPair.task_id, taskPair.task);
+    if (loadedTaskMap[currDateId]) { 
+      for (var taskIndex in loadedTaskMap[currDateId]) {
+        var taskPair = loadedTaskMap[currDateId][taskIndex];
+        appendTask(taskPair.task_id, taskPair.task, false);
       }
     }
 
@@ -337,7 +396,7 @@ function populateWeek() {
       };
 
       db.add_task_to_user(sessionStorage.user_id, taskToAdd, function(error, taskId) {
-        appendTask(taskId, taskToAdd);
+        appendTask(taskId, taskToAdd, false);
       });
 
       $(this).prev().val('');
@@ -395,7 +454,7 @@ function populateWeek() {
 
             db.get_user_task( sessionStorage.user_id, taskId, function( err, task ) {
 
-              appendTask(taskId, task);
+              appendTask(taskId, task, false);
 
             });
 
@@ -412,44 +471,30 @@ function populateWeek() {
 }
 
 /*
-    displayCalendarComponent: Loads the calendar component. Is used in two cases -
-        1) in the month bar where the user can click a day to jump to it without scrolling
-        2) in the task details where the user can reschedule a task
-
-*/
-function displayCalendarComponent() {
-    // #TODO - implement this... There are some libraries that provide it but I can't get them to work!
-}
-
-/*
     appendTask: Appends a task to a date.
     @dateId - the date ID for the date to append this task to
     @taskName - the name of the task.
     #TODO Currently uses a "dummy" random int as a task ID. Connect DB to use the real task ID.
 */
-function appendTask(taskId, task) {
+function appendTask(taskId, task, isReassigned) {
 
   // Assign task category color
-  var taskColor;
-  if (task.category in categoryMap) {
-    taskColor = categoryMap[task.category];
-  } else {
-    //#TODO add more colors and not throw this alert
-    if (colorCounter > 7) {
-      alert("You have too many categories! Please delete one before adding this task.")
-    } else {
-      categoryMap[task.category] = colorArray[colorCounter];
-      taskColor = categoryMap[task.category];
-      colorCounter++;
+  db.get_user(sessionStorage.user_id, function (error, user) {
+    var categoryColor;
+
+    for (category in user.categories) {
+      if (user.categories[category].name == task.category) {
+        categoryColor = user.categories[category].color;
+      }
     }
-  }
+
 
 // Took out estimated time part:
 
   var taskDetailsDOM =
     '<div class="taskDetails">' +
           '<input type="text" class="form-control editName" placeholder="' + task.name + '" style="display: none;">' +
-      '<h4 class="taskDetailsHeading">' + '<span style="color: '+ taskColor+'" >' + task.category.toUpperCase() + '</span> ' + task.name +'</h4>' +
+      '<h4 class="taskDetailsHeading">' + '<span style="color: '+ categoryColor +'" >' + task.category.toUpperCase() + '</span> ' + task.name +'</h4>' +
 
 
     '<button class="editButton" type="button">' +
@@ -506,23 +551,26 @@ function appendTask(taskId, task) {
   var taskDom;
 
   if (task.progress <= 100) {
-      taskDOM =
-    '<li id="'+ taskId +'" class="task list-group-item" data-checked="false">' +
-      '<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + taskColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + " [Due " + m + "/" + d + "] " + "<b>" + "<i><span class='progress-indicator'>" + task.progress + "%" + "</span></i>" + "</b>" + '</span>' +
-      taskDetailsDOM +
-    '</li>';
+      taskDOM = 
+        '<li id="'+ taskId +'" class="task list-group-item" data-checked="false">' +
+          '<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + categoryColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + " [Due " + m + "/" + d + "] " + "<b>" + "<i><span class='progress-indicator'>" + task.progress + "%" + "</span></i>" + "</b>" + '</span>' + 
+          taskDetailsDOM + 
+        '</li>';
   } else {
-    taskDOM =
-    '<li id="'+ taskId +'" class="task list-group-item" data-checked="false">' +
-      '<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + taskColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + " [Due " + m + "/" + d + "] " + "<b>" + "<i><span class='progress-indicator'>" + "</span></i>" + "</b>" + '</span>' +
-      taskDetailsDOM +
-    '</li>';
+      taskDOM = 
+        '<li id="'+ taskId +'" class="task list-group-item" data-checked="false">' +
+          '<input class="taskCheckbox" type="checkbox"/>' + '<span style="color: ' + categoryColor + '; font-weight="bolder">&#9679;</span> ' + '<span class="taskName">' + task.name + " [Due " + m + "/" + d + "] " + "<b>" + "<i><span class='progress-indicator'></span></i>" + "</b>" + '</span>' + 
+          taskDetailsDOM + 
+        '</li>';
   }
 
 
+      $("#" + parseDate(task.assigned_date) + " .tasks").append(taskDOM);
 
 
-  $("#" + parseDate(task.assigned_date) + " .tasks").append(taskDOM);
+      for (var tag in task.tags) {
+         $('#' + taskId + ' .tags').addTag(task.tags[tag]);
+      }
 
   if (task.due_date < today.getTime()) {
     $("#" + taskId).find(".taskName").css("color", "red");
@@ -541,80 +589,82 @@ function appendTask(taskId, task) {
     'onRemoveTag': removeTagFromDb
   });
 
-  for (var tag in task.tags) {
-     $('#' + taskId + ' .tags').addTag(task.tags[tag]);
-  }
+      // Load subtasks
+      for (var subtask in task.subtasks) {
+        renderSubtask( taskId, task.subtasks, task.subtasks[subtask].name, task.subtasks[subtask].complete );
+      }
+      $('#' + taskId + ' .taskDetails').hide(); // Hide taskDetails until clicked.
 
   // Load estimated time
   renderEstimate(task.estimate, taskId);
 
   renderRemainder(task.estimate, task.hours, taskId);
 
-  // Load subtasks
-  for (var subtask in task.subtasks) {
-    renderSubtask( taskId, task.subtasks, task.subtasks[subtask].name, task.subtasks[subtask].complete );
-  }
-  $('#' + taskId + ' .taskDetails').hide(); // Hide taskDetails until clicked.
+      // CSS cursor for add subtask button
+      $("#" + taskId + ' .subtaskButton').css("cursor", "pointer"); 
 
-  // CSS cursor for add subtask button
-  $("#" + taskId + ' .subtaskButton').css("cursor", "pointer");
-
-  // Event handlers for adding subtasks (click and enter key)
-  $("#" + taskId + ' .subtaskButton').click(function (e) {
-    e.preventDefault();
-    var taskId = $(this).parent().parent().parent().parent().attr('id');
-    var subtaskName = $(this).prev().val();
-    db.get_user_task(sessionStorage.user_id, taskId, function (error, task) {
-      if (error) {
-        console.log(error);
-        return;
-      }
-      appendSubtask(taskId, task.subtasks, subtaskName);
-      renderSubtask( taskId, task.subtasks, subtaskName, false );
-      $("#" + taskId + ' .subtaskButton').prev().val('');
-    })
-  });
-
-  $("#" + taskId + ' .subtaskInput').keypress(function (e) {
-     var key = e.which;
-     if (key == 13) { // the enter key code
-      e.preventDefault();
-      var taskId = $(this).parent().parent().parent().parent().attr('id');
-      var subtaskName = $(this).val();
-      db.get_user_task(sessionStorage.user_id, taskId, function (error, task) {
-        if (error) {
-          console.log(error);
-          return;
-        }
-        appendSubtask(taskId, task.subtasks, subtaskName);
-        renderSubtask( taskId, task.subtasks, subtaskName, false );
-        $("#" + taskId + ' .subtaskButton').prev().val('');
-      })
-    }
-  });
-
-  $("#" + taskId + ' .editName').keypress(function (e) {
-    var key = e.which;
-    if (key == 13) { // the enter key code
-      e.preventDefault();
-      var taskId = $(this).parent().parent().attr('id');
-      var name = $(this).val();
-
-      var taskPatch =  {
-        "name": name,
-      };
-
-      db.patch_task_for_user(taskId, taskPatch, function(error) {
-        $('#' + taskId).remove();
+      // Event handlers for adding subtasks (click and enter key)
+      $("#" + taskId + ' .subtaskButton').click(function (e) { 
+        e.preventDefault();
+        var taskId = $(this).parent().parent().parent().parent().attr('id');
+        var subtaskName = $(this).prev().val();
         db.get_user_task(sessionStorage.user_id, taskId, function (error, task) {
-          appendTask(taskId, task);
-        });
+          if (error) {
+            console.log(error);
+            return;
+          }
+          appendSubtask(taskId, task.subtasks, subtaskName);
+          renderSubtask( taskId, task.subtasks, subtaskName, false );
+          $("#" + taskId + ' .subtaskButton').prev().val('');
+        })
       });
-    }
+
+      $("#" + taskId + ' .subtaskInput').keypress(function (e) {
+         var key = e.which;
+         if (key == 13) { // the enter key code
+          e.preventDefault();
+          var taskId = $(this).parent().parent().parent().parent().attr('id');
+          var subtaskName = $(this).val();
+          db.get_user_task(sessionStorage.user_id, taskId, function (error, task) {
+            if (error) {
+              console.log(error);
+              return;
+            }
+            appendSubtask(taskId, task.subtasks, subtaskName);
+            renderSubtask( taskId, task.subtasks, subtaskName, false );
+            $("#" + taskId + ' .subtaskButton').prev().val('');
+          })
+        }
+      });
+
+      $("#" + taskId + ' .editName').keypress(function (e) {
+        var key = e.which;
+        if (key == 13) { // the enter key code
+          e.preventDefault();
+          var taskId = $(this).parent().parent().attr('id');
+          var name = $(this).val();
+
+          var taskPatch =  {
+            "name": name,
+          };
+
+          db.patch_task_for_user(taskId, taskPatch, function(error) {
+            $('#' + taskId).remove();
+            db.get_user_task(sessionStorage.user_id, taskId, function (error, task) {
+              appendTask(taskId, task, false);
+            });
+          });
+        }
+      });   
+
+      // Call loadTask to load the interactive features of a task (toggle, details, etc.)
+      loadTask(taskId, task);
+      if (isReassigned) {
+        $("#" + taskId).find(".taskName").css("color", "red");
+        isReassigned = false;
+      }
   });
 
-  // Call loadTask to load the interactive features of a task (toggle, details, etc.)
-  loadTask(taskId, task);
 }
 
 /*
@@ -916,16 +966,13 @@ function loadTask(taskId, task) {
         $widget.find('.dateWrapper').append(
           '<div class="input-group input-daterange">' +
               '<span class="input-group-addon">Assigned:</span>' +
-              '<input type="text" class="form-control assign-date" value="' + parseDate(task.assigned_date) + '">' +
+              '<input type="text" class="form-control assign-date" data-date-start-date="yesterday" value="' + parseDate(task.assigned_date) + '">' +
               '<span class="input-group-addon">Due:</span>' +
-              '<input type="text" class="form-control due-date" value="' + parseDate(task.due_date) + '">' +
+              '<input type="text" class="form-control due-date" data-date-start-date="yesterday" value="' + parseDate(task.due_date) + '">' +
           '</div>')
 
         $widget.find('.input-daterange input').each(function() {
           $(this).datepicker();
-          // $(this).on('changeDate', function (e) {
-          //   console.log($(this).datepicker('getDate'));
-          // });
         });
 
         $widget.find('.input-daterange .assign-date').each(function() {
@@ -938,8 +985,8 @@ function loadTask(taskId, task) {
 
             $(this).on('hide', function (e) {
               $widget.remove();
-              //scrollJump(newAssignedDate);
-              appendTask(taskId, taskToPatch);
+              scrollJump(newAssignedDate);
+              appendTask(taskId, taskToPatch, false);
             });
 
           });
@@ -1085,6 +1132,9 @@ function loadTask(taskId, task) {
     // -----------------------
     // Datepicker event handlers
 
+    if (task.complete) {
+      $checkbox.attr("disabled", true);
+    }
 
     // Handle clicking the task outside of the checkbox
     $widget.on('click', function () {
@@ -1116,6 +1166,9 @@ function loadTask(taskId, task) {
           $(this).next().next().removeClass('checked');
           task.complete = false;
         }
+
+        // this is where CHECKBOX stuff happens (merging JINA's commits).
+        $checkbox.attr("disabled", true);
 
         // patch task to mark complete or not. needs DB field
         db.patch_task_for_user(taskId, {complete: task.complete}, function(error) {
@@ -1421,50 +1474,6 @@ function loadTask(taskId, task) {
   //  $('#display-json').html(JSON.stringify(checkedItems, null, '\t'));
   // });
 }
-
-// -----------------------------------------------------------
-
-/************************
-    LANDING.HTML JS
-*************************/
-
-// Button and request handlers for landing.html
-$('#myModal').on('shown.bs.modal', function () {
-  $('#myInput').focus()
-})
-
-$('#createaccount').on('click', function(event) {
-  event.preventDefault();
-    var user = {
-      "username": $("#newusername").val(),
-        "email": $("#newemail").val(),
-        "password": $("#newpassword").val(),
-        "categories": []
-    };
-    db.add_user(user, function (error, user_id) {
-        if (!error) {
-          sessionStorage.user_id = user_id;
-            window.location.href = "/user";
-        }
-    });
-});
-
-$('#signin').on('click', function(event) {
-  event.preventDefault();
-  var user = {
-    "email": $("#email").val(),
-    "password": $("#password").val()
-  };
-  db.log_in(user, function (error, user_id) {
-    if (!error) {
-        sessionStorage.user_id = user_id;
-        window.location.href = "/user";
-    } else {
-        $("#modalErrorText").text(error);
-        $("#errorModal").modal('show');
-    }
-  });
-});
 
 $("#logout").click(function (event) {
     event.preventDefault();
