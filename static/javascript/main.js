@@ -1113,6 +1113,7 @@ function loadTask(taskId, task) {
           var total = 3600 * hours + 60 * minutes; //total is in seconds
 
           if (!isNaN(hours) && !isNaN(minutes)) {
+
             $widget.find('.targetTimeText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
 
             db.get_user_task(sessionStorage.user_id, taskId, function (err, newTask) {
@@ -1301,7 +1302,7 @@ function loadTask(taskId, task) {
           var total = 3600 * hours + 60 * minutes; //total is in seconds
 
           if (!isNaN(hours) && !isNaN(minutes)) {
-
+            
             $widget.find('.progressText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
             $widget.find('.progressText').text(hours + " hr " + minutes + " min of progress time have been added.");
             $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});
@@ -1317,6 +1318,7 @@ function loadTask(taskId, task) {
 
             $plusWrapper.empty();
           }
+
         }
       });
       } else if ($plusWrapper.find('.plusProgress').length == 1) {
