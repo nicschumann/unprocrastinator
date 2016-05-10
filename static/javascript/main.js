@@ -29,6 +29,8 @@ Ask Jina about the front end code anytime!!! :)
 
 ********************************************/
 
+var fadeOutTiming = 750;
+
 var db = require('../../queries/queries.js');
 var autosize = require('autosize');
 
@@ -44,11 +46,14 @@ var dateCounter = 0;
 //Global task map for loading existing tasks
 var taskMap = {};
 
+function fadeOverlayOut() {
+     $('#overlay').fadeOut( fadeOutTiming ); 
+}
+
 // Actions to happen on page load
 $(document).ready(function(){
   if ($('.index-body')[0]) {
     loadTaskMap();
-
 
     /** We removed this during the merge of JINA's code */
     //var colorCounter = 0;
@@ -100,6 +105,8 @@ $(document).ready(function(){
           LANDING.HTML JS
       *************************/
 
+      fadeOverlayOut();
+
       // Button and request handlers for landing.html
       $('#myModal').on('shown.bs.modal', function () {
         $('#myInput').focus()
@@ -138,6 +145,8 @@ $(document).ready(function(){
       });
 
     } else if ($('.faq-body')[0]) {
+
+      fadeOverlayOut();
 
     }
 });
@@ -245,6 +254,7 @@ function loadTaskMap() {
 
       checkReassignTasks(reassignTaskMap);
       populateWeek(taskMap);
+      fadeOverlayOut();
     }
   });
 }
