@@ -95,25 +95,6 @@ $(document).ready(function(){
         }); 
       });
 
-      $("#logout").click(function (event) {
-          event.preventDefault();
-          db.log_out(function (error) {
-              if (!error) {
-                  window.location.href = "/login";
-              }
-          });
-      });
-
-      $("#unprocrastinator").click(function (event) { //automatically log user out
-          event.preventDefault();
-          db.log_out(function (error) {
-              if (!error) {
-                  window.location.href = "/login";
-              }
-          });
-      });
-
-
     } else if ($('.faq-body')[0]) {
 
     }
@@ -1249,6 +1230,25 @@ function loadTask(taskId, task) {
   //  $('#display-json').html(JSON.stringify(checkedItems, null, '\t'));
   // });
 }
+
+
+$("#logout").click(function (event) {
+    event.preventDefault();
+    db.log_out(function (error) {
+        if (!error) {
+            window.location.href = "/login";
+        }
+    });
+});
+
+$("#unprocrastinator").click(function (event) { //automatically log user out
+    event.preventDefault();
+    db.log_out(function (error) {
+        if (!error) {
+            window.location.href = "/login";
+        }
+    });
+});
 
 /*
 displayUserInfo: displays user info to
