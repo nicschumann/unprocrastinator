@@ -1099,7 +1099,11 @@ function loadTask(taskId, task) {
 
           var total = 3600 * hours + 60 * minutes; //total is in seconds
 
-          $widget.find('.targetTimeText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
+          if (!isNaN(hours) && !isNaN(minutes)) {
+
+            $widget.find('.targetTimeText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
+
+          
           //$widget.find('.targetTimeText').text("Estimated time " + hours + ": " + minutes + ": " + seconds);
 
         //   var taskToPatch = task;
@@ -1118,6 +1122,8 @@ function loadTask(taskId, task) {
               };
               db.patch_task_for_user(taskId, task_update);
           });
+          
+        }
 
 
           $targetTimeWrapper.empty();
@@ -1290,10 +1296,8 @@ function loadTask(taskId, task) {
 
           var total = 3600 * hours + 60 * minutes; //total is in seconds
 
-          if (isNaN(hours) || isNaN(minutes)) {
+          if (!isNaN(hours) && !isNaN(minutes)) {
             
-            console.log("error");
-          } else {
             $widget.find('.progressText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
             $widget.find('.progressText').text(hours + " hr " + minutes + " min of progress time have been added.");
             $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});
@@ -1309,6 +1313,7 @@ function loadTask(taskId, task) {
 
             $plusWrapper.empty();
           }
+
         }
       });
       } else if ($plusWrapper.find('.plusProgress').length == 1) {
