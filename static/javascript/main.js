@@ -55,17 +55,12 @@ $(document).ready(function(){
   if ($('.index-body')[0]) {
     loadTaskMap();
 
-    /** We removed this during the merge of JINA's code */
-    //var colorCounter = 0;
-
     $("#monthName").text(getMonthOfYear(today));
     $('#jumpDate').val(todayId);
-
 
     // Load calendar jump datepicker
     $('.date').datepicker()
       .on('changeDate', function(e) {
-        console.log($('.date').datepicker('getDate'));
         scrollJump($('.date').datepicker('getDate'));
       });
 
@@ -90,13 +85,6 @@ $(document).ready(function(){
         }
     });
 
-    /** Removed this while merging JINA's code */
-    // $('#datepicker1').on("changeDate", function() {
-    //     $('#pickedDate').val(
-    //         $('#datepicker1').datepicker('getFormattedDate')
-    //     );
-    // });
-    // $(window).scrollTop(0);
     } else if ($('.landing-body')[0]) {
 
       // -----------------------------------------------------------
@@ -175,6 +163,7 @@ function getMonthByNum(i) {
 }
 
 function scrollJump(date) {
+  date.setDate(date.getDate() - 1);
   while ($("#" + generateDateId(date)).length == 0) {
     populateWeek(taskMap);
   }
@@ -249,7 +238,6 @@ function loadTaskMap() {
         if (generateDateFromId(dateId).getTime() < today.getTime()) {
           reassignTaskMap[dateId] = taskMap[dateId];
           delete taskMap[dateId]
-          console.log('moved to reassigntaskmap')
          };
       };
 
@@ -266,14 +254,18 @@ function checkReassignTasks(reassignTaskMap) {
       for (var taskIndex in reassignTaskMap[dateId]) {
         var taskPair = reassignTaskMap[dateId][taskIndex];
         var reassignedTask = taskPair.task;
-        reassignedTask.assigned_date = today.getTime();
 
         // Removed this while merging JINA's Branch
         // db.patch_task_for_user( taskPair.task_id, reassignedTask, function(err, task) {
         //   appendTask(taskPair.task_id, reassignedTask);
         // })
 
-        db.patch_task_for_user( taskPair.task_id, reassignedTask);
+        var taskPatch = {
+          "assigned_date": today.getTime()
+        }
+
+
+        db.patch_task_for_user( taskPair.task_id, taskPatch );
         appendTask(taskPair.task_id, reassignedTask, true);
 
       }
@@ -893,12 +885,27 @@ function renderEstimate(estimatedTime, taskId) {
 
 function renderRemainder(estimatedTime, timeSpent, taskId) {
   if (estimatedTime) {
-    var difference = estimatedTime - timeSpent;
-    var hoursLeft = Math.floor(difference / 3600);
-    var minutesLeft = Math.round((difference - 3600 * hoursLeft) / 60);
-    var secondsLeft = Math.round(difference - 3600 * hoursLeft - 60 * minutesLeft);
 
-    if (difference < 0) {
+    var difference = 0;
+    var hoursLeft = 0;
+    var minutesLeft = 0;
+    var seoncdleft = 0;
+    if (estimatedTime < 3600) {//less than 1 hour
+      difference = estimatedTime - timeSpent;
+      minutesLeft = Math.round((difference) / 60);
+      secondsLeft = Math.round(difference - 60 * minutesLeft);
+    } else {
+      difference = estimatedTime - timeSpent;
+      hoursLeft = Math.floor(difference / 3600);
+      minutesLeft = Math.round((difference - 3600 * hoursLeft) / 60);
+      secondsLeft = Math.round(difference - 3600 * hoursLeft - 60 * minutesLeft);
+    }
+    
+    console.log(difference);
+    if (difference < 0) { //over
+      if (hoursLeft == 0) {
+        $( '#'+taskId ).find('.remainderTimeText').text("Over " + (-1) * minutesLeft + " min. Please update your estimated time!");
+      }
       if (hoursLeft < 0) {
         if (minutesLeft < 0) {
           $( '#'+taskId ).find('.remainderTimeText').text("Over " + (-1) * hoursLeft + " hr and " + (-1) * minutesLeft + " min. Please update your estimated time!");
@@ -990,9 +997,13 @@ function loadTask(taskId, task) {
           $(this).on('changeDate', function (e) {
             var taskToPatch = task;
             var newAssignedDate = $(this).datepicker('getDate');
-            taskToPatch.assigned_date = $(this).datepicker('getDate').getTime();
+            taskToPatch.assigned_date = newAssignedDate.getTime();
+            
+            var taskPatch = {
+              "assigned_date": newAssignedDate.getTime()
+            }
 
-            db.patch_task_for_user(taskId, taskToPatch);
+            db.patch_task_for_user(taskId, taskPatch);
 
             $(this).on('hide', function (e) {
               $widget.remove();
@@ -1005,10 +1016,12 @@ function loadTask(taskId, task) {
 
         $widget.find('.input-daterange .due-date').each(function() {
           $(this).on('changeDate', function (e) {
-            var taskToPatch = task;
+
             var dueDate = $(this).datepicker('getDate');
-            taskToPatch.due_date = dueDate.getTime();
-            db.patch_task_for_user(taskId, taskToPatch);
+            var taskPatch = {
+              "due_date": dueDate.getTime()
+            }
+            db.patch_task_for_user(taskId, taskPatch);
 
             var taskTitleBar = $widget.find('.taskName')[0].innerHTML;
             var dateString = dueDate.getMonth() + 1 + '/' + dueDate.getDate();
@@ -1114,30 +1127,19 @@ function loadTask(taskId, task) {
 
             $widget.find('.targetTimeText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
 
-          
-          //$widget.find('.targetTimeText').text("Estimated time " + hours + ": " + minutes + ": " + seconds);
-
-        //   var taskToPatch = task;
-        //   taskToPatch.estimate = total;
-        //   var progress = Math.round((taskToPatch.hours / taskToPatch.estimate) * 100);
-        //   taskToPatch.progress = progress;
-          //
-        //   db.patch_task_for_user(taskId, taskToPatch);
-
-          db.get_user_task(sessionStorage.user_id, taskId, function (err, newTask) {
-              var new_estimate = total
-              task_update = {
-                  "estimate": new_estimate,
-                  "estimate_set": true,
-                  "progress": Math.round((newTask.hours / new_estimate) * 100)
-              };
-              db.patch_task_for_user(taskId, task_update);
-          });
-          
-        }
+            db.get_user_task(sessionStorage.user_id, taskId, function (err, newTask) {
+                var new_estimate = total
+                var taskPatch = {
+                    "estimate": new_estimate,
+                    "estimate_set": true,
+                    "progress": Math.round((newTask.hours / new_estimate) * 100)
+                };
+                db.patch_task_for_user(taskId, taskPatch);
+            });
 
 
-          $targetTimeWrapper.empty();
+            $targetTimeWrapper.empty();
+          }
         }
       });
       } else if ($targetTimeWrapper.find('.targetTime').length == 1) {
@@ -1188,11 +1190,14 @@ function loadTask(taskId, task) {
         $checkbox.attr("disabled", true);
 
         // patch task to mark complete or not. needs DB field
-        db.patch_task_for_user(taskId, {complete: task.complete}, function(error) {
+        var taskPatch = {
+          "complete": task.complete
+        }
+        db.patch_task_for_user(taskId, taskPatch, function(error) {
           if (error) {
             console.log(error);
           }
-        })
+        });
 
         $widget.data('state', (isChecked) ? "complete" : "incomplete");
       });
@@ -1308,18 +1313,18 @@ function loadTask(taskId, task) {
           var total = 3600 * hours + 60 * minutes; //total is in seconds
 
           if (!isNaN(hours) && !isNaN(minutes)) {
-            
+
             $widget.find('.progressText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
             $widget.find('.progressText').text(hours + " hr " + minutes + " min of progress time have been added.");
             $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});
 
             db.get_user_task(sessionStorage.user_id, taskId, function (err, newTask) {
               var new_hours = newTask.hours + total
-              task_update = {
+              var taskPatch= {
                   "hours": new_hours,
                   "progress": Math.round((new_hours / newTask.estimate) * 100)
               };
-              db.patch_task_for_user(taskId, task_update);
+              db.patch_task_for_user(taskId, taskPatch);
             });
 
             $plusWrapper.empty();
@@ -1365,13 +1370,13 @@ function loadTask(taskId, task) {
           $widget.find('.progressText').text(hours + " hr " + minutes + " min of progress time have been added.");
           $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});
 
-          var taskToPatch = task;
+          var progress = Math.round((task.hours + total / task.estimate) * 100);
 
-          taskToPatch.hours = task.hours + total;
-          var progress = Math.round((taskToPatch.hours / task.estimate) * 100);
-          taskToPatch.progress = progress;
-
-          db.patch_task_for_user(taskId, taskToPatch);
+          var taskPatch = {
+            "hours": task.hours + total,
+            "progress": progress
+          }
+          db.patch_task_for_user(taskId, taskPatch);
 
         });
       } else if ($timerWrapper.find('.timer').length == 1) {

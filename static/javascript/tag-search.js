@@ -178,9 +178,6 @@ module.exports = function( db ) {
 
 		function setAutocompleteSource( event, categories ) {
 
-			//console.log( event );
-			//console.log( categories );
-
 			element.autocomplete('setSource', TAGS );
 
 		}
