@@ -1199,20 +1199,25 @@ function loadTask(taskId, task) {
 
           var total = 3600 * hours + 60 * minutes; //total is in seconds
 
-          $widget.find('.progressText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
-          $widget.find('.progressText').text(hours + " hr " + minutes + " min of progress time have been added.");
-          $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});
+          if (isNaN(hours) || isNaN(minutes)) {
+            
+            console.log("error");
+          } else {
+            $widget.find('.progressText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
+            $widget.find('.progressText').text(hours + " hr " + minutes + " min of progress time have been added.");
+            $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});
 
-          db.get_user_task(sessionStorage.user_id, taskId, function (err, newTask) {
+            db.get_user_task(sessionStorage.user_id, taskId, function (err, newTask) {
               var new_hours = newTask.hours + total
               task_update = {
                   "hours": new_hours,
                   "progress": Math.round((new_hours / newTask.estimate) * 100)
               };
               db.patch_task_for_user(taskId, task_update);
-          });
+            });
 
-          $plusWrapper.empty();
+            $plusWrapper.empty();
+          }
         }
       });
       } else if ($plusWrapper.find('.plusProgress').length == 1) {
