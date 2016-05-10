@@ -49,18 +49,12 @@ $(document).ready(function(){
   if ($('.index-body')[0]) {
     loadTaskMap();
 
-
-    /** We removed this during the merge of JINA's code */
-    //var colorCounter = 0;
-
     $("#monthName").text(getMonthOfYear(today));
     $('#jumpDate').val(todayId);
-
 
     // Load calendar jump datepicker
     $('.date').datepicker()
       .on('changeDate', function(e) {
-        console.log($('.date').datepicker('getDate'));
         scrollJump($('.date').datepicker('getDate'));
       });
 
@@ -85,13 +79,6 @@ $(document).ready(function(){
         }
     });
 
-    /** Removed this while merging JINA's code */
-    // $('#datepicker1').on("changeDate", function() {
-    //     $('#pickedDate').val(
-    //         $('#datepicker1').datepicker('getFormattedDate')
-    //     );
-    // });
-    // $(window).scrollTop(0);
     } else if ($('.landing-body')[0]) {
 
       // -----------------------------------------------------------
@@ -240,7 +227,6 @@ function loadTaskMap() {
         if (generateDateFromId(dateId).getTime() < today.getTime()) {
           reassignTaskMap[dateId] = taskMap[dateId];
           delete taskMap[dateId]
-          console.log('moved to reassigntaskmap')
          };
       };
 
@@ -1100,28 +1086,22 @@ function loadTask(taskId, task) {
 
           var total = 3600 * hours + 60 * minutes; //total is in seconds
 
-          $widget.find('.targetTimeText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
-          //$widget.find('.targetTimeText').text("Estimated time " + hours + ": " + minutes + ": " + seconds);
+          if (!isNaN(hours) && !isNaN(minutes)) {
+            $widget.find('.targetTimeText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
 
-        //   var taskToPatch = task;
-        //   taskToPatch.estimate = total;
-        //   var progress = Math.round((taskToPatch.hours / taskToPatch.estimate) * 100);
-        //   taskToPatch.progress = progress;
-          //
-        //   db.patch_task_for_user(taskId, taskToPatch);
-
-          db.get_user_task(sessionStorage.user_id, taskId, function (err, newTask) {
-              var new_estimate = total
-              task_update = {
-                  "estimate": new_estimate,
-                  "estimate_set": true,
-                  "progress": Math.round((newTask.hours / new_estimate) * 100)
-              };
-              db.patch_task_for_user(taskId, task_update);
-          });
+            db.get_user_task(sessionStorage.user_id, taskId, function (err, newTask) {
+                var new_estimate = total
+                task_update = {
+                    "estimate": new_estimate,
+                    "estimate_set": true,
+                    "progress": Math.round((newTask.hours / new_estimate) * 100)
+                };
+                db.patch_task_for_user(taskId, task_update);
+            });
 
 
-          $targetTimeWrapper.empty();
+            $targetTimeWrapper.empty();
+          }
         }
       });
       } else if ($targetTimeWrapper.find('.targetTime').length == 1) {
@@ -1291,10 +1271,8 @@ function loadTask(taskId, task) {
 
           var total = 3600 * hours + 60 * minutes; //total is in seconds
 
-          if (isNaN(hours) || isNaN(minutes)) {
-            
-            console.log("error");
-          } else {
+          if (!isNaN(hours) && !isNaN(minutes)) {
+
             $widget.find('.progressText').css({ opacity: 1, "height": "auto", "padding-bottom" : "10px"});
             $widget.find('.progressText').text(hours + " hr " + minutes + " min of progress time have been added.");
             $widget.find('.progressText').delay(2000).animate({ opacity: 0, "height": "0", "padding-bottom": "0px"});

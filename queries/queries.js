@@ -244,7 +244,6 @@ exports.add_task_to_user = function (user_id, task, callback) {
                         task_ref.child("tags").on("value", function (tags_snapshot) {
                             task_ref.child("estimate_set").once("value", function (estimate_set_snapshot) {
                                 var estimate_set = estimate_set_snapshot.exists() ? estimate_set_snapshot.val() : false;
-                                console.log(estimate_set);
                                 if (tags_snapshot.exists() && !estimate_set) {
                                     users.child(user_id).child("tags").once("value", function (snapshot) {
                                         var user_tags = snapshot.exists() ? snapshot.val() : [];
