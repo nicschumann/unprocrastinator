@@ -978,6 +978,9 @@ function loadTask(taskId, task) {
     // -----------------------
     // Datepicker event handlers
 
+    if (task.complete) {
+      $checkbox.attr("disabled", true);
+    }
 
     // Handle clicking the task outside of the checkbox
     $widget.on('click', function () {
