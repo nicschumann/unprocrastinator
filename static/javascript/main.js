@@ -29,6 +29,8 @@ Ask Jina about the front end code anytime!!! :)
 
 ********************************************/
 
+var fadeOutTiming = 750;
+
 var db = require('../../queries/queries.js');
 var autosize = require('autosize');
 
@@ -43,6 +45,10 @@ var dateCounter = 0;
 
 //Global task map for loading existing tasks
 var taskMap = {};
+
+function fadeOverlayOut() {
+     $('#overlay').fadeOut( fadeOutTiming ); 
+}
 
 // Actions to happen on page load
 $(document).ready(function(){
@@ -87,6 +93,8 @@ $(document).ready(function(){
           LANDING.HTML JS
       *************************/
 
+      fadeOverlayOut();
+
       // Button and request handlers for landing.html
       $('#myModal').on('shown.bs.modal', function () {
         $('#myInput').focus()
@@ -119,12 +127,15 @@ $(document).ready(function(){
               sessionStorage.user_id = user_id;
               window.location.href = "/user";
           } else {
-              alert(error);
+              $('#errorModal').modal('show');
+              $('#modalErrorText').text( error.message );
           }
         }); 
       });
 
     } else if ($('.faq-body')[0]) {
+
+      fadeOverlayOut();
 
     }
 });
@@ -232,6 +243,7 @@ function loadTaskMap() {
 
       checkReassignTasks(reassignTaskMap);
       populateWeek(taskMap);
+      fadeOverlayOut();
     }
   });
 }
@@ -972,9 +984,9 @@ function loadTask(taskId, task) {
         $widget.find('.dateWrapper').append(
           '<div class="input-group input-daterange">' +
               '<span class="input-group-addon">Assigned:</span>' +
-              '<input type="text" class="form-control assign-date" data-date-start-date="yesterday" value="' + parseDate(task.assigned_date) + '">' +
+              '<input type="text" class="form-control assign-date" data-date-start-date="today" value="' + parseDate(task.assigned_date) + '">' +
               '<span class="input-group-addon">Due:</span>' +
-              '<input type="text" class="form-control due-date" data-date-start-date="yesterday" value="' + parseDate(task.due_date) + '">' +
+              '<input type="text" class="form-control due-date" data-date-start-date="today" value="' + parseDate(task.due_date) + '">' +
           '</div>')
 
         $widget.find('.input-daterange input').each(function() {

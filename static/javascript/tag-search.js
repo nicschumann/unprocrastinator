@@ -79,7 +79,7 @@ module.exports = function( db ) {
 
 		options = options || {};
 
-		//$(document).on( category_update, setAutocompleteSource );
+		$(document).on( category_update, initializeAutocomplete( false ) );
 
 		initializeAutocomplete( false )();
 
