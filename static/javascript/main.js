@@ -165,6 +165,7 @@ function getMonthByNum(i) {
 }
 
 function scrollJump(date) {
+  date.setDate(date.getDate() - 1);
   while ($("#" + generateDateId(date)).length == 0) {
     populateWeek(taskMap);
   }
