@@ -13,9 +13,9 @@ The file you are looking at is the README for our project. The project uses a lo
 
 2. [github repository](http://github.com/nicschumann/unprocrastinator) – This is the project's github repository. You can browse the source code here. Most of the interesting work happens in ```static/javascript``` and ```queries```. The server itself, which is insanely minimal, lives in ```router.js```.
 
-3. [final report](https://docs.google.com/a/brown.edu/document/d/19uGloGuMyR024V_m6vM_PHlFRA4iEAfp7oWiy0q-DiE/edit?usp=sharing). This is our final report, as a google drive document. Anyone who's authenticated to google with a brown email should be able to view the document. If you have any problems viewing this document, please email  **nicolas_schumann** ```at``` **brown** ```dot``` **edu**.
+3. [final report](https://docs.google.com/document/d/19uGloGuMyR024V_m6vM_PHlFRA4iEAfp7oWiy0q-DiE/pub). This is our final report, as a google drive document. 
 
-That should be all you need! If you feel like you need more information, or want to get the project running locally, or generally have other questions, please email the group at **our-cs-logins-listed-above** ```at``` **cs** ```dot``` **brown** ```dot``` **edu**.
+That should be all you need! If you feel like you need more information, or want to get the project running locally, or generally have other questions, please email the group at **our-cs-logins-listed-above** ```@``` **cs** ```.``` **brown** ```.``` **edu**.
 
 Thanks!
 
@@ -27,13 +27,11 @@ We've build a basic server that can be used for debugging and playing with the b
 
 2. Run ```make build-test``` to compile and package the client-side database scripts. This needs to happen so that we can embed the database and nodejs specific programs in a browser-friendly manner. Under the hood, this uses a tool called ```browserify``` which does a nice job converting a node program into a vanilla javascript program.
 
-3. Run ```node main.js``` this will start a server on port ```8080``` which serves the test code (as well as Jina's existing frontent model). 
+3. Run ```node main.js``` this will start a server on port ```8080``` .
 
-4. Visit ```http://localhost:8080/test```. You'll be redirected to ```http://localhost:8080/test/login``` at which point you can create a toy account with our firebase instance and play around with the test frontend.
+The core methods for interacting with the firebase are located at ```queries/queries.js```. The front end code that interacts with the html, and uses the queries is located at ```static/javascript/main.js```, and gets compiled to the file at ```static/javascript/bundle.js```. In general, we should use the term **```bundle.<filetype>```** for compiled output, and ignore that output in version control (this is why you have to run ```make build-client``` when you check the branch out). 
 
-The core methods for interacting with the firebase are located at ```queries/queries.js```. The front end code that interacts with the html, and uses the queries is located at ```static/test/javascript/dbtest_client.js```, and gets compiled to the file at ```static/test/javascript/bundle.js```. In general, we should use the term **```bundle.<filetype>```** for compiled output, and ignore that output in version control (this is why you have to run ```make build-test``` when you check the branch out). 
-
-The actual HTML that represents the views of the test application live at ```templates/test/login.html``` and ```templates/test/user.html```. Let's use the ```templates/test``` folder for any views related to testing, and similarly, the server should mount any testing routes at ```/test```.
+The actual HTML that represents the views of the test application live at ```templates/index.html``` and ```templates/landing.html```. 
 
 
 ## Installation
@@ -69,7 +67,10 @@ var User = {
 	"username": String,
 	"password": EncryptedString,
 	"tasks": [ TaskID ],
-	"tags": [TagID]
+	"tags": [TagID],
+	"categories": [TagID],
+	"avg_time": Integer,
+	"task_num": Integer
 }
 ```
 
@@ -89,7 +90,13 @@ var Task = {
 	],
 	"progress": [0, 100],
 	"tags": [ TagID ],
-	"hours": NotYetDefined
+	"hours": Integer,
+	"assigned_date": dateID,
+	"due_date": dateID,
+	"estimate": Integer,
+	"complete": Boolean,
+	"estimate_set": Boolean,
+	"notes": String
 }
 ```
 
@@ -101,13 +108,15 @@ Tags are a little bit simpler, but follow the same model. Each tag gets a unique
 
 
 ```js
-var Task = {
+var Tag = {
 	"name": String,
-    "category": Boolean
+	"total_time": Integer,
+	"avg_time": Integer,
+	"num_tasks": Integer
 }
 ```
 
-Note that ```category``` is true just in case this tag is regarded as a category by some task.
+By default, a category is treated as a tag, but a user can undo that very easily.
 
 ---
 
