@@ -111,7 +111,9 @@ $(document).ready(function(){
             "username": $("#newusername").val(),
               "email": $("#newemail").val(),
               "password": $("#newpassword").val(),
-              "categories": []
+              "categories": [],
+              "avg_time": 3600,
+              "task_num": 1
           };
           db.add_user(user, function (error, user_id) {
               if (!error) {
@@ -1184,7 +1186,7 @@ function loadTask(taskId, task) {
     $checkbox.on('change', function () {
         // Set the button's state
         var isChecked = $checkbox.is(':checked');
-        var taskToPatch = task;
+
         if (isChecked) {
           $(this).next().next().addClass('checked');
           task.complete = true;
@@ -1205,6 +1207,22 @@ function loadTask(taskId, task) {
             console.log(error);
           }
         });
+
+      
+        if (task.complete) {
+          db.get_user(sessionStorage.user_id, function (err, user) {
+            var old_avg = user.avg_time;
+            var n = user.task_num; //actual number of tasks is one less. this is to avoid dividing by zero
+            var new_avg = Math.round((old_avg * (n - 1) + task.hours) / n);
+
+            var userPatch = {
+              "avg_time": new_avg,
+              "task_num": n + 1
+            }
+
+            db.patch_user(sessionStorage.user_id, userPatch);
+          });
+        }
 
         $widget.data('state', (isChecked) ? "complete" : "incomplete");
       });

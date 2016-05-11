@@ -30,6 +30,9 @@ exports.add_user = function (user, callback) {
                     users.child(authData.uid).set({
                         email: authData.password.email,
                         username: user.username,
+                        avg_time: user.avg_time,
+                        categories: user.categories,
+                        task_num: user.task_num
                     });
                     console.log("Successfully created user acoount with uid: ", user_id);
                     if (callback) { callback(null, user_id); }
@@ -211,6 +214,10 @@ exports.patch_user = function (user_id, user, callback) {
 exports.add_task_to_user = function (user_id, task, callback) {
     task.user = user_id;
 
+    var avg = 0;
+    users.child(user_id).child("avg_time").once("value", function (snapshot) {
+        avg = snapshot.exists() ? snapshot.val() : [];
+    });
     // add new category and its color into user categories
     users.child(user_id).child("categories").once("value", function (snapshot) {
         user_categories = snapshot.exists() ? snapshot.val() : [];
@@ -254,8 +261,8 @@ exports.add_task_to_user = function (user_id, task, callback) {
                                             })
                                             if (user_tag) {
                                                 tag_hours.push(user_tag.avg_time);
-                                            } else { //default to 1 hour = 3600 seconds
-                                                var default_time = 3600
+                                            } else { 
+                                                var default_time = avg;
                                                 user_tags.push(
                                                     {
                                                         "name": tag,
