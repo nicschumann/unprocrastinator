@@ -909,7 +909,6 @@ function renderRemainder(estimatedTime, timeSpent, taskId) {
       secondsLeft = Math.round(difference - 3600 * hoursLeft - 60 * minutesLeft);
     }
     
-    console.log(difference);
     if (difference < 0) { //over
       if (hoursLeft == 0) {
         $( '#'+taskId ).find('.remainderTimeText').text("Over " + (-1) * minutesLeft + " min. Please update your estimated time!");
@@ -1531,8 +1530,10 @@ make sure the sign in process worked!
 function displayUserInfo() {
     db.get_user(sessionStorage.user_id, function (error, user) {
         if (!error) {
+          if (user !== null) {
             var info = user.username + "&nbsp;&nbsp; | &nbsp;&nbsp;";
             $("#user_label").html(info);
+          }
         }
     });
 }
