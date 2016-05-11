@@ -46,9 +46,7 @@ Since this development workflow launches compilation servers as background proce
 
 ## Abstract Specification
 
-This section of the README outlines the APIs that different segments of the application use. The APIs that we specify here are generally used to obtain references to, interact with, and safely and consistently alter application state. We'll start by outlining the different datatypes that the application manipulates, and continue by describing the **client API** (a browser-side library for interacting with the application's REST API), the **REST API** (The application's routes), and the **Database API** (a server-side library for interfacing with our [firebase](https://www.firebase.com/features.html) instance.)
-
-*Please note that this is a living document, and we may change it as a group in the future, as we learn more.*
+This section of the README outlines the APIs that different segments of the application use. The APIs that we specify here are generally used to obtain references to, interact with, and safely and consistently alter application state. We'll start by outlining the different datatypes that the application manipulates, and continue by describing the  **Database API** (a server-side library for interfacing with our [firebase](https://www.firebase.com/features.html) instance.)
 
 ---
 
@@ -122,92 +120,7 @@ var Tag = {
 
 ---
 
-Our application is decomposed into three different interface APIs; we'll discuss the **client API** and the **Database API** here. We'll let the **REST API** emerge dynamically out of the needs of each of these.
-
-**Note for developers / API implementors: please update these pages in your feature-branches as you work! That way, we'll fill out a specification as we work**
-
-
-#### The Client API
-
-The Client API is implemented as a client-side javascript library for the front-end code to interact with when it needs to take an action operating on application state. The following section describes the methods implemented by the client API. Note that in the client API should always place the required contextual UsedID as the first argument to each method. Also note that each method comes in synchronous and asychronous flavors. Since each of these methods interacts with a remote service and therefore performs non-trivial IO, we should prefer the non-blocking callback method to the synchronous method. The abstract interface for the callback method is included with each method for completeness, although the synchronous version is "easier to read", in some sense. The interface for an asynchronous version of a synchronous method can be obtained from the synchronous version in a completely robotic way. If a sychronous method has interface ```f : A → B```, then the asynchronous version has interface ```f_async : A → ( (Err, B) → void ) → void```, Where the second parameter to the function is a callback expecting a potentially-null error as the first parameter and the value ```B``` as its second parameter, and the entire routine is ```void```-valued.
-
-Further note that **all** of these methods will need to pass, implicitly or explicitly, a ```session_id``` or ```access_token``` along with the request that acts to validate that this request is acting on behalf of a certain user. For the sake of simplicity, let's refer to a pair of a ```UserID``` and an ```AccessToken``` as a ```Credential```, so that in the following ``` Credential = (UserID, AccessToken)```.
-
-
-
----
-
-##### ```get_user : (Username, EncryptedPassword) → Credential```
-*```get_user_async : (Username, EncryptedPassword) → ( (Err, Credential) → void ) → void```*
-
-Given a username and a password, retrieve the user specified by that username, password pair.
-
----
-
-##### ```add_user : (Username, EncryptedPassword) → Credential```
-*```add_user_async : (Username, EncryptedPassword) → ( (Err, UserID) → void ) → void```*
-
-Add a new user to the database, assuming that the username is unique in the database.
-
----
-
-##### ```delete_user : UserID → User```
-*```delete_user : UserID → ( (Err, User) → void ) → void```*
-
-Remove a user from the database
-
----
-
-##### ```get_tasks : Credential → [Task]```
-*```get_tasks_async : UserID → ( (Err, [Task]) → void ) → void```*
-
-Given a ```UserID```, get the list of task objects attached to that users. Consider implementing a cache for this function, to make ```get_task``` more performant.
-
----
-
-##### ```get_task : (Credential, TaskID) → Task```
-*```get_task_async : (UserID, TaskID) → ( (Err,Task) → void ) → void ```*
-
-If you have a specific ```TaskID``` that you'd like to retrieve a task for, you can use this routine, which is essentially a specialization of the above.
-
----
-
-##### ```get_tasks_by_tag : (Credential, TagId) → [Task]```
-*```get_tasks_by_tag : (UserID, TagId) → ( (Err,[Task]) → void ) → void ```*
-
-If you have a specific ```TagID``` that you'd like to retrieve a task for, you can use this routine, which will retrieve all tasks with respect to a certain user that have the specified tag.
-
----
-
-##### ```get_tasks_by_category : (Credential, CategoryId) → [Task]```
-*```get_tasks_by_category : (UserID, CategoryId) → ( (Err,[Task]) → void ) → void ```*
-
-If you have a specific ```CategoryID``` that you'd like to retrieve a task for, you can use this routine, which will retrieve all tasks with respect to a certain user that have the specified category.
-
----
-
-##### ```add_task : (Credential, Task) → TaskID```
-*```get_tasks_by_tag : (UserID, Task) → ( (Err,TaskID) → void ) → void ```*
-
-Given a ```UserID``` and a ```Task``` add a that task to the database and link it to the given user as a single transaction.
-
----
-
-##### ```delete_task : (Credential, TaskID) → Task```
-*```delete_task : (UserID, TaskID) → ( (Err,Task) → void ) → void ```*
-
-Given a specific ```UserID``` and a specific ```TaskId```, drop that task from the database, and return the freshly deleted task.
-
----
-
-##### ```edit_task : (Credential, TaskID, TaskObject) → Task```
-*```edit_task : (UserID, TaskID, TaskObject) → ( (Err,Task) → void ) → void ```*
-
-This routine consumes a ```TaskObject``` which is some subset of the fields required by a ```Task```, and updates that given ```TaskID``` to reflect this "patch".
-
----
-
-*There are serveral more methods in the client interface, but their interfaces and functionalities should be deducable from the examples above. Please implement, and fill them in here! If there are any questions, we can resolve them as a group.*
+Our application is decomposed into three different interface APIs; we'll discuss the **Database API** here. We'll let the **REST API** emerge dynamically out of the needs of each of these.
 
 
 #### The Database API
@@ -258,7 +171,50 @@ This routine exchanges a ```UserID``` for a ```User```.
 
 ---
 
-##### ```patch_tasks_for_user : UserID, [(TaskID, TaskObject)] → User```
+##### ```get_tasks : Credential → [Task]```
+*```get_tasks_async : UserID → ( (Err, [Task]) → void ) → void```*
+
+Given a ```UserID```, get the list of task objects attached to that users. Consider implementing a cache for this function, to make ```get_task``` more performant.
+
+---
+
+##### ```get_task : (Credential, TaskID) → Task```
+*```get_task_async : (UserID, TaskID) → ( (Err,Task) → void ) → void ```*
+
+If you have a specific ```TaskID``` that you'd like to retrieve a task for, you can use this routine, which is essentially a specialization of the above.
+
+---
+
+##### ```get_tasks_by_tags : (Credential, TagId) → [Task]```
+*```get_tasks_by_tag : (UserID, TagId) → ( (Err,[Task]) → void ) → void ```*
+
+If you have a specific ```TagID``` that you'd like to retrieve a task for, you can use this routine, which will retrieve all tasks with respect to a certain user that have the specified tag.
+
+---
+
+##### ```get_tasks_by_category : (Credential, CategoryId) → [Task]```
+*```get_tasks_by_category : (UserID, CategoryId) → ( (Err,[Task]) → void ) → void ```*
+
+If you have a specific ```CategoryID``` that you'd like to retrieve a task for, you can use this routine, which will retrieve all tasks with respect to a certain user that have the specified category.
+
+---
+
+##### ```add_task_to_user : (Credential, Task) → TaskID```
+*```get_tasks_by_tag : (UserID, Task) → ( (Err,TaskID) → void ) → void ```*
+
+Given a ```UserID``` and a ```Task``` add a that task to the database and link it to the given user as a single transaction.
+
+---
+
+##### ```remove_task_from_user : (Credential, TaskID) → Task```
+*```delete_task : (UserID, TaskID) → ( (Err,Task) → void ) → void ```*
+
+Given a specific ```UserID``` and a specific ```TaskId```, drop that task from the database, and return the freshly deleted task.
+
+---
+
+
+##### ```patch_task_for_user : UserID, [(TaskID, TaskObject)] → User```
 *```patch_tasks_for_user : UserID, [(TaskID, TaskObject)]  → ( (Err,User) → void ) → void ```*
 
 This routine patches a set of the users tasks.
