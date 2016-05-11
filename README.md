@@ -67,8 +67,8 @@ var User = {
 	"username": String,
 	"password": EncryptedString,
 	"tasks": [ TaskID ],
-	"tags": [TagID],
-	"categories": [TagID],
+	"tags": [ TagID ],
+	"categories": [ CategoryID ],
 	"avg_time": Integer,
 	"task_num": Integer
 }
@@ -81,7 +81,7 @@ The task type defines what a task type means to us. Just like users, each task o
 ```js
 var Task = {
 	"name": String,
-	"Category": TagID
+	"Category": CategoryID
 	"subtasks": [
 		{
 			"name": String
@@ -115,8 +115,6 @@ var Tag = {
 	"num_tasks": Integer
 }
 ```
-
-By default, a category is treated as a tag, but a user can undo that very easily.
 
 ---
 
@@ -181,6 +179,13 @@ If you have a specific ```TagID``` that you'd like to retrieve a task for, you c
 
 ---
 
+##### ```get_tasks_by_category : (Credential, CategoryId) → [Task]```
+*```get_tasks_by_category : (UserID, CategoryId) → ( (Err,[Task]) → void ) → void ```*
+
+If you have a specific ```CategoryID``` that you'd like to retrieve a task for, you can use this routine, which will retrieve all tasks with respect to a certain user that have the specified category.
+
+---
+
 ##### ```add_task : (Credential, Task) → TaskID```
 *```get_tasks_by_tag : (UserID, Task) → ( (Err,TaskID) → void ) → void ```*
 
@@ -199,13 +204,6 @@ Given a specific ```UserID``` and a specific ```TaskId```, drop that task from t
 *```edit_task : (UserID, TaskID, TaskObject) → ( (Err,Task) → void ) → void ```*
 
 This routine consumes a ```TaskObject``` which is some subset of the fields required by a ```Task```, and updates that given ```TaskID``` to reflect this "patch".
-
----
-
-##### ```add_tag_to_task : (Credential, TaskID, Tag) → TagID```
-*```add_tag_to_task : (UserID, TaskID, Tag) → ( (Err,TagID) → void ) → void ```*
-
-This routine adds a tag to a given task, also updating a the user and creating a new task object. This routine WILL create a new TaskId, regardless of whether a task with exactly the same shape exists in the database already.
 
 ---
 
